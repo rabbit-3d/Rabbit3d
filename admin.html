@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Rabbit3D — Panel de carga</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" type="image/webp" href="data:image/webp;base64,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">
+<style>
+  :root{
+    --bg:#0A0F1A; --bg-panel:#131C2E; --bg-panel-alt:#1A2438;
+    --ink:#F3F5F8; --ink-soft:#94A1B4;
+    --line: rgba(255,255,255,0.12); --line-strong: rgba(255,255,255,0.24);
+    --red:#E8125C; --red-dark:#B80F49;
+    --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',system-ui,sans-serif; --font-mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--ink);line-height:1.5;}
+  .wrap{max-width:860px;margin:0 auto;padding:40px 20px 80px;}
+  h1{font-family:var(--font-display);font-size:1.6rem;margin:0 0 4px;}
+  h2{font-family:var(--font-display);font-size:1.15rem;margin:0 0 14px;}
+  .subtitle{color:var(--ink-soft);font-size:.9rem;margin:0 0 30px;}
+  .card{background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:24px;}
+  label{display:block;font-size:.82rem;font-weight:600;margin:14px 0 5px;}
+  label:first-child{margin-top:0;}
+  input[type=text], input[type=email], input[type=password], input[type=number], input[type=date], select, textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:var(--font-body);font-size:.92rem;background:var(--bg-panel-alt);color:var(--ink);
+  }
+  input::placeholder, textarea::placeholder{ color: var(--ink-soft); }
+  textarea{resize:vertical;min-height:70px;}
+  input[type=checkbox]{margin-right:8px;}
+  .checkbox-row{display:flex;align-items:center;font-weight:500;font-size:.9rem;margin-top:14px;}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;padding:11px 22px;border-radius:999px;
+    font-weight:600;font-size:.9rem;border:none;cursor:pointer;margin-top:18px;
+  }
+  .btn-primary{background:var(--red);color:#fff;}
+  .btn-primary:hover{background:var(--red-dark);}
+  .btn-primary:disabled{background:#5C3542;color:#B7899A;cursor:not-allowed;}
+  .btn-ghost{background:transparent;border:1px solid var(--line-strong);color:var(--ink);}
+  .btn-ghost:hover{background:var(--ink);color:var(--bg);}
+  .btn-danger{background:transparent;border:1px solid var(--red);color:var(--red);padding:6px 14px;font-size:.78rem;margin-top:0;}
+  .btn-danger:hover{background:var(--red);color:#fff;}
+  .tabs{display:flex;gap:8px;margin-bottom:20px;}
+  .tab{font-family:var(--font-mono);font-size:.8rem;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--bg-panel);cursor:pointer;color:var(--ink-soft);}
+  .tab.is-active{background:var(--red);color:#fff;border-color:var(--red);}
+  .panel{display:none;}
+  .panel.is-active{display:block;}
+  .status{font-family:var(--font-mono);font-size:.82rem;padding:10px 14px;border-radius:8px;margin-top:14px;display:none;}
+  .status.ok{display:block;background:rgba(74,222,128,.12);color:#4ADE80;}
+  .status.err{display:block;background:rgba(232,18,92,.14);color:#FF6B93;}
+  .status.busy{display:block;background:var(--bg-panel-alt);color:var(--ink-soft);}
+  .preview-row{display:flex;align-items:center;gap:14px;margin-top:12px;}
+  .preview-row img{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line);}
+  .preview-sizes{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.86rem;}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  th{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em;}
+  td img{width:44px;height:44px;object-fit:cover;border-radius:6px;}
+  .row-actions{white-space:nowrap;}
+  .top-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .top-bar-brand{display:flex;align-items:center;gap:12px;}
+  .top-bar-logo{height:40px;width:40px;border-radius:10px;object-fit:cover;box-shadow:0 0 0 1px var(--line-strong);}
+  .hint{font-size:.78rem;color:var(--ink-soft);margin-top:6px;}
+  #loginScreen{max-width:380px;margin:80px auto;text-align:center;}
+  .login-logo{height:64px;width:64px;border-radius:14px;object-fit:cover;margin:0 auto 16px;box-shadow:0 0 0 1px var(--line-strong);}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+  @media (max-width:560px){ .grid-2{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="wrap" id="loginScreen">
+  <div class="card">
+    <img src="data:image/webp;base64,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" alt="" class="login-logo">
+    <h1>Rabbit3D</h1>
+    <p class="subtitle">Panel de carga — solo para uso interno.</p>
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" required autocomplete="username">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" required autocomplete="current-password">
+      <button class="btn btn-primary" type="submit" style="width:100%">Iniciar sesión</button>
+      <div class="status" id="loginStatus"></div>
+    </form>
+    <p class="hint">Tu usuario se crea desde el Dashboard de Supabase
+      (Authentication → Users → Add user), no hay registro público acá.</p>
+  </div>
+</div>
+
+<!-- ============ PANEL (visible tras login) ============ -->
+<div class="wrap" id="panelScreen" style="display:none">
+  <div class="top-bar">
+    <div class="top-bar-brand">
+      <img src="data:image/webp;base64,UklGRlIPAABXRUJQVlA4IEYPAABwPgCdASp4AHgAPlEijUSjoiEiqxl6qHAKCWUAxUiwUFyzLz4EYuG4X8y/m0c6r1tnoNeW9+0fwt/uDXUfDX8Q+YfsP5Mf2n/ye5RWP/4/oR/FPr79z/K/+s/t98lf3jwJ97X856gX4t/If7r+TP5b8i/YD/M+oF60fPP8L/ef3B/t3oz/wHoJ9Wf85+Un0AfyH+g/578z/if/DeA39s/zf+m9wL+V/13/g/478p/pO/i/+1/mPzO9on5v/cP+N/jv3m+gT+Sf0X/Wf3796v8r////b9yP//9xH7h+yL+xP/5PDVK3onTWLKvUirElbAhJCp2vIKu0b+oJdvGvwCy0it4Aa66m8SyIuNklgGBQQo/9Xb+Tc5Mvsoa1kIM/1jRBwpx8PgDPe6LuSO2FavMmYbPfaTrSxaY9/H0sOWtrHvFYiK4Mw2Y16BiOkNqsKWP+fb6o6/g/PbFCLO+WPMM22ddExQI/RYHYkLEQHngPLJgqcSLcMetuEF33UNoQXsSeNNEPm6QAXxsdC67+XVSMPiWbeAKQmOuxA04B/kQ+tqNQurzqFAkkcc2hLLyijD6+x5mZ+5pzfL7Jm83e7umffZcWJH+36//vjKdHqyJWLXprhXBGttBFMwgdFtIB5hFG7BzJArv9cyjJfNXtgf3hx8NIeAQHRqtT1Z5gAP7+QORf2hxEt/mfLWFyFZsCFq2LHGixSn60S5iBAtN6cTFyerVY7zyH/tvCYckJxJWsUIe05YVf4oquv2Qba7COL/fl29zvn1280GRXO8jVnPoTZoyvlNkrzz0znLIQf/+E6POkJWhktsGiihUMBXxZi1iYdAz3zWL/FNudQaPsqQVOIy+JHhOihRTNEXWGUIOp5UeTvFV5rB+aKN+RVSkGX6qAI24p8q+3DiXKBxyiH1G3u/SoBRhGWjgIeEYDSxS/58WFyqWdvkdA2ffhEmb8hD4VoD72nxQ1lHGQfYOZSwKdYzz22Cs/eP3YVIBKQMVqVct8xxgU5xcnqAYn7rH2F26rXX+Sy4xb/6ri9DgOmmlunvbXiJm1aPXqPDRRYbwiniFQj6CPC5bALLRnHudtql/c6+GO+W4ALeczhMrTALyaQDmVyb2AdbeQltbygcwlXe3ZMWlh9HUuCufz50sl8yLbPcqcogBAOBo9I9pUV6/zYFnidRiUkN6YU+JHFkccnlWfd9vLTYwAEkNBXWaS7AUm9IpeKlfcNs/7v2iW6oebj3csZOAWlPw8v/8erOP6bNHfFWBU6R2/u/663ft/wa5dWLnWvmcylte3qX6IUgj8647f/h49tD0RUbCITMtnaDimjm1sZgWypeWbtmZsuU8XSvdys0SHwrlesd84Wbb61GtMxYkDmtIGCkeJRn+8FDo2SNRO1EiYj9pjyG6ynoFxKxXTFfJJFlUi1BrP5hOuYUCV7PA0ALOUivaO1998CzzBOMDM39KE0EmfAR5FCqquwMTN06QcL9xn6eepeA4dUu43jg9+1vfmw2liRy8SUE087rUipgdn1OG+8HEtPXngvbGQWFRmFTr3jl7YtRIHhHzxxDeSjKTYd+cpeTpGOoT8mmsgWeK6bKh+rfsoYBEeZDQDx3MXeTHv31SD4gpIr9vQRFfgIMmHNjtbTn+xs7Oke7lZh9bKTbAhk/NQwzFWLPiOXRXQWbuJAtejFAN78WVJTRu9I1lfjxBfi1VdqFjtFKDi+i6Od7iI5WTEyt6hEqpR1tY738V3bm0on1KS6r1eoy8S4v0Pkw3fiZeBT6adSTQ08PjqAiYHyC2T3EFARJgadNZFFaTXj2llBnf4o+HlqP3IRzZbccDwXB0NjgrWNR2OOKtYrcVTsyrqm07wfmV7/RSqsmkb8wMR1w1q9iT0Gzy09BRrnkK/ErcyQtEHPtfPA/BmfCoEvbiQBTX3iqvnEnety2cbhqRKeHCfY/q940c66R0yGKiuzrGIpmVRMEHPHke5NcGEH/TVEtf+cs7jHibSB8E9ezhrOtYr6/YEeSDzS0B8hvoLI2D4dvROP4qGQYBME8MwM4sHRta+GRu/C0x9xiI0MkSoFQNz5DYJUUIgg+UvEkEr35mfEFqs61ZvsANXkpsU68eyo5mLIG2m0P191E9p5QtWN59sSCSo5FiIL0+tLqd7gkSH5C+NKjAuJCzde3A9JGqwSxy77Q2V0Z33A3V6oXRb/pnMV3V4S+pPdTIjms7qqU1ae8Nlb5Cq8lzMSi7o6Ne1PSLqrScpeDSdpnyk8HlLZTB9Q0aeDjnepuhpTMwxOcPOe+fK831d52njYw4/oY+GvpGtnakCHgd6N52Pz11qiVvzx+U2SurY/hgxEmRZ5KZNjSCnfLpbS3zMfbdwVxstHUDufVf3QgepaLj7SydzFbVDter+4lH/w+zdgnZ1QNF9YRUic8RMXpRQG3t5VyE9kVJDtafzEtFNElSpFh7SiWy5BlUEpYjWkFNiP0Pioyx3v9D26fupHWYrtzlaucgA6qiz+cxdZrNjQtqXuO7OHShTjyf0unVHKUcQwALDryVsw3/qlGXxYwCPF1hQzQ0ZNnq7FnZ7hvcoDVc3U96oV16BpFnifq+deBsOOze+TkfxBxLhlV/PFUF4OeAD0yD0eqj6KsI/6bOFyEDC56qR3fEuOB7VdSYhpFS8Gj3/W1Vp8wpG02gjtXP1FaQ0cKpHphHLPnqMPq4B3GH8yco8FhXbjfmfYw0fAJ0qJlV7kr6JJCk39iW3o4dsoUvZKGdQsc5h6gEbapHW8dd306th6LfNEg267eU9mayPOyf1naAbi9wmpqOEQhUQbxogRXfLMSASVzME9qWyTceeKsOTyFQSKelGKJzq/imesdoLTh0sbqDtiz/HWIhb5B3T+xb64X9kyPVWlbcC0eS2Av82zy58W04VlbqbLQKnd4Nye7axAxzzQ2dXNPgeDev4Ws+O0uAl8YcpOjb/0WbEg4/zyFHgVPJJaJbU934gCQFPX4A//6oG8A6K5UVT4/P7nc2e8Fy+YDWtk9H2PgxgdCTM5Blsntv2lPCXQq4Ba8t4l9WQ1q9IIz6j3dgzOLJ8n3hvo0v+II0glHj4/Xvt/5j2TJDJKaJ69hJbDdDzryR/H9OEN0AdGOxrnHOWaLhVdgCjXpqcQlDP+1X8hqiAA/c3s6kyq4mqzlAKho6BdGzGOkMN/KVxWwELUx3KZokfxhgkS7InP53jHdSAfi/mM+eKJyTLXPrNFkQrlr4q8QaQaBR9wN+VAQBMM+mGPEr1U/n16HFyROgE0KU/Ci/082S/WLRPbXUVCeFjAQCtLXOsPB1i8Z9UhtIZQlQME7Kn68bnTDMp02vcdCI1u9lj8G6Teys4fGx0ESh1Qso0sxcDP5LX/7dDkcXoukX/H6NZIdNfVuNUF27XAhDhMigD0ER+mUAOyW1q9dsyedQVekP+hr/6VJsZxWNcJy0tgH9v8NkoliCBGkD6KuzLsoNaeFxPSGOBUwfRyFyNJo9nwillmmL2kSZhfw+aVaLeE0c4c4S7cAB34ngmuUK7v0RMTUzcYfA4rz1RC1WQUCxIve3qR10rVH9E9Bn+9GxXFe5m6/lFNHTnVuvZ6t1uM58IqaZGwyTPM5qh4F/Tllvv2iOOkIPiXIc/zZxAo2dpxF8IrVB6FN319xnqGFCHT3QbmeYRpB/qxKUEgmUjCVW94mWYwnjLGfYW18jBkTeZHK0x/x5wy88ANTGwjiPTNP03PkVuv/CE3j1lLqy6WCMoykrXjWVu/N63WNq3e/ZFkvcTMhBk6M+UquKrZmVDgq8UpXZYPBk63fbbsFGeh14fGK5wpiv4xBXsKJuF0PaG+/APx9Y5wUCo9mvGW51aTnsLK9hqpGrtUIZoYRK/2Kr7Ga8lwEiGcNwPJiWCqAzlqj7Nlihwp6gsGlMcxHvxilgdVRfWgN1JyGxvKRfQTbhhAwF4U2+sWIR9cjwVdvHqgYKhuFMILw6No30Sp5spGsmXz/pB0kDr7AReoQ0oTKfYcEORgzuaShtbsKGzlD4ZXlNCPegyoGS2RF+SiU5lRynUM5dWrN1+aglpCoy4ofDd08aPJyMr9P0oDE/PkGqNMc2WhmcCHY4YvZLMhx/Is776WrAwvYNeVq4Afp8FYQWBLxFB+syunkv0UqMY8AznshCyV7yuidy8atQxyrqTOAYah0G/ic+aOh24P84JihQL+ggZiLmKgGWX2BkSs6RNTYMQ3hlOMUjTApA+/pYUus9D4Nh4F1iHaB6duXat+uUeWoUJinouzQkCO1maEpRHnmRKHyaEcpexvE9xRLYrz0uJX81BQD9/LqkQlxZFIyECNWaz9cw63fJ+e8tEWMZfZjw3P2BptTy23ptNfIbOABq8njVzZ0UPvr0zr713SiLDa9Li74u3wic9pHH6DTsmhOSD+fMJKm5G68gIlbfNl/gKvY9hNC/+tBErUr5d6W27q9pHpFRfloWzji4YdzDb/f7Q6eOYfcXPkszAacDecdrQ5izaiXhaupFE9qtrpUwtiJycla9cba+lcgRNjoG0pqbxP7+Zz8GotPHOOkB0+qFtmRgHLOrk4xK7kIlnfS8O8DQZPqZTRFPCmgxD0YF8f6mlomBC00m2txvFZdL3FsHYtYKLPgd2exTInkcldzUA0K+MgcuiPKEfcxsElbnDThKyX9r/VIe5lsYe6oz/NWDel/y2V/jGqEZd/EZx8XHL1us3ilenf+toJLFh7Jei7IZt97vo/F4l9eDa6Z9fI/c2o/p8cM3GH/kwkA+yK3wGnQRrebJpc7al7Nxlgsoq+X4LaIUNa4OoT5T1V0Dn9duA++CS3Qznhk6R8iWrao9eytAC4ZKg1HMv7ObGZj8sG9X8lSnupzlv6DvCt/6gvPx4peCC/kYomxZMXYZU4mf96feCAvyuCbFvPXBO8nr2+aSlHIHzcYs07CeGbuEtmB1S/5UWVpVoWFyOsOzuJqVWJ3PZxlIHuQIo8f4VQgi6Wsg10KndiZF4Ko521IOxk8H/Q8gTNqubWjkOEr4tpHP5C+lcC5ZA0E4PH+HqKUI96nUUzd1BXHOBDSo7W/uWJ98eDnTcM1aG4Ic5dRgNVnDf+OL6IWFl/MNhZPrvKafxKPhQSQdlB5m5h3QjYaDQ0vIXwsp090uyIOZZdAYiE0X1vIUKgejwAAEQeMMnNAgUBPj8bhTfy/btcltntRgeIpMYurQOJHMNTAAAAAAA" alt="" class="top-bar-logo">
+      <div>
+        <h1>Panel de carga — Rabbit3D</h1>
+        <p class="subtitle">Conectado como <strong id="userEmail"></strong></p>
+      </div>
+    </div>
+    <button class="btn btn-ghost" id="logoutBtn">Cerrar sesión</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab is-active" data-tab="productos">Producto</button>
+    <button class="tab" data-tab="galeria">Foto de galería</button>
+  </div>
+
+  <!-- -------- FORM: PRODUCTO -------- -->
+  <div class="panel is-active" id="panel-productos">
+    <div class="card">
+      <h2>Nuevo producto</h2>
+      <form id="productForm">
+        <label for="p_name">Nombre</label>
+        <input type="text" id="p_name" required>
+
+        <label for="p_description">Descripción</label>
+        <textarea id="p_description"></textarea>
+
+        <div class="grid-2">
+          <div>
+            <label for="p_category">Categoría</label>
+            <select id="p_category" required>
+              <option value="llaveros">Llaveros</option>
+              <option value="figuras">Figuras y decoración</option>
+              <option value="hogar">Hogar y utilidad</option>
+              <option value="personalizado">Personalizados</option>
+            </select>
+          </div>
+          <div>
+            <label for="p_price">Precio (texto libre)</label>
+            <input type="text" id="p_price" placeholder="$3.500 / Consultar">
+          </div>
+        </div>
+
+        <div class="checkbox-row" id="p_wholesale_row">
+          <input type="checkbox" id="p_wholesale">
+          <label for="p_wholesale" style="margin:0">Disponible en pack mayorista (50/100)</label>
+        </div>
+        <p class="hint" id="p_wholesale_hint">Los packs mayoristas son solo para llaveros — elegí esa categoría para poder tildar esta opción.</p>
+
+        <div class="grid-2" id="p_wholesale_fields" style="display:none">
+          <div>
+            <label for="p_pack_sizes">Tamaños de pack</label>
+            <input type="text" id="p_pack_sizes" placeholder="50,100">
+          </div>
+          <div>
+            <label for="p_wholesale_price">Precio mayorista</label>
+            <input type="text" id="p_wholesale_price" placeholder="$2.800 c/u en pack de 100">
+          </div>
+        </div>
+
+        <label for="p_image">Foto del producto</label>
+        <input type="file" id="p_image" accept="image/*" required>
+        <div class="preview-row" id="p_preview" style="display:none">
+          <img id="p_preview_img" alt="">
+          <span class="preview-sizes" id="p_preview_sizes"></span>
+        </div>
+        <p class="hint">La imagen se redimensiona (máx. 1000px) y se convierte a WebP en tu navegador antes de subirse — no hace falta editarla antes.</p>
+
+        <button class="btn btn-primary" type="submit" id="p_submit">Subir producto</button>
+        <div class="status" id="p_status"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Productos cargados</h2>
+      <table>
+        <thead><tr><th></th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Activo</th><th></th></tr></thead>
+        <tbody id="productsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- -------- FORM: GALERÍA -------- -->
+  <div class="panel" id="panel-galeria">
+    <div class="card">
+      <h2>Nueva(s) foto(s) de galería</h2>
+      <form id="galleryForm">
+        <label for="g_category">Sección</label>
+        <select id="g_category" required>
+          <option value="taller">Taller</option>
+          <option value="prensa">Prensa / TV</option>
+        </select>
+
+        <div class="grid-2">
+          <div>
+            <label for="g_title">Título (opcional)</label>
+            <input type="text" id="g_title" placeholder="Ej: Nota en el noticiero local">
+          </div>
+          <div>
+            <label for="g_date">Fecha (opcional)</label>
+            <input type="date" id="g_date">
+          </div>
+        </div>
+
+        <label for="g_alt">Texto alternativo (accesibilidad)</label>
+        <input type="text" id="g_alt" placeholder="Ej: Entrevista de Rabbit3D en TV">
+
+        <label for="g_images">Foto(s)</label>
+        <input type="file" id="g_images" accept="image/*" multiple required>
+        <p class="hint">Podés seleccionar varias a la vez. Cada una se optimiza (máx. 1200px, WebP) antes de subirse.</p>
+
+        <button class="btn btn-primary" type="submit" id="g_submit">Subir foto(s)</button>
+        <div class="status" id="g_status"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Fotos cargadas</h2>
+      <div class="tabs" id="galleryFilterTabs">
+        <button class="tab is-active" data-gcat="taller">Taller</button>
+        <button class="tab" data-gcat="prensa">Prensa</button>
+      </div>
+      <table>
+        <thead><tr><th></th><th>Título</th><th>Fecha</th><th></th></tr></thead>
+        <tbody id="galleryTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/**
+ * ⚠️ Estas credenciales tienen que ser LAS MISMAS que las de index.html
+ * (buscá "RABBIT3D_CONFIG" ahí). Si rotás la anon key algún día,
+ * actualizala en los dos archivos.
+ */
+const SUPABASE_URL = "https://jcrpxrfjenjdgqtwkiyw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjcnB4cmZqZW5qZGdxdHdraXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzAzMDYsImV4cCI6MjA5MDg0NjMwNn0.eygcb6oGMkXRUXoJUCs_9B5yr5doF3LrQn9C1-eYHpE";
+const STORAGE_BUCKET = "rabbit3d-media";
+const TABLE_PRODUCTS = "rabbit3d_products";
+const TABLE_GALLERY = "rabbit3d_gallery";
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ---------------------------------------------------------------
+// COMPRESIÓN DE IMÁGENES EN EL NAVEGADOR
+// Redimensiona y convierte a WebP antes de subir — así ninguna
+// imagen pesada llega a la base compartida con otros proyectos.
+// ---------------------------------------------------------------
+async function compressImage(file, maxWidth = 1200, quality = 0.75) {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxWidth / bitmap.width);
+  const width = Math.round(bitmap.width * scale);
+  const height = Math.round(bitmap.height * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, width, height);
+
+  const blob = await new Promise((resolve) =>
+    canvas.toBlob(resolve, "image/webp", quality)
+  );
+  return blob; // Blob ya liviano, listo para subir
+}
+
+function randomFileName() {
+  const id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()));
+  return `${id}.webp`;
+}
+
+async function uploadToStorage(blob, folder) {
+  const path = `${folder}/${randomFileName()}`;
+  const { error } = await sb.storage.from(STORAGE_BUCKET).upload(path, blob, {
+    contentType: "image/webp",
+    upsert: false,
+  });
+  if (error) throw error;
+  return path;
+}
+
+function kb(bytes) {
+  return `${(bytes / 1024).toFixed(0)} KB`;
+}
+
+// ---------------------------------------------------------------
+// AUTENTICACIÓN
+// ---------------------------------------------------------------
+const loginScreen = document.getElementById("loginScreen");
+const panelScreen = document.getElementById("panelScreen");
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("loginStatus");
+  status.className = "status busy";
+  status.textContent = "Iniciando sesión…";
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    status.className = "status err";
+    status.textContent = "No se pudo iniciar sesión: " + error.message;
+    return;
+  }
+  status.className = "status ok";
+  status.textContent = "¡Listo!";
+  await enterPanel();
+});
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+async function enterPanel() {
+  const { data } = await sb.auth.getUser();
+  if (!data?.user) return;
+  document.getElementById("userEmail").textContent = data.user.email;
+  loginScreen.style.display = "none";
+  panelScreen.style.display = "block";
+  loadProducts();
+  loadGallery("taller");
+}
+
+// Si ya había una sesión activa (recarga de página), entrar directo.
+sb.auth.getSession().then(({ data }) => {
+  if (data?.session) enterPanel();
+});
+
+// ---------------------------------------------------------------
+// TABS
+// ---------------------------------------------------------------
+document.querySelectorAll(".tabs .tab[data-tab]").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tabs .tab[data-tab]").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    document.querySelectorAll(".panel").forEach((p) => p.classList.remove("is-active"));
+    document.getElementById(`panel-${tab.dataset.tab}`).classList.add("is-active");
+  });
+});
+
+// ---------------------------------------------------------------
+// PRODUCTOS: preview + submit + listado
+// ---------------------------------------------------------------
+
+// Los packs mayoristas son solo para llaveros: el checkbox y los campos
+// de pack se habilitan únicamente con esa categoría seleccionada.
+function syncWholesaleAvailability() {
+  const category = document.getElementById("p_category").value;
+  const checkbox = document.getElementById("p_wholesale");
+  const hint = document.getElementById("p_wholesale_hint");
+  const fields = document.getElementById("p_wholesale_fields");
+  const isLlaveros = category === "llaveros";
+
+  checkbox.disabled = !isLlaveros;
+  hint.style.display = isLlaveros ? "none" : "block";
+  if (!isLlaveros) {
+    checkbox.checked = false;
+    fields.style.display = "none";
+    document.getElementById("p_pack_sizes").value = "";
+    document.getElementById("p_wholesale_price").value = "";
+  } else {
+    fields.style.display = checkbox.checked ? "grid" : "none";
+  }
+}
+document.getElementById("p_category").addEventListener("change", syncWholesaleAvailability);
+document.getElementById("p_wholesale").addEventListener("change", syncWholesaleAvailability);
+syncWholesaleAvailability(); // estado inicial al cargar la página
+
+document.getElementById("p_image").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const preview = document.getElementById("p_preview");
+  const img = document.getElementById("p_preview_img");
+  const sizes = document.getElementById("p_preview_sizes");
+  sizes.textContent = "Comprimiendo…";
+  preview.style.display = "flex";
+
+  const compressed = await compressImage(file, 1000, 0.75);
+  img.src = URL.createObjectURL(compressed);
+  sizes.textContent = `Original ${kb(file.size)} → optimizada ${kb(compressed.size)}`;
+  e.target._compressedBlob = compressed;
+});
+
+document.getElementById("productForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("p_status");
+  const submitBtn = document.getElementById("p_submit");
+  const fileInput = document.getElementById("p_image");
+
+  try {
+    submitBtn.disabled = true;
+    status.className = "status busy";
+    status.textContent = "Optimizando y subiendo imagen…";
+
+    const blob = fileInput._compressedBlob || (await compressImage(fileInput.files[0], 1000, 0.75));
+    const imagePath = await uploadToStorage(blob, "productos");
+
+    status.textContent = "Guardando producto…";
+    const { error } = await sb.from(TABLE_PRODUCTS).insert({
+      name: document.getElementById("p_name").value.trim(),
+      description: document.getElementById("p_description").value.trim() || null,
+      category: document.getElementById("p_category").value,
+      price_label: document.getElementById("p_price").value.trim() || null,
+      allows_wholesale: document.getElementById("p_wholesale").checked,
+      wholesale_pack_sizes: document.getElementById("p_pack_sizes").value.trim() || null,
+      wholesale_price_label: document.getElementById("p_wholesale_price").value.trim() || null,
+      image_path: imagePath,
+      is_active: true,
+    });
+    if (error) throw error;
+
+    status.className = "status ok";
+    status.textContent = "Producto cargado correctamente.";
+    e.target.reset();
+    syncWholesaleAvailability();
+    document.getElementById("p_preview").style.display = "none";
+    loadProducts();
+  } catch (err) {
+    status.className = "status err";
+    status.textContent = "Error: " + err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+async function loadProducts() {
+  const { data, error } = await supabase
+    .from(TABLE_PRODUCTS)
+    .select("*")
+    .order("created_at", { ascending: false });
+  const tbody = document.getElementById("productsTableBody");
+  tbody.innerHTML = "";
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="6">Error cargando productos: ${error.message}</td></tr>`;
+    return;
+  }
+  data.forEach((p) => {
+    const url = imageUrl(p.image_path);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${url ? `<img src="${url}" alt="">` : ""}</td>
+      <td>${escapeHtml(p.name)}</td>
+      <td>${escapeHtml(p.category)}</td>
+      <td>${escapeHtml(p.price_label || "")}</td>
+      <td>${p.is_active ? "Sí" : "No"}</td>
+      <td class="row-actions">
+        <button class="btn btn-danger" data-delete-product="${p.id}" data-path="${p.image_path || ""}">Borrar</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("productsTableBody").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-delete-product]");
+  if (!btn) return;
+  if (!confirm("¿Borrar este producto?")) return;
+  const id = btn.dataset.deleteProduct;
+  const path = btn.dataset.path;
+  if (path) await sb.storage.from(STORAGE_BUCKET).remove([path]);
+  await sb.from(TABLE_PRODUCTS).delete().eq("id", id);
+  loadProducts();
+});
+
+// ---------------------------------------------------------------
+// GALERÍA: submit (múltiples archivos) + listado + filtro
+// ---------------------------------------------------------------
+document.getElementById("galleryForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("g_status");
+  const submitBtn = document.getElementById("g_submit");
+  const files = Array.from(document.getElementById("g_images").files);
+  const category = document.getElementById("g_category").value;
+
+  if (!files.length) return;
+
+  try {
+    submitBtn.disabled = true;
+    let count = 0;
+    for (const file of files) {
+      count++;
+      status.className = "status busy";
+      status.textContent = `Optimizando y subiendo ${count} de ${files.length}…`;
+
+      const blob = await compressImage(file, 1200, 0.75);
+      const imagePath = await uploadToStorage(blob, category);
+
+      const { error } = await sb.from(TABLE_GALLERY).insert({
+        category,
+        title: document.getElementById("g_title").value.trim() || null,
+        alt_text: document.getElementById("g_alt").value.trim() || null,
+        event_date: document.getElementById("g_date").value || null,
+        image_path: imagePath,
+      });
+      if (error) throw error;
+    }
+
+    status.className = "status ok";
+    status.textContent = `${count} foto(s) cargada(s) correctamente.`;
+    e.target.reset();
+    loadGallery(category);
+  } catch (err) {
+    status.className = "status err";
+    status.textContent = "Error: " + err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+document.querySelectorAll("#galleryFilterTabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("#galleryFilterTabs .tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    loadGallery(tab.dataset.gcat);
+  });
+});
+
+async function loadGallery(category) {
+  const { data, error } = await supabase
+    .from(TABLE_GALLERY)
+    .select("*")
+    .eq("category", category)
+    .order("created_at", { ascending: false });
+  const tbody = document.getElementById("galleryTableBody");
+  tbody.innerHTML = "";
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="4">Error cargando galería: ${error.message}</td></tr>`;
+    return;
+  }
+  data.forEach((g) => {
+    const url = imageUrl(g.image_path);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${url ? `<img src="${url}" alt="">` : ""}</td>
+      <td>${escapeHtml(g.title || "—")}</td>
+      <td>${escapeHtml(g.event_date || "")}</td>
+      <td class="row-actions">
+        <button class="btn btn-danger" data-delete-gallery="${g.id}" data-path="${g.image_path}">Borrar</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("galleryTableBody").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-delete-gallery]");
+  if (!btn) return;
+  if (!confirm("¿Borrar esta foto?")) return;
+  const id = btn.dataset.deleteGallery;
+  const path = btn.dataset.path;
+  if (path) await sb.storage.from(STORAGE_BUCKET).remove([path]);
+  await sb.from(TABLE_GALLERY).delete().eq("id", id);
+  const activeCat = document.querySelector("#galleryFilterTabs .tab.is-active").dataset.gcat;
+  loadGallery(activeCat);
+});
+
+// ---------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------
+function imageUrl(path) {
+  if (!path) return null;
+  return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+}
+function escapeHtml(str) {
+  return String(str).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+</script>
+</body>
+</html>
