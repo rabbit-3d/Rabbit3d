@@ -56,6 +56,39 @@
   .preview-row{display:flex;align-items:center;gap:14px;margin-top:12px;}
   .preview-row img{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line);}
   .preview-sizes{font-family:var(--font-mono);font-size:.75rem;color:var(--ink-soft);}
+
+  /* dropzone (arrastrar y soltar) */
+  .dropzone{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    text-align:center; padding:28px 16px; border:2px dashed var(--line-strong); border-radius:12px;
+    color:var(--ink-soft); cursor:pointer; transition:border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  .dropzone p{ margin:0; font-size:.86rem; line-height:1.4; }
+  .dropzone strong{ color:var(--ink); }
+  .dropzone:hover, .dropzone:focus-visible{ border-color:var(--red); color:var(--ink); outline:none; }
+  .dropzone.is-dragover{ border-color:var(--red); background:rgba(232,18,92,.08); color:var(--ink); }
+
+  /* selector de punto focal */
+  .focal-wrap{ display:flex; gap:16px; align-items:flex-start; margin-top:14px; flex-wrap:wrap; }
+  .focal-picker{
+    position:relative; width:100%; max-width:220px; overflow:hidden; border-radius:10px;
+    border:1px solid var(--line); cursor:crosshair; touch-action:none; background:var(--bg-panel-alt);
+    flex-shrink:0;
+  }
+  .focal-picker-img{ width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
+  .focal-crosshair{
+    position:absolute; width:24px; height:24px; margin:-12px 0 0 -12px; left:50%; top:50%;
+    border:2px solid #fff; border-radius:50%;
+    box-shadow:0 0 0 2px var(--red), 0 2px 8px rgba(0,0,0,.5);
+    pointer-events:none;
+  }
+  .focal-info{ flex:1; min-width:180px; }
+  .focal-list{ display:flex; flex-direction:column; gap:18px; margin-top:14px; }
+  .focal-list-item{ display:flex; gap:14px; align-items:flex-start; padding:12px; border:1px solid var(--line); border-radius:10px; flex-wrap:wrap; }
+  .focal-list-item .focal-picker{ max-width:160px; }
+  .focal-list-item .focal-info{ font-size:.82rem; }
+  .focal-list-item .file-name{ font-size:.82rem; font-weight:600; word-break:break-all; margin-bottom:4px; }
+
   table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.86rem;}
   th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle;}
   th{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em;}
@@ -65,6 +98,10 @@
   .top-bar-brand{display:flex;align-items:center;gap:12px;}
   .top-bar-logo{height:40px;width:40px;border-radius:10px;object-fit:cover;box-shadow:0 0 0 1px var(--line-strong);}
   .hint{font-size:.78rem;color:var(--ink-soft);margin-top:6px;}
+  .edit-link{display:inline-block;font-size:.82rem;color:var(--red);text-decoration:underline;margin:0 0 16px;}
+  .edit-link:hover{color:var(--red-dark);}
+  .btn-edit{background:transparent;border:1px solid var(--line-strong);color:var(--ink);padding:6px 14px;font-size:.78rem;margin-top:0;margin-right:4px;}
+  .btn-edit:hover{border-color:var(--red);color:var(--red);}
   #loginScreen{max-width:380px;margin:80px auto;text-align:center;}
   .login-logo{height:64px;width:64px;border-radius:14px;object-fit:cover;margin:0 auto 16px;box-shadow:0 0 0 1px var(--line-strong);}
   .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
@@ -114,7 +151,8 @@
   <!-- -------- FORM: PRODUCTO -------- -->
   <div class="panel is-active" id="panel-productos">
     <div class="card">
-      <h2>Nuevo producto</h2>
+      <h2 id="p_form_title">Nuevo producto</h2>
+      <a href="#" id="p_cancel_edit" class="edit-link" style="display:none">← Cancelar edición y crear uno nuevo</a>
       <form id="productForm">
         <label for="p_name">Nombre</label>
         <input type="text" id="p_name" required>
@@ -155,11 +193,25 @@
           </div>
         </div>
 
-        <label for="p_image">Foto del producto</label>
-        <input type="file" id="p_image" accept="image/*" required>
-        <div class="preview-row" id="p_preview" style="display:none">
-          <img id="p_preview_img" alt="">
-          <span class="preview-sizes" id="p_preview_sizes"></span>
+        <label>Foto del producto</label>
+        <div class="dropzone" id="p_dropzone" tabindex="0" role="button" aria-label="Elegir o arrastrar una foto">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15V4M12 4 8 8M12 4l4 4"/>
+            <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+          </svg>
+          <p><strong>Arrastrá una foto acá</strong><br>o hacé click para elegirla</p>
+        </div>
+        <input type="file" id="p_image" accept="image/*" hidden>
+
+        <div class="focal-wrap" id="p_focal_wrap" style="display:none">
+          <div class="focal-picker" id="p_focal_picker" style="aspect-ratio:4/3">
+            <img id="p_preview_img" class="focal-picker-img" alt="">
+            <div class="focal-crosshair" id="p_focal_crosshair"></div>
+          </div>
+          <div class="focal-info">
+            <span class="preview-sizes" id="p_preview_sizes"></span>
+            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible al recortarse.</p>
+          </div>
         </div>
         <p class="hint">La imagen se redimensiona (máx. 1000px) y se convierte a WebP en tu navegador antes de subirse — no hace falta editarla antes.</p>
 
@@ -180,18 +232,21 @@
   <!-- -------- FORM: GALERÍA -------- -->
   <div class="panel" id="panel-galeria">
     <div class="card">
-      <h2>Nueva(s) foto(s) de galería</h2>
+      <h2 id="g_form_title">Nueva(s) foto(s) de galería</h2>
+      <a href="#" id="g_cancel_edit" class="edit-link" style="display:none">← Cancelar edición y cargar fotos nuevas</a>
       <form id="galleryForm">
         <label for="g_category">Sección</label>
         <select id="g_category" required>
           <option value="taller">Taller</option>
           <option value="prensa">Prensa / TV</option>
+          <option value="charlas">Charlas / exposiciones</option>
+          <option value="clientes">Clientes destacados</option>
         </select>
 
         <div class="grid-2">
           <div>
             <label for="g_title">Título (opcional)</label>
-            <input type="text" id="g_title" placeholder="Ej: Nota en el noticiero local">
+            <input type="text" id="g_title" placeholder="Ej: Charla en la facultad / Pedido de Spreen">
           </div>
           <div>
             <label for="g_date">Fecha (opcional)</label>
@@ -200,11 +255,20 @@
         </div>
 
         <label for="g_alt">Texto alternativo (accesibilidad)</label>
-        <input type="text" id="g_alt" placeholder="Ej: Entrevista de Rabbit3D en TV">
+        <input type="text" id="g_alt" placeholder="Ej: Descripción breve de la foto">
 
-        <label for="g_images">Foto(s)</label>
-        <input type="file" id="g_images" accept="image/*" multiple required>
+        <label>Foto(s)</label>
+        <div class="dropzone" id="g_dropzone" tabindex="0" role="button" aria-label="Elegir o arrastrar fotos">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15V4M12 4 8 8M12 4l4 4"/>
+            <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+          </svg>
+          <p><strong>Arrastrá una o más fotos acá</strong><br>o hacé click para elegirlas</p>
+        </div>
+        <input type="file" id="g_images" accept="image/*" multiple hidden>
         <p class="hint">Podés seleccionar varias a la vez. Cada una se optimiza (máx. 1200px, WebP) antes de subirse.</p>
+
+        <div class="focal-list" id="g_focal_list"></div>
 
         <button class="btn btn-primary" type="submit" id="g_submit">Subir foto(s)</button>
         <div class="status" id="g_status"></div>
@@ -216,6 +280,8 @@
       <div class="tabs" id="galleryFilterTabs">
         <button class="tab is-active" data-gcat="taller">Taller</button>
         <button class="tab" data-gcat="prensa">Prensa</button>
+        <button class="tab" data-gcat="charlas">Charlas</button>
+        <button class="tab" data-gcat="clientes">Clientes</button>
       </div>
       <table>
         <thead><tr><th></th><th>Título</th><th>Fecha</th><th></th></tr></thead>
@@ -249,12 +315,40 @@
             <input type="text" id="s_zone" placeholder="General Pico, La Pampa, Argentina — envíos a todo el país">
           </div>
         </div>
+        <div class="grid-2">
+          <div>
+            <label for="s_cults3d">Link a tu perfil de Cults3D</label>
+            <input type="text" id="s_cults3d" placeholder="https://cults3d.com/en/users/tu-usuario">
+          </div>
+          <div>
+            <label for="s_telegram">Link a tu canal de Telegram</label>
+            <input type="text" id="s_telegram" placeholder="https://t.me/tu-canal">
+          </div>
+        </div>
 
         <h2 style="margin-top:28px">Sobre mí</h2>
         <p class="hint" style="margin-top:0">El texto de "Sobre mí" (bio y línea de tiempo) ahora es fijo en la página — pedile a Claude que lo actualice si querés cambiarlo. Acá solo se administra la foto.</p>
 
-        <label for="s_profile_photo">Foto de "Sobre mí" (opcional — dejá vacío para no cambiarla)</label>
-        <input type="file" id="s_profile_photo" accept="image/*">
+        <label>Foto de "Sobre mí"</label>
+        <div class="dropzone" id="s_photo_dropzone" tabindex="0" role="button" aria-label="Elegir o arrastrar la foto de Sobre mí">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15V4M12 4 8 8M12 4l4 4"/>
+            <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+          </svg>
+          <p><strong>Arrastrá una foto acá</strong><br>o hacé click para reemplazarla</p>
+        </div>
+        <input type="file" id="s_profile_photo" accept="image/*" hidden>
+
+        <div class="focal-wrap" id="s_photo_focal_wrap" style="display:none">
+          <div class="focal-picker" id="s_photo_focal_picker" style="aspect-ratio:4/5">
+            <img id="s_photo_preview_img" class="focal-picker-img" alt="">
+            <div class="focal-crosshair" id="s_photo_focal_crosshair"></div>
+          </div>
+          <div class="focal-info">
+            <span class="preview-sizes" id="s_photo_preview_label">Foto actual</span>
+            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible. Para reemplazarla, soltá una nueva arriba.</p>
+          </div>
+        </div>
 
         <button class="btn btn-primary" type="submit" id="s_submit">Guardar cambios</button>
         <div class="status" id="s_status"></div>
@@ -321,6 +415,80 @@ function kb(bytes) {
 }
 
 // ---------------------------------------------------------------
+// DROPZONE (arrastrar y soltar, con click como alternativa)
+// ---------------------------------------------------------------
+function setupDropzone(dropzoneEl, inputEl, onFiles) {
+  dropzoneEl.addEventListener("click", () => inputEl.click());
+  dropzoneEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      inputEl.click();
+    }
+  });
+  ["dragenter", "dragover"].forEach((evt) =>
+    dropzoneEl.addEventListener(evt, (e) => {
+      e.preventDefault();
+      dropzoneEl.classList.add("is-dragover");
+    })
+  );
+  ["dragleave", "dragend", "drop"].forEach((evt) =>
+    dropzoneEl.addEventListener(evt, () => dropzoneEl.classList.remove("is-dragover"))
+  );
+  dropzoneEl.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const files = e.dataTransfer?.files;
+    if (files && files.length) {
+      inputEl.files = files;
+      onFiles(files);
+    }
+  });
+  inputEl.addEventListener("change", () => {
+    if (inputEl.files.length) onFiles(inputEl.files);
+  });
+}
+
+// ---------------------------------------------------------------
+// SELECTOR DE PUNTO FOCAL (click/arrastre sobre la vista previa)
+// ---------------------------------------------------------------
+function setupFocalPicker(pickerEl, crosshairEl, initial, onChange) {
+  let point = { x: initial.x, y: initial.y };
+
+  function paint() {
+    crosshairEl.style.left = `${point.x}%`;
+    crosshairEl.style.top = `${point.y}%`;
+    pickerEl.querySelector(".focal-picker-img").style.objectPosition = `${point.x}% ${point.y}%`;
+  }
+
+  function setFromEvent(clientX, clientY) {
+    const rect = pickerEl.getBoundingClientRect();
+    const x = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.min(100, Math.max(0, ((clientY - rect.top) / rect.height) * 100));
+    point = { x: Math.round(x), y: Math.round(y) };
+    paint();
+    onChange(point);
+  }
+
+  function pointFromPointerEvent(e) {
+    setFromEvent(e.clientX, e.clientY);
+  }
+
+  pickerEl.addEventListener("pointerdown", (e) => {
+    pickerEl.setPointerCapture(e.pointerId);
+    pointFromPointerEvent(e);
+    const onMove = (ev) => pointFromPointerEvent(ev);
+    pickerEl.addEventListener("pointermove", onMove);
+    pickerEl.addEventListener(
+      "pointerup",
+      () => pickerEl.removeEventListener("pointermove", onMove),
+      { once: true }
+    );
+  });
+
+  paint();
+  return { get: () => point };
+}
+
+// ---------------------------------------------------------------
 // AUTENTICACIÓN
 // ---------------------------------------------------------------
 const loginScreen = document.getElementById("loginScreen");
@@ -380,7 +548,7 @@ document.querySelectorAll(".tabs .tab[data-tab]").forEach((tab) => {
 });
 
 // ---------------------------------------------------------------
-// PRODUCTOS: preview + submit + listado
+// PRODUCTOS: preview + punto focal + submit + listado
 // ---------------------------------------------------------------
 
 // Los packs mayoristas son solo para llaveros: el checkbox y los campos
@@ -407,19 +575,85 @@ document.getElementById("p_category").addEventListener("change", syncWholesaleAv
 document.getElementById("p_wholesale").addEventListener("change", syncWholesaleAvailability);
 syncWholesaleAvailability(); // estado inicial al cargar la página
 
-document.getElementById("p_image").addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const preview = document.getElementById("p_preview");
+let productFocalPicker = null; // se crea recién cuando hay una imagen elegida
+let editingProductId = null;
+let editingProductOriginal = null;
+
+async function handleProductFile(file) {
+  const fileInput = document.getElementById("p_image");
+  const focalWrap = document.getElementById("p_focal_wrap");
   const img = document.getElementById("p_preview_img");
   const sizes = document.getElementById("p_preview_sizes");
+
   sizes.textContent = "Comprimiendo…";
-  preview.style.display = "flex";
+  focalWrap.style.display = "flex";
 
   const compressed = await compressImage(file, 1000, 0.75);
   img.src = URL.createObjectURL(compressed);
   sizes.textContent = `Original ${kb(file.size)} → optimizada ${kb(compressed.size)}`;
-  e.target._compressedBlob = compressed;
+  fileInput._compressedBlob = compressed;
+
+  productFocalPicker = setupFocalPicker(
+    document.getElementById("p_focal_picker"),
+    document.getElementById("p_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+}
+
+setupDropzone(document.getElementById("p_dropzone"), document.getElementById("p_image"), (files) =>
+  handleProductFile(files[0])
+);
+
+function startEditProduct(p) {
+  editingProductId = p.id;
+  editingProductOriginal = p;
+
+  document.getElementById("p_name").value = p.name || "";
+  document.getElementById("p_description").value = p.description || "";
+  document.getElementById("p_category").value = p.category;
+  document.getElementById("p_price").value = p.price_label || "";
+  document.getElementById("p_wholesale").checked = !!p.allows_wholesale;
+  document.getElementById("p_pack_sizes").value = p.wholesale_pack_sizes || "";
+  document.getElementById("p_wholesale_price").value = p.wholesale_price_label || "";
+  syncWholesaleAvailability();
+  document.getElementById("p_wholesale_fields").style.display = p.allows_wholesale ? "grid" : "none";
+
+  // Muestra la imagen YA guardada (no una nueva) hasta que se suelte un reemplazo.
+  document.getElementById("p_image")._compressedBlob = null;
+  const focalWrap = document.getElementById("p_focal_wrap");
+  const img = document.getElementById("p_preview_img");
+  const sizes = document.getElementById("p_preview_sizes");
+  img.src = imageUrl(p.image_path) || "";
+  sizes.textContent = "Foto actual — soltá una nueva arriba para reemplazarla";
+  focalWrap.style.display = "flex";
+  productFocalPicker = setupFocalPicker(
+    document.getElementById("p_focal_picker"),
+    document.getElementById("p_focal_crosshair"),
+    { x: p.focal_x ?? 50, y: p.focal_y ?? 50 },
+    () => {}
+  );
+
+  document.getElementById("p_form_title").textContent = `Editando: ${p.name}`;
+  document.getElementById("p_cancel_edit").style.display = "inline-block";
+  document.getElementById("p_submit").textContent = "Guardar cambios";
+  document.getElementById("panel-productos").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function cancelEditProduct() {
+  editingProductId = null;
+  editingProductOriginal = null;
+  productFocalPicker = null;
+  document.getElementById("productForm").reset();
+  syncWholesaleAvailability();
+  document.getElementById("p_focal_wrap").style.display = "none";
+  document.getElementById("p_form_title").textContent = "Nuevo producto";
+  document.getElementById("p_cancel_edit").style.display = "none";
+  document.getElementById("p_submit").textContent = "Subir producto";
+}
+document.getElementById("p_cancel_edit").addEventListener("click", (e) => {
+  e.preventDefault();
+  cancelEditProduct();
 });
 
 document.getElementById("productForm").addEventListener("submit", async (e) => {
@@ -427,17 +661,32 @@ document.getElementById("productForm").addEventListener("submit", async (e) => {
   const status = document.getElementById("p_status");
   const submitBtn = document.getElementById("p_submit");
   const fileInput = document.getElementById("p_image");
+  const isEditing = !!editingProductId;
+
+  if (!isEditing && !fileInput.files[0]) {
+    status.className = "status err";
+    status.textContent = "Elegí una foto para el producto.";
+    return;
+  }
 
   try {
     submitBtn.disabled = true;
     status.className = "status busy";
-    status.textContent = "Optimizando y subiendo imagen…";
 
-    const blob = fileInput._compressedBlob || (await compressImage(fileInput.files[0], 1000, 0.75));
-    const imagePath = await uploadToStorage(blob, "productos");
+    let imagePath = isEditing ? editingProductOriginal.image_path : null;
+    let focal = productFocalPicker ? productFocalPicker.get() : { x: 50, y: 50 };
+    const newFile = fileInput.files[0];
 
-    status.textContent = "Guardando producto…";
-    const { error } = await sb.from(TABLE_PRODUCTS).insert({
+    if (newFile || !isEditing) {
+      status.textContent = "Optimizando y subiendo imagen…";
+      const blob = fileInput._compressedBlob || (await compressImage(fileInput.files[0], 1000, 0.75));
+      imagePath = await uploadToStorage(blob, "productos");
+      if (isEditing && editingProductOriginal.image_path) {
+        await sb.storage.from(STORAGE_BUCKET).remove([editingProductOriginal.image_path]);
+      }
+    }
+
+    const payload = {
       name: document.getElementById("p_name").value.trim(),
       description: document.getElementById("p_description").value.trim() || null,
       category: document.getElementById("p_category").value,
@@ -446,15 +695,19 @@ document.getElementById("productForm").addEventListener("submit", async (e) => {
       wholesale_pack_sizes: document.getElementById("p_pack_sizes").value.trim() || null,
       wholesale_price_label: document.getElementById("p_wholesale_price").value.trim() || null,
       image_path: imagePath,
-      is_active: true,
-    });
+      focal_x: focal.x,
+      focal_y: focal.y,
+    };
+
+    status.textContent = isEditing ? "Guardando cambios…" : "Guardando producto…";
+    const { error } = isEditing
+      ? await sb.from(TABLE_PRODUCTS).update(payload).eq("id", editingProductId)
+      : await sb.from(TABLE_PRODUCTS).insert({ ...payload, is_active: true });
     if (error) throw error;
 
     status.className = "status ok";
-    status.textContent = "Producto cargado correctamente.";
-    e.target.reset();
-    syncWholesaleAvailability();
-    document.getElementById("p_preview").style.display = "none";
+    status.textContent = isEditing ? "Producto actualizado correctamente." : "Producto cargado correctamente.";
+    cancelEditProduct();
     loadProducts();
   } catch (err) {
     status.className = "status err";
@@ -465,7 +718,7 @@ document.getElementById("productForm").addEventListener("submit", async (e) => {
 });
 
 async function loadProducts() {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from(TABLE_PRODUCTS)
     .select("*")
     .order("created_at", { ascending: false });
@@ -475,6 +728,7 @@ async function loadProducts() {
     tbody.innerHTML = `<tr><td colspan="6">Error cargando productos: ${error.message}</td></tr>`;
     return;
   }
+  tbody._rows = data;
   data.forEach((p) => {
     const url = imageUrl(p.image_path);
     const tr = document.createElement("tr");
@@ -485,6 +739,7 @@ async function loadProducts() {
       <td>${escapeHtml(p.price_label || "")}</td>
       <td>${p.is_active ? "Sí" : "No"}</td>
       <td class="row-actions">
+        <button class="btn btn-edit" data-edit-product="${p.id}">Editar</button>
         <button class="btn btn-danger" data-delete-product="${p.id}" data-path="${p.image_path || ""}">Borrar</button>
       </td>`;
     tbody.appendChild(tr);
@@ -492,6 +747,14 @@ async function loadProducts() {
 }
 
 document.getElementById("productsTableBody").addEventListener("click", async (e) => {
+  const editBtn = e.target.closest("[data-edit-product]");
+  if (editBtn) {
+    const row = document.getElementById("productsTableBody")._rows.find(
+      (r) => String(r.id) === editBtn.dataset.editProduct
+    );
+    if (row) startEditProduct(row);
+    return;
+  }
   const btn = e.target.closest("[data-delete-product]");
   if (!btn) return;
   if (!confirm("¿Borrar este producto?")) return;
@@ -503,27 +766,175 @@ document.getElementById("productsTableBody").addEventListener("click", async (e)
 });
 
 // ---------------------------------------------------------------
-// GALERÍA: submit (múltiples archivos) + listado + filtro
+// GALERÍA: preview + punto focal por foto + submit (múltiples
+// archivos, o edición de una sola) + listado + filtro
 // ---------------------------------------------------------------
+const GALLERY_ASPECT = { taller: "1/1", prensa: "16/9", charlas: "16/9", clientes: "16/9" };
+let galleryEntries = []; // [{ file, blob, picker }]
+let editingGalleryId = null;
+let editingGalleryOriginal = null;
+
+function currentGalleryAspect() {
+  return GALLERY_ASPECT[document.getElementById("g_category").value] || "4/3";
+}
+
+function addFocalListItem(imgBlob, label, initial) {
+  const list = document.getElementById("g_focal_list");
+  const aspect = currentGalleryAspect();
+
+  const item = document.createElement("div");
+  item.className = "focal-list-item";
+  item.innerHTML = `
+    <div class="focal-picker" style="aspect-ratio:${aspect}">
+      <img class="focal-picker-img" alt="">
+      <div class="focal-crosshair"></div>
+    </div>
+    <div class="focal-info">
+      <div class="file-name">${escapeHtml(label)}</div>
+      <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
+    </div>
+  `;
+  list.appendChild(item);
+
+  const pickerImg = item.querySelector(".focal-picker-img");
+  pickerImg.src = imgBlob instanceof Blob ? URL.createObjectURL(imgBlob) : imgBlob;
+
+  const picker = setupFocalPicker(
+    item.querySelector(".focal-picker"),
+    item.querySelector(".focal-crosshair"),
+    initial,
+    () => {}
+  );
+  return picker;
+}
+
+async function handleGalleryFiles(fileList) {
+  if (editingGalleryId) {
+    // En edición, una foto nueva reemplaza a la única que se está editando.
+    document.getElementById("g_focal_list").innerHTML = "";
+    galleryEntries = [];
+    const file = fileList[0];
+    const compressed = await compressImage(file, 1200, 0.75);
+    const picker = addFocalListItem(compressed, `${file.name} (reemplazo)`, { x: 50, y: 50 });
+    galleryEntries.push({ file, blob: compressed, picker });
+    return;
+  }
+  for (const file of Array.from(fileList)) {
+    const compressed = await compressImage(file, 1200, 0.75);
+    const sizeLabel = `${file.name} — Original ${kb(file.size)} → optimizada ${kb(compressed.size)}`;
+    const picker = addFocalListItem(compressed, sizeLabel, { x: 50, y: 50 });
+    galleryEntries.push({ file, blob: compressed, picker });
+  }
+}
+
+document.getElementById("g_category").addEventListener("change", () => {
+  const aspect = currentGalleryAspect();
+  document.querySelectorAll("#g_focal_list .focal-picker").forEach((el) => {
+    el.style.aspectRatio = aspect;
+  });
+});
+
+setupDropzone(document.getElementById("g_dropzone"), document.getElementById("g_images"), (files) =>
+  handleGalleryFiles(files)
+);
+
+function startEditGallery(g) {
+  editingGalleryId = g.id;
+  editingGalleryOriginal = g;
+  galleryEntries = [];
+
+  document.getElementById("g_category").value = g.category;
+  document.getElementById("g_title").value = g.title || "";
+  document.getElementById("g_alt").value = g.alt_text || "";
+  document.getElementById("g_date").value = g.event_date || "";
+
+  document.getElementById("g_focal_list").innerHTML = "";
+  const picker = addFocalListItem(imageUrl(g.image_path), "Foto actual — soltá una nueva arriba para reemplazarla", {
+    x: g.focal_x ?? 50,
+    y: g.focal_y ?? 50,
+  });
+  // Referencia "vacía": si no se suelta una foto nueva, se reusa la imagen actual (sin blob).
+  galleryEntries.push({ file: null, blob: null, picker, keepExisting: true });
+
+  document.getElementById("g_form_title").textContent = `Editando foto: ${g.title || "sin título"}`;
+  document.getElementById("g_cancel_edit").style.display = "inline-block";
+  document.getElementById("g_submit").textContent = "Guardar cambios";
+  document.getElementById("panel-galeria").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function cancelEditGallery() {
+  editingGalleryId = null;
+  editingGalleryOriginal = null;
+  galleryEntries = [];
+  document.getElementById("galleryForm").reset();
+  document.getElementById("g_focal_list").innerHTML = "";
+  document.getElementById("g_form_title").textContent = "Nueva(s) foto(s) de galería";
+  document.getElementById("g_cancel_edit").style.display = "none";
+  document.getElementById("g_submit").textContent = "Subir foto(s)";
+}
+document.getElementById("g_cancel_edit").addEventListener("click", (e) => {
+  e.preventDefault();
+  cancelEditGallery();
+});
+
 document.getElementById("galleryForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const status = document.getElementById("g_status");
   const submitBtn = document.getElementById("g_submit");
-  const files = Array.from(document.getElementById("g_images").files);
   const category = document.getElementById("g_category").value;
 
-  if (!files.length) return;
+  if (!galleryEntries.length) {
+    status.className = "status err";
+    status.textContent = "Elegí al menos una foto.";
+    return;
+  }
 
   try {
     submitBtn.disabled = true;
+
+    if (editingGalleryId) {
+      status.className = "status busy";
+      status.textContent = "Guardando cambios…";
+      const entry = galleryEntries[0];
+      let imagePath = editingGalleryOriginal.image_path;
+      let focal = entry.picker.get();
+
+      if (!entry.keepExisting || entry.blob) {
+        imagePath = await uploadToStorage(entry.blob, category);
+        if (editingGalleryOriginal.image_path) {
+          await sb.storage.from(STORAGE_BUCKET).remove([editingGalleryOriginal.image_path]);
+        }
+      }
+
+      const { error } = await sb
+        .from(TABLE_GALLERY)
+        .update({
+          category,
+          title: document.getElementById("g_title").value.trim() || null,
+          alt_text: document.getElementById("g_alt").value.trim() || null,
+          event_date: document.getElementById("g_date").value || null,
+          image_path: imagePath,
+          focal_x: focal.x,
+          focal_y: focal.y,
+        })
+        .eq("id", editingGalleryId);
+      if (error) throw error;
+
+      status.className = "status ok";
+      status.textContent = "Foto actualizada correctamente.";
+      cancelEditGallery();
+      loadGallery(category);
+      return;
+    }
+
     let count = 0;
-    for (const file of files) {
+    for (const entry of galleryEntries) {
       count++;
       status.className = "status busy";
-      status.textContent = `Optimizando y subiendo ${count} de ${files.length}…`;
+      status.textContent = `Subiendo ${count} de ${galleryEntries.length}…`;
 
-      const blob = await compressImage(file, 1200, 0.75);
-      const imagePath = await uploadToStorage(blob, category);
+      const imagePath = await uploadToStorage(entry.blob, category);
+      const focal = entry.picker.get();
 
       const { error } = await sb.from(TABLE_GALLERY).insert({
         category,
@@ -531,6 +942,8 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
         alt_text: document.getElementById("g_alt").value.trim() || null,
         event_date: document.getElementById("g_date").value || null,
         image_path: imagePath,
+        focal_x: focal.x,
+        focal_y: focal.y,
       });
       if (error) throw error;
     }
@@ -538,6 +951,8 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
     status.className = "status ok";
     status.textContent = `${count} foto(s) cargada(s) correctamente.`;
     e.target.reset();
+    document.getElementById("g_focal_list").innerHTML = "";
+    galleryEntries = [];
     loadGallery(category);
   } catch (err) {
     status.className = "status err";
@@ -556,7 +971,7 @@ document.querySelectorAll("#galleryFilterTabs .tab").forEach((tab) => {
 });
 
 async function loadGallery(category) {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from(TABLE_GALLERY)
     .select("*")
     .eq("category", category)
@@ -567,6 +982,7 @@ async function loadGallery(category) {
     tbody.innerHTML = `<tr><td colspan="4">Error cargando galería: ${error.message}</td></tr>`;
     return;
   }
+  tbody._rows = data;
   data.forEach((g) => {
     const url = imageUrl(g.image_path);
     const tr = document.createElement("tr");
@@ -575,6 +991,7 @@ async function loadGallery(category) {
       <td>${escapeHtml(g.title || "—")}</td>
       <td>${escapeHtml(g.event_date || "")}</td>
       <td class="row-actions">
+        <button class="btn btn-edit" data-edit-gallery="${g.id}">Editar</button>
         <button class="btn btn-danger" data-delete-gallery="${g.id}" data-path="${g.image_path}">Borrar</button>
       </td>`;
     tbody.appendChild(tr);
@@ -582,6 +999,14 @@ async function loadGallery(category) {
 }
 
 document.getElementById("galleryTableBody").addEventListener("click", async (e) => {
+  const editBtn = e.target.closest("[data-edit-gallery]");
+  if (editBtn) {
+    const row = document.getElementById("galleryTableBody")._rows.find(
+      (r) => String(r.id) === editBtn.dataset.editGallery
+    );
+    if (row) startEditGallery(row);
+    return;
+  }
   const btn = e.target.closest("[data-delete-gallery]");
   if (!btn) return;
   if (!confirm("¿Borrar esta foto?")) return;
@@ -596,6 +1021,9 @@ document.getElementById("galleryTableBody").addEventListener("click", async (e) 
 // ---------------------------------------------------------------
 // CONFIGURACIÓN DEL SITIO (contacto, bio, fotos)
 // ---------------------------------------------------------------
+let profilePhotoPicker = null;
+let profilePhotoNewBlob = null; // solo se llena si se soltó una foto nueva
+
 async function loadSettings() {
   const { data, error } = await sb.from(TABLE_SETTINGS).select("*").eq("id", 1).maybeSingle();
   if (error || !data) return;
@@ -603,7 +1031,49 @@ async function loadSettings() {
   document.getElementById("s_instagram").value = data.instagram_handle || "";
   document.getElementById("s_email").value = data.contact_email || "";
   document.getElementById("s_zone").value = data.zone_text || "";
+  document.getElementById("s_cults3d").value = data.cults3d_url || "";
+  document.getElementById("s_telegram").value = data.telegram_url || "";
+
+  // Mostrar la foto YA cargada (antes esto quedaba invisible y parecía que no había nada).
+  if (data.profile_photo_path) {
+    const wrap = document.getElementById("s_photo_focal_wrap");
+    const img = document.getElementById("s_photo_preview_img");
+    const label = document.getElementById("s_photo_preview_label");
+    img.src = imageUrl(data.profile_photo_path);
+    label.textContent = "Foto actual";
+    wrap.style.display = "flex";
+    profilePhotoPicker = setupFocalPicker(
+      document.getElementById("s_photo_focal_picker"),
+      document.getElementById("s_photo_focal_crosshair"),
+      { x: data.profile_photo_focal_x ?? 50, y: data.profile_photo_focal_y ?? 50 },
+      () => {}
+    );
+  }
 }
+
+async function handleProfilePhotoFile(file) {
+  const wrap = document.getElementById("s_photo_focal_wrap");
+  const img = document.getElementById("s_photo_preview_img");
+  const label = document.getElementById("s_photo_preview_label");
+  label.textContent = "Comprimiendo…";
+  wrap.style.display = "flex";
+
+  const compressed = await compressImage(file, 1000, 0.78);
+  img.src = URL.createObjectURL(compressed);
+  label.textContent = `Nueva foto — Original ${kb(file.size)} → optimizada ${kb(compressed.size)}`;
+  profilePhotoNewBlob = compressed;
+
+  profilePhotoPicker = setupFocalPicker(
+    document.getElementById("s_photo_focal_picker"),
+    document.getElementById("s_photo_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+}
+
+setupDropzone(document.getElementById("s_photo_dropzone"), document.getElementById("s_profile_photo"), (files) =>
+  handleProfilePhotoFile(files[0])
+);
 
 document.getElementById("settingsForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -621,13 +1091,18 @@ document.getElementById("settingsForm").addEventListener("submit", async (e) => 
       instagram_handle: document.getElementById("s_instagram").value.trim().replace(/^@/, "") || null,
       contact_email: document.getElementById("s_email").value.trim() || null,
       zone_text: document.getElementById("s_zone").value.trim() || null,
+      cults3d_url: document.getElementById("s_cults3d").value.trim() || null,
+      telegram_url: document.getElementById("s_telegram").value.trim() || null,
     };
 
-    const profileFile = document.getElementById("s_profile_photo").files[0];
-    if (profileFile) {
-      status.textContent = "Optimizando y subiendo foto de 'Sobre mí'…";
-      const blob = await compressImage(profileFile, 1000, 0.78);
-      update.profile_photo_path = await uploadToStorage(blob, "sitio");
+    if (profilePhotoNewBlob) {
+      status.textContent = "Subiendo foto de 'Sobre mí'…";
+      update.profile_photo_path = await uploadToStorage(profilePhotoNewBlob, "sitio");
+    }
+    if (profilePhotoPicker) {
+      const focal = profilePhotoPicker.get();
+      update.profile_photo_focal_x = focal.x;
+      update.profile_photo_focal_y = focal.y;
     }
 
     status.textContent = "Guardando cambios…";
@@ -637,6 +1112,7 @@ document.getElementById("settingsForm").addEventListener("submit", async (e) => 
     status.className = "status ok";
     status.textContent = "Cambios guardados correctamente.";
     document.getElementById("s_profile_photo").value = "";
+    profilePhotoNewBlob = null;
   } catch (err) {
     status.className = "status err";
     status.textContent = "Error: " + err.message;
