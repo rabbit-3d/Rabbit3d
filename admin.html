@@ -42,6 +42,8 @@
   .btn-ghost:hover{background:var(--ink);color:var(--bg);}
   .btn-danger{background:transparent;border:1px solid var(--red);color:var(--red);padding:6px 14px;font-size:.78rem;margin-top:0;}
   .btn-danger:hover{background:var(--red);color:#fff;}
+  .btn-small{padding:6px 12px;font-size:.78rem;margin-top:0;margin-right:4px;}
+  .btn:disabled{opacity:.35;cursor:not-allowed;}
   .tabs{display:flex;gap:8px;margin-bottom:20px;}
   .tab{font-family:var(--font-mono);font-size:.8rem;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--bg-panel);cursor:pointer;color:var(--ink-soft);}
   .tab.is-active{background:var(--red);color:#fff;border-color:var(--red);}
@@ -106,6 +108,7 @@
   <div class="tabs">
     <button class="tab is-active" data-tab="productos">Producto</button>
     <button class="tab" data-tab="galeria">Foto de galería</button>
+    <button class="tab" data-tab="sitio">Sitio</button>
   </div>
 
   <!-- -------- FORM: PRODUCTO -------- -->
@@ -220,6 +223,44 @@
       </table>
     </div>
   </div>
+
+  <!-- -------- CONFIGURACIÓN DEL SITIO -------- -->
+  <div class="panel" id="panel-sitio">
+    <div class="card">
+      <h2>Contacto</h2>
+      <form id="settingsForm">
+        <div class="grid-2">
+          <div>
+            <label for="s_whatsapp">WhatsApp (solo números, con código de país)</label>
+            <input type="text" id="s_whatsapp" placeholder="5492983123456">
+          </div>
+          <div>
+            <label for="s_instagram">Instagram (sin @)</label>
+            <input type="text" id="s_instagram" placeholder="rabbit3d">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label for="s_email">Email de contacto</label>
+            <input type="text" id="s_email" placeholder="hola@rabbit3d.com.ar">
+          </div>
+          <div>
+            <label for="s_zone">Zona / envíos</label>
+            <input type="text" id="s_zone" placeholder="General Pico, La Pampa, Argentina — envíos a todo el país">
+          </div>
+        </div>
+
+        <h2 style="margin-top:28px">Sobre mí</h2>
+        <p class="hint" style="margin-top:0">El texto de "Sobre mí" (bio y línea de tiempo) ahora es fijo en la página — pedile a Claude que lo actualice si querés cambiarlo. Acá solo se administra la foto.</p>
+
+        <label for="s_profile_photo">Foto de "Sobre mí" (opcional — dejá vacío para no cambiarla)</label>
+        <input type="file" id="s_profile_photo" accept="image/*">
+
+        <button class="btn btn-primary" type="submit" id="s_submit">Guardar cambios</button>
+        <div class="status" id="s_status"></div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -234,6 +275,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const STORAGE_BUCKET = "rabbit3d-media";
 const TABLE_PRODUCTS = "rabbit3d_products";
 const TABLE_GALLERY = "rabbit3d_gallery";
+const TABLE_SETTINGS = "rabbit3d_settings";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -317,6 +359,7 @@ async function enterPanel() {
   panelScreen.style.display = "block";
   loadProducts();
   loadGallery("taller");
+  loadSettings();
 }
 
 // Si ya había una sesión activa (recarga de página), entrar directo.
@@ -548,6 +591,58 @@ document.getElementById("galleryTableBody").addEventListener("click", async (e) 
   await sb.from(TABLE_GALLERY).delete().eq("id", id);
   const activeCat = document.querySelector("#galleryFilterTabs .tab.is-active").dataset.gcat;
   loadGallery(activeCat);
+});
+
+// ---------------------------------------------------------------
+// CONFIGURACIÓN DEL SITIO (contacto, bio, fotos)
+// ---------------------------------------------------------------
+async function loadSettings() {
+  const { data, error } = await sb.from(TABLE_SETTINGS).select("*").eq("id", 1).maybeSingle();
+  if (error || !data) return;
+  document.getElementById("s_whatsapp").value = data.whatsapp_number || "";
+  document.getElementById("s_instagram").value = data.instagram_handle || "";
+  document.getElementById("s_email").value = data.contact_email || "";
+  document.getElementById("s_zone").value = data.zone_text || "";
+}
+
+document.getElementById("settingsForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("s_status");
+  const submitBtn = document.getElementById("s_submit");
+
+  try {
+    submitBtn.disabled = true;
+    status.className = "status busy";
+    status.textContent = "Guardando…";
+
+    const update = {
+      id: 1,
+      whatsapp_number: document.getElementById("s_whatsapp").value.replace(/\D/g, "") || null,
+      instagram_handle: document.getElementById("s_instagram").value.trim().replace(/^@/, "") || null,
+      contact_email: document.getElementById("s_email").value.trim() || null,
+      zone_text: document.getElementById("s_zone").value.trim() || null,
+    };
+
+    const profileFile = document.getElementById("s_profile_photo").files[0];
+    if (profileFile) {
+      status.textContent = "Optimizando y subiendo foto de 'Sobre mí'…";
+      const blob = await compressImage(profileFile, 1000, 0.78);
+      update.profile_photo_path = await uploadToStorage(blob, "sitio");
+    }
+
+    status.textContent = "Guardando cambios…";
+    const { error } = await sb.from(TABLE_SETTINGS).upsert(update, { onConflict: "id" });
+    if (error) throw error;
+
+    status.className = "status ok";
+    status.textContent = "Cambios guardados correctamente.";
+    document.getElementById("s_profile_photo").value = "";
+  } catch (err) {
+    status.className = "status err";
+    status.textContent = "Error: " + err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
 });
 
 // ---------------------------------------------------------------
