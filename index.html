@@ -497,11 +497,31 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 .category-body{ padding: 18px 18px 20px; display:flex; flex-direction:column; gap:6px; flex:1; }
 .category-body h3{ margin:0; font-size:1.02rem; }
 .category-desc{ font-size:.86rem; margin:0; flex:1; color: var(--ink-soft); }
-.category-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:8px; font-size:.8rem; color: var(--ink-soft); }
+.category-price-list{
+  display:flex; flex-direction:column; gap:4px; margin:8px 0 0;
+  padding-top:8px; border-top:1px solid var(--line);
+}
+.category-price-item{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  font-size:.85rem;
+}
+.cpi-qty{ font-family: var(--font-mono); font-size:.78rem; color: var(--ink-soft); }
+.cpi-price{ font-family: var(--font-display); font-weight:700; color: var(--red); }
+.category-footer{ display:flex; align-items:center; justify-content:flex-end; margin-top:8px; font-size:.8rem; color: var(--ink-soft); }
 .category-price{ font-family: var(--font-mono); font-weight:600; color: var(--red); }
 .empty-note{ text-align:center; color: var(--ink-soft); font-size:.9rem; }
 
 .modal-category{ max-width:560px; }
+
+.category-pricing-list{ display:flex; flex-direction:column; gap:8px; margin:16px 0; }
+.category-pricing-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 16px; border-radius: var(--radius-sm); background: var(--bg-panel-2);
+  border:1px solid var(--line);
+}
+.category-pricing-qty{ font-family: var(--font-mono); font-size:.85rem; color: var(--ink-soft); }
+.category-pricing-total{ font-family: var(--font-display); font-weight:700; font-size:1.15rem; color: var(--red); }
+
 .category-media-grid{
   display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin:16px 0;
   max-height:360px; overflow-y:auto;
@@ -737,6 +757,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     <h3 id="categoryModalTitle"></h3>
     <p class="modal-subtitle" id="categoryModalDescription"></p>
     <p class="modal-subtitle" id="categoryModalPriceNote"></p>
+    <div class="category-pricing-list" id="categoryModalPricing"></div>
 
     <div class="category-media-grid" id="categoryModalMedia"></div>
 
@@ -753,7 +774,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     <p class="modal-subtitle">Contanos quién sos para armar el mensaje.</p>
     <form id="waModalForm">
       <label for="wa_name">Tu nombre</label>
-      <input type="text" id="wa_name" required placeholder="Ej: Ana">
+      <input type="text" id="wa_name" required placeholder="Ej: Ana Gómez">
       <label for="wa_locality">Tu localidad</label>
       <input type="text" id="wa_locality" required placeholder="Ej: Santa Rosa, La Pampa">
       <button type="submit" class="btn btn-primary" style="width:100%">Continuar a WhatsApp</button>
@@ -1059,7 +1080,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     </ul>
 
     <div class="hero-actions center">
-      <a href="https://cults3d.com" target="_blank" rel="noopener" class="btn btn-primary" id="cults3dBtn">Ver mis diseños en Cults3D</a>
+      <a href="https://cults3d.com/es/usuarios/rabbit3d/modelos-3d" target="_blank" rel="noopener" class="btn btn-primary" id="cults3dBtn">Ver mis diseños en Cults3D</a>
       <a href="https://t.me" target="_blank" rel="noopener" class="btn btn-ghost" id="telegramBtn" hidden>Sumate al canal de Telegram</a>
     </div>
   </div>
@@ -1259,7 +1280,8 @@ window.RABBIT3D_CONFIG = {
       .from(cfg.TABLES.products)
       .select("*")
       .eq("is_active", true)
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("id", { ascending: true });
     if (error) {
       console.warn("[rabbit3d] Error trayendo productos:", error.message);
       return null;
@@ -1273,7 +1295,8 @@ window.RABBIT3D_CONFIG = {
       .from(cfg.TABLES.gallery)
       .select("*")
       .eq("category", category)
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("id", { ascending: true });
     if (error) {
       console.warn(`[rabbit3d] Error trayendo galería (${category}):`, error.message);
       return null;
@@ -1301,7 +1324,8 @@ window.RABBIT3D_CONFIG = {
       .from("rabbit3d_categories")
       .select("*")
       .eq("is_active", true)
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("id", { ascending: true });
     if (error) {
       console.warn("[rabbit3d] Error trayendo categorías:", error.message);
       return null;
@@ -1315,9 +1339,45 @@ window.RABBIT3D_CONFIG = {
       .from("rabbit3d_category_media")
       .select("*")
       .eq("category_id", categoryId)
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("id", { ascending: true });
     if (error) {
       console.warn("[rabbit3d] Error trayendo fotos/videos de la categoría:", error.message);
+      return null;
+    }
+    return data;
+  }
+
+  // OJO: acá se piden explícitamente solo las columnas públicas.
+  // "unit_price" está bloqueado a nivel de base de datos para el rol
+  // "anon" — si se pidiera con select("*"), la consulta entera fallaría.
+  async function fetchCategoryPricing(categoryId) {
+    if (!client) return null;
+    const { data, error } = await client
+      .from("rabbit3d_category_pricing")
+      .select("id, category_id, quantity, total_price, sort_order")
+      .eq("category_id", categoryId)
+      .order("sort_order", { ascending: true })
+      .order("quantity", { ascending: true });
+    if (error) {
+      console.warn("[rabbit3d] Error trayendo precios de la categoría:", error.message);
+      return null;
+    }
+    return data;
+  }
+
+  // Trae los precios de TODAS las categorías en una sola consulta (en vez
+  // de una por tarjeta), para poder mostrarlos directo en la grilla del
+  // inicio sin golpear la base de datos una vez por cada producto.
+  async function fetchAllCategoryPricing() {
+    if (!client) return null;
+    const { data, error } = await client
+      .from("rabbit3d_category_pricing")
+      .select("id, category_id, quantity, total_price, sort_order")
+      .order("sort_order", { ascending: true })
+      .order("quantity", { ascending: true });
+    if (error) {
+      console.warn("[rabbit3d] Error trayendo precios:", error.message);
       return null;
     }
     return data;
@@ -1331,6 +1391,8 @@ window.RABBIT3D_CONFIG = {
     fetchSettings,
     fetchCategories,
     fetchCategoryMedia,
+    fetchCategoryPricing,
+    fetchAllCategoryPricing,
   };
 })();
 
@@ -1353,14 +1415,19 @@ async function init() {
   setupCategoryModal();
   setupWhatsappModal();
 
-  await renderCategories((await safeFetchCategories()) || []);
-
-  renderGallery("taller", (await safeFetchGallery("taller")) || []);
-  renderPress("prensa", (await safeFetchGallery("prensa")) || []);
-  renderPress("charlas", (await safeFetchGallery("charlas")) || []);
-  renderPress("clientes", (await safeFetchGallery("clientes")) || []);
-
-  applySettings(await safeFetchSettings());
+  // Todo esto se pide en paralelo (no uno atrás del otro), así ninguna
+  // sección espera a las demás — por ejemplo, la foto de "Sobre mí" ya
+  // no queda en cola detrás de las consultas de categorías/galerías.
+  await Promise.all([
+    safeFetchSettings().then(applySettings),
+    (async () => {
+      await renderCategories((await safeFetchCategories()) || []);
+    })(),
+    safeFetchGallery("taller").then((data) => renderGallery("taller", data || [])),
+    safeFetchGallery("prensa").then((data) => renderPress("prensa", data || [])),
+    safeFetchGallery("charlas").then((data) => renderPress("charlas", data || [])),
+    safeFetchGallery("clientes").then((data) => renderPress("clientes", data || [])),
+  ]);
 }
 
 async function safeFetchCategories() {
@@ -1373,6 +1440,20 @@ async function safeFetchCategories() {
 async function safeFetchCategoryMedia(id) {
   try {
     return (await window.Rabbit3DData?.fetchCategoryMedia(id)) || null;
+  } catch {
+    return null;
+  }
+}
+async function safeFetchCategoryPricing(id) {
+  try {
+    return (await window.Rabbit3DData?.fetchCategoryPricing(id)) || null;
+  } catch {
+    return null;
+  }
+}
+async function safeFetchAllCategoryPricing() {
+  try {
+    return (await window.Rabbit3DData?.fetchAllCategoryPricing()) || null;
   } catch {
     return null;
   }
@@ -1592,11 +1673,12 @@ function setupAuth() {
 // WHATSAPP (número resuelto dinámicamente desde applySettings)
 // ---------------------------------------------------------------
 let currentWhatsappNumber = "5490000000000"; // se actualiza desde applySettings() si hay Supabase configurado
+const MIN_ORDER_QTY = 50; // mínimo de pedido, fijo para todo el sitio
 
 // ---------------------------------------------------------------
 // CATEGORÍAS (pedidos por cantidad)
 // ---------------------------------------------------------------
-function categoryCard(c, fallbackMedia) {
+function categoryCard(c, fallbackMedia, priceTiers) {
   const card = document.createElement("button");
   card.type = "button";
   card.className = "category-card";
@@ -1617,9 +1699,24 @@ function categoryCard(c, fallbackMedia) {
     focalY = fallbackMedia.focal_y;
   }
 
+  // Precio: si ya cargaste precios por cantidad, se muestran TODOS acá
+  // (lo que realmente paga el cliente por cada pack). Si no cargaste
+  // ninguno, cae a la nota de precio libre, y si tampoco hay, "Consultar precio".
+  const priceHtml =
+    priceTiers && priceTiers.length
+      ? `<div class="category-price-list">
+          ${priceTiers
+            .map(
+              (p) =>
+                `<span class="category-price-item"><span class="cpi-qty">${p.quantity} un.</span><span class="cpi-price">$${Number(p.total_price).toLocaleString("es-AR")}</span></span>`
+            )
+            .join("")}
+        </div>`
+      : `<span class="category-price">${escapeHtml(c.price_note || "Consultar precio")}</span>`;
+
   card.innerHTML = `
     <div class="category-media">
-      <span class="category-tag">Desde ${c.min_qty} unidades</span>
+      <span class="category-tag">Desde ${MIN_ORDER_QTY} unidades</span>
       ${
         imgUrl
           ? `<img src="${imgUrl}" alt="${escapeHtml(c.name)}" loading="lazy" decoding="async" width="480" height="360" style="object-position:${focalPosition({ focal_x: focalX, focal_y: focalY })}">`
@@ -1629,8 +1726,8 @@ function categoryCard(c, fallbackMedia) {
     <div class="category-body">
       <h3>${escapeHtml(c.name)}</h3>
       <p class="category-desc">${escapeHtml(c.description || "")}</p>
+      ${priceHtml}
       <div class="category-footer">
-        <span class="category-price">${escapeHtml(c.price_note || "Consultar precio")}</span>
         <span>Ver más →</span>
       </div>
     </div>
@@ -1646,13 +1743,22 @@ async function renderCategories(categories) {
   grid.innerHTML = "";
   empty.hidden = categories.length > 0;
 
+  // Una sola consulta para los precios de TODAS las categorías, en vez
+  // de una por tarjeta.
+  const allPricing = (await safeFetchAllCategoryPricing()) || [];
+  const pricingByCategory = {};
+  allPricing.forEach((p) => {
+    if (!pricingByCategory[p.category_id]) pricingByCategory[p.category_id] = [];
+    pricingByCategory[p.category_id].push(p);
+  });
+
   for (const c of categories) {
     let fallbackMedia = null;
     if (!c.cover_image_path) {
       const media = (await safeFetchCategoryMedia(c.id)) || [];
       fallbackMedia = media.find((m) => m.media_type === "image") || null;
     }
-    grid.appendChild(categoryCard(c, fallbackMedia));
+    grid.appendChild(categoryCard(c, fallbackMedia, pricingByCategory[c.id] || null));
   }
 }
 
@@ -1670,19 +1776,35 @@ function driveFileId(url) {
 
 async function openCategoryModal(category) {
   const backdrop = document.getElementById("categoryModalBackdrop");
-  document.getElementById("categoryModalMinQty").textContent = `Mínimo ${category.min_qty} unidades`;
+  document.getElementById("categoryModalMinQty").textContent = `Mínimo ${MIN_ORDER_QTY} unidades`;
   document.getElementById("categoryModalTitle").textContent = category.name;
   document.getElementById("categoryModalDescription").textContent = category.description || "";
   document.getElementById("categoryModalPriceNote").textContent = category.price_note || "";
 
   const waBtn = document.getElementById("categoryModalWhatsapp");
   waBtn.onclick = () => {
-    openWhatsappModal(`un pedido de "${category.name}" (mínimo ${category.min_qty} unidades)`);
+    openWhatsappModal(`un pedido de "${category.name}" (mínimo ${MIN_ORDER_QTY} unidades)`);
   };
+
+  const pricingList = document.getElementById("categoryModalPricing");
+  pricingList.innerHTML = "";
+  backdrop.hidden = false;
+
+  safeFetchCategoryPricing(category.id).then((pricing) => {
+    if (!pricing || !pricing.length) return;
+    pricingList.innerHTML = pricing
+      .map(
+        (p) => `
+        <div class="category-pricing-row">
+          <span class="category-pricing-qty">${p.quantity} unidades</span>
+          <span class="category-pricing-total">$${Number(p.total_price).toLocaleString("es-AR")}</span>
+        </div>`
+      )
+      .join("");
+  });
 
   const mediaGrid = document.getElementById("categoryModalMedia");
   mediaGrid.innerHTML = `<p class="hint" style="grid-column:1/-1; text-align:center; color:var(--ink-soft)">Cargando fotos y videos…</p>`;
-  backdrop.hidden = false;
 
   const media = (await safeFetchCategoryMedia(category.id)) || [];
   mediaGrid.innerHTML = "";
@@ -1732,6 +1854,7 @@ function setupCategoryModal() {
   function closeModal() {
     backdrop.hidden = true;
     document.getElementById("categoryModalMedia").innerHTML = "";
+    document.getElementById("categoryModalPricing").innerHTML = "";
   }
   closeBtn.addEventListener("click", closeModal);
   closeLink.addEventListener("click", closeModal);

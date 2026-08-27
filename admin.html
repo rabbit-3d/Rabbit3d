@@ -105,8 +105,15 @@
   th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle;}
   th{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em;}
   td img{width:44px;height:44px;object-fit:cover;border-radius:6px;}
+  td img.cat-cover-img{width:64px;height:64px;border-radius:8px;}
+  .cat-cover-empty{
+    width:64px;height:64px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    background:var(--bg-panel-alt);color:var(--ink-soft);font-size:.65rem;text-align:center;line-height:1.2;
+    border:1px dashed var(--line-strong);
+  }
   .row-actions{white-space:nowrap;}
   .top-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .top-bar-actions{display:flex;align-items:center;gap:10px;}
   .top-bar-brand{display:flex;align-items:center;gap:12px;}
   .top-bar-logo{height:40px;width:40px;border-radius:10px;object-fit:cover;box-shadow:0 0 0 1px var(--line-strong);}
   .hint{font-size:.78rem;color:var(--ink-soft);margin-top:6px;}
@@ -151,7 +158,10 @@
         <p class="subtitle">Conectado como <strong id="userEmail"></strong></p>
       </div>
     </div>
-    <button class="btn btn-ghost" id="logoutBtn">Cerrar sesión</button>
+    <div class="top-bar-actions">
+      <a href="index.html" class="btn btn-ghost">← Ver sitio</a>
+      <button class="btn btn-ghost" id="logoutBtn">Cerrar sesión</button>
+    </div>
   </div>
 
   <div class="tabs">
@@ -174,16 +184,10 @@
         <label for="c_description">Descripción</label>
         <textarea id="c_description" placeholder="Ej: Souvenirs personalizados para cumpleaños infantiles, con el diseño que elijas."></textarea>
 
-        <div class="grid-2">
-          <div>
-            <label for="c_min_qty">Cantidad mínima de pedido</label>
-            <input type="number" id="c_min_qty" min="1" value="50" required>
-          </div>
-          <div>
-            <label for="c_price_note">Nota de precio (opcional)</label>
-            <input type="text" id="c_price_note" placeholder="Ej: Desde $2.500 c/u según diseño">
-          </div>
-        </div>
+        <p class="hint" style="margin-top:0">El mínimo de pedido es fijo en 50 unidades para todas las categorías. Los precios se cargan aparte, en "Precios" una vez creada la categoría.</p>
+
+        <label for="c_price_note">Nota de precio (opcional)</label>
+        <input type="text" id="c_price_note" placeholder="Ej: Desde $45.000 el pack de 50 — según diseño">
 
         <div class="checkbox-row">
           <input type="checkbox" id="c_active" checked>
@@ -241,7 +245,7 @@
     <div class="card">
       <h2>Categorías cargadas</h2>
       <table>
-        <thead><tr><th></th><th>Nombre</th><th>Mínimo</th><th>Visible</th><th></th></tr></thead>
+        <thead><tr><th></th><th>Nombre</th><th>Visible</th><th></th></tr></thead>
         <tbody id="categoriesTableBody"></tbody>
       </table>
     </div>
@@ -311,6 +315,42 @@
       <div class="status" id="cm_status"></div>
 
       <div class="focal-list" id="cm_media_list" style="margin-top:20px"></div>
+    </div>
+
+    <div class="card" id="categoryPricingCard" style="display:none">
+      <h2>Precios de: <span id="cp_category_name"></span></h2>
+      <p class="hint" style="margin-top:0">El mínimo de pedido siempre es 50 unidades. Normalmente vas a cargar un solo precio (para 50), pero podés agregar otras cantidades si querés (ej: 100).</p>
+
+      <form id="pricingForm">
+        <div class="grid-2">
+          <div>
+            <label for="cp_quantity">Cantidad</label>
+            <input type="number" id="cp_quantity" min="1" value="50" required>
+          </div>
+          <div>
+            <label>¿Cómo vas a cargar el precio?</label>
+            <div class="tabs" id="cp_mode_tabs">
+              <button class="tab is-active" type="button" data-mode="unit">Por unidad</button>
+              <button class="tab" type="button" data-mode="total">Total del pack</button>
+            </div>
+          </div>
+        </div>
+
+        <label id="cp_price_label" for="cp_price">Precio por unidad</label>
+        <input type="number" id="cp_price" min="0" step="1" required placeholder="Ej: 900">
+        <p class="hint" id="cp_calc_preview" style="margin-top:0"></p>
+
+        <button class="btn btn-primary" type="submit" id="cp_submit">Agregar precio</button>
+        <a href="#" id="cp_cancel_edit" class="edit-link" style="display:none">← Cancelar edición</a>
+        <div class="status" id="cp_status"></div>
+      </form>
+
+      <table style="margin-top:20px">
+        <thead>
+          <tr><th>Cantidad</th><th>Precio unitario (solo vos)</th><th>Precio total (lo ve el cliente)</th><th></th></tr>
+        </thead>
+        <tbody id="pricingTableBody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -621,6 +661,7 @@ const TABLE_GALLERY = "rabbit3d_gallery";
 const TABLE_SETTINGS = "rabbit3d_settings";
 const TABLE_CATEGORIES = "rabbit3d_categories";
 const TABLE_CATEGORY_MEDIA = "rabbit3d_category_media";
+const TABLE_CATEGORY_PRICING = "rabbit3d_category_pricing";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -658,6 +699,23 @@ function normalizeStaticAssetPath(raw) {
 // archivos estáticos del repo).
 function isOwnStorageFile(path) {
   return !!path && !/^https?:\/\//i.test(path) && !isStaticAssetPath(path);
+}
+
+// ---------------------------------------------------------------
+// REORDENAR LISTAS (categorías, galería, fotos/videos por categoría)
+// Reasigna sort_order 0..n-1 según la nueva posición — funciona incluso
+// si todos los ítems arrancaron con el mismo sort_order por defecto.
+// ---------------------------------------------------------------
+async function reorderList(table, rows, id, direction, onDone) {
+  const idx = rows.findIndex((r) => r.id === id);
+  const swapWith = direction === "up" ? idx - 1 : idx + 1;
+  if (idx < 0 || swapWith < 0 || swapWith >= rows.length) return;
+
+  const newRows = rows.slice();
+  [newRows[idx], newRows[swapWith]] = [newRows[swapWith], newRows[idx]];
+
+  await Promise.all(newRows.map((r, i) => sb.from(table).update({ sort_order: i }).eq("id", r.id)));
+  onDone();
 }
 
 // ---------------------------------------------------------------
@@ -959,7 +1017,6 @@ function startEditCategory(c) {
 
   document.getElementById("c_name").value = c.name || "";
   document.getElementById("c_description").value = c.description || "";
-  document.getElementById("c_min_qty").value = c.min_qty ?? 50;
   document.getElementById("c_price_note").value = c.price_note || "";
   document.getElementById("c_active").checked = !!c.is_active;
 
@@ -993,7 +1050,6 @@ function cancelEditCategory() {
   editingCategoryOriginal = null;
   categoryFocalPicker = null;
   document.getElementById("categoryForm").reset();
-  document.getElementById("c_min_qty").value = 50;
   document.getElementById("c_active").checked = true;
   document.getElementById("c_focal_wrap").style.display = "none";
   resetCategoryImageSource();
@@ -1040,7 +1096,6 @@ document.getElementById("categoryForm").addEventListener("submit", async (e) => 
     const payload = {
       name: document.getElementById("c_name").value.trim(),
       description: document.getElementById("c_description").value.trim() || null,
-      min_qty: Number(document.getElementById("c_min_qty").value) || 50,
       price_note: document.getElementById("c_price_note").value.trim() || null,
       is_active: document.getElementById("c_active").checked,
       cover_image_path: imagePath,
@@ -1067,7 +1122,11 @@ document.getElementById("categoryForm").addEventListener("submit", async (e) => 
 });
 
 async function loadCategories() {
-  const { data, error } = await sb.from(TABLE_CATEGORIES).select("*").order("sort_order", { ascending: true });
+  const { data, error } = await sb
+    .from(TABLE_CATEGORIES)
+    .select("*")
+    .order("sort_order", { ascending: true })
+    .order("id", { ascending: true });
   const tbody = document.getElementById("categoriesTableBody");
   tbody.innerHTML = "";
   if (error) {
@@ -1075,15 +1134,17 @@ async function loadCategories() {
     return;
   }
   tbody._rows = data;
-  data.forEach((c) => {
+  data.forEach((c, i) => {
     const url = imageUrl(c.cover_image_path);
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${url ? `<img src="${url}" alt="">` : ""}</td>
+      <td>${url ? `<img class="cat-cover-img" src="${url}" alt="Portada de ${escapeHtml(c.name)}">` : `<div class="cat-cover-empty">Sin foto</div>`}</td>
       <td>${escapeHtml(c.name)}</td>
-      <td>${c.min_qty}</td>
       <td>${c.is_active ? "Sí" : "No"}</td>
       <td class="row-actions">
+        <button class="btn btn-ghost btn-small" data-move-category="${c.id}" data-dir="up" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-ghost btn-small" data-move-category="${c.id}" data-dir="down" ${i === data.length - 1 ? "disabled" : ""}>↓</button>
+        <button class="btn btn-edit" data-manage-pricing="${c.id}">Precios</button>
         <button class="btn btn-edit" data-manage-media="${c.id}">Fotos/videos</button>
         <button class="btn btn-edit" data-edit-category="${c.id}">Editar</button>
         <button class="btn btn-danger" data-delete-category="${c.id}" data-path="${c.cover_image_path || ""}">Borrar</button>
@@ -1094,6 +1155,12 @@ async function loadCategories() {
 
 document.getElementById("categoriesTableBody").addEventListener("click", async (e) => {
   const rows = document.getElementById("categoriesTableBody")._rows;
+
+  const moveBtn = e.target.closest("[data-move-category]");
+  if (moveBtn) {
+    await reorderList(TABLE_CATEGORIES, rows, Number(moveBtn.dataset.moveCategory), moveBtn.dataset.dir, loadCategories);
+    return;
+  }
 
   const editBtn = e.target.closest("[data-edit-category]");
   if (editBtn) {
@@ -1106,6 +1173,13 @@ document.getElementById("categoriesTableBody").addEventListener("click", async (
   if (mediaBtn) {
     const row = rows.find((r) => String(r.id) === mediaBtn.dataset.manageMedia);
     if (row) openCategoryMedia(row);
+    return;
+  }
+
+  const pricingBtn = e.target.closest("[data-manage-pricing]");
+  if (pricingBtn) {
+    const row = rows.find((r) => String(r.id) === pricingBtn.dataset.managePricing);
+    if (row) openCategoryPricing(row);
     return;
   }
 
@@ -1336,15 +1410,22 @@ async function loadCategoryMedia() {
     .from(TABLE_CATEGORY_MEDIA)
     .select("*")
     .eq("category_id", activeMediaCategoryId)
-    .order("sort_order", { ascending: true });
+    .order("sort_order", { ascending: true })
+    .order("id", { ascending: true });
   const list = document.getElementById("cm_media_list");
   list.innerHTML = "";
   if (error) {
     list.innerHTML = `<p class="hint">Error cargando: ${error.message}</p>`;
     return;
   }
-  data.forEach((m) => {
+  list._rows = data;
+  data.forEach((m, i) => {
     const div = document.createElement("div");
+    const moveBtns = `
+      <div class="row-actions" style="margin-top:8px">
+        <button class="btn btn-ghost btn-small" data-move-media="${m.id}" data-dir="up" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-ghost btn-small" data-move-media="${m.id}" data-dir="down" ${i === data.length - 1 ? "disabled" : ""}>↓</button>
+      </div>`;
     if (m.media_type === "image") {
       div.className = "focal-list-item";
       div.innerHTML = `
@@ -1354,6 +1435,7 @@ async function loadCategoryMedia() {
         <div class="focal-info">
           <div class="file-name">${escapeHtml(m.caption || "Foto")}</div>
           <button class="btn btn-danger" data-delete-media="${m.id}" data-path="${m.image_path}">Borrar</button>
+          ${moveBtns}
         </div>`;
     } else {
       const thumb = youtubeThumbnail(m.video_url);
@@ -1363,6 +1445,7 @@ async function loadCategoryMedia() {
         <div class="media-video-info">
           <div class="file-name">${escapeHtml(m.caption || "Video")}</div>
           <a href="${m.video_url}" target="_blank" rel="noopener">${escapeHtml(m.video_url)}</a>
+          ${moveBtns}
         </div>
         <button class="btn btn-danger" data-delete-media="${m.id}">Borrar</button>`;
     }
@@ -1371,6 +1454,12 @@ async function loadCategoryMedia() {
 }
 
 document.getElementById("cm_media_list").addEventListener("click", async (e) => {
+  const moveBtn = e.target.closest("[data-move-media]");
+  if (moveBtn) {
+    const rows = document.getElementById("cm_media_list")._rows;
+    await reorderList(TABLE_CATEGORY_MEDIA, rows, Number(moveBtn.dataset.moveMedia), moveBtn.dataset.dir, loadCategoryMedia);
+    return;
+  }
   const btn = e.target.closest("[data-delete-media]");
   if (!btn) return;
   if (!confirm("¿Borrar este elemento?")) return;
@@ -1378,6 +1467,182 @@ document.getElementById("cm_media_list").addEventListener("click", async (e) => 
   if (isOwnStorageFile(path)) await sb.storage.from(STORAGE_BUCKET).remove([path]);
   await sb.from(TABLE_CATEGORY_MEDIA).delete().eq("id", btn.dataset.deleteMedia);
   loadCategoryMedia();
+});
+
+// ---------------------------------------------------------------
+// PRECIOS POR CANTIDAD de cada categoría. El cliente solo va a ver
+// total_price — unit_price es de referencia interna (y además está
+// bloqueado a nivel de base de datos para que "anon" no pueda leerlo).
+// ---------------------------------------------------------------
+let activePricingCategoryId = null;
+let editingPricingId = null;
+
+function openCategoryPricing(category) {
+  activePricingCategoryId = category.id;
+  document.getElementById("cp_category_name").textContent = category.name;
+  document.getElementById("categoryPricingCard").style.display = "block";
+  document.getElementById("categoryPricingCard").scrollIntoView({ behavior: "smooth", block: "start" });
+  cancelEditPricing();
+  loadCategoryPricing();
+}
+
+document.querySelectorAll("#cp_mode_tabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("#cp_mode_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    updatePricingPreview();
+  });
+});
+document.getElementById("cp_quantity").addEventListener("input", updatePricingPreview);
+document.getElementById("cp_price").addEventListener("input", updatePricingPreview);
+
+function currentPricingMode() {
+  return document.querySelector("#cp_mode_tabs .tab.is-active").dataset.mode;
+}
+
+function updatePricingPreview() {
+  const mode = currentPricingMode();
+  const label = document.getElementById("cp_price_label");
+  const preview = document.getElementById("cp_calc_preview");
+  const quantity = Number(document.getElementById("cp_quantity").value) || 0;
+  const price = Number(document.getElementById("cp_price").value) || 0;
+
+  if (mode === "unit") {
+    label.textContent = "Precio por unidad";
+    document.getElementById("cp_price").placeholder = "Ej: 900";
+    const total = price * quantity;
+    preview.textContent = quantity && price ? `= $${total.toLocaleString("es-AR")} el pack de ${quantity} unidades` : "";
+  } else {
+    label.textContent = "Precio total del pack";
+    document.getElementById("cp_price").placeholder = "Ej: 45000";
+    const unit = quantity ? price / quantity : 0;
+    preview.textContent = quantity && price ? `= $${unit.toLocaleString("es-AR", { maximumFractionDigits: 2 })} por unidad` : "";
+  }
+}
+updatePricingPreview();
+
+function startEditPricing(row) {
+  editingPricingId = row.id;
+  document.getElementById("cp_quantity").value = row.quantity;
+  document.querySelectorAll("#cp_mode_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+  document.querySelector('#cp_mode_tabs .tab[data-mode="total"]').classList.add("is-active");
+  document.getElementById("cp_price").value = row.total_price;
+  updatePricingPreview();
+  document.getElementById("cp_submit").textContent = "Guardar cambios";
+  document.getElementById("cp_cancel_edit").style.display = "inline-block";
+}
+
+function cancelEditPricing() {
+  editingPricingId = null;
+  document.getElementById("pricingForm").reset();
+  document.getElementById("cp_quantity").value = 50;
+  document.querySelectorAll("#cp_mode_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+  document.querySelector('#cp_mode_tabs .tab[data-mode="unit"]').classList.add("is-active");
+  updatePricingPreview();
+  document.getElementById("cp_submit").textContent = "Agregar precio";
+  document.getElementById("cp_cancel_edit").style.display = "none";
+}
+document.getElementById("cp_cancel_edit").addEventListener("click", (e) => {
+  e.preventDefault();
+  cancelEditPricing();
+});
+
+document.getElementById("pricingForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("cp_status");
+  const submitBtn = document.getElementById("cp_submit");
+  const quantity = Number(document.getElementById("cp_quantity").value);
+  const price = Number(document.getElementById("cp_price").value);
+  const mode = currentPricingMode();
+
+  if (!quantity || !price) {
+    status.className = "status err";
+    status.textContent = "Completá la cantidad y el precio.";
+    return;
+  }
+
+  const unit_price = mode === "unit" ? price : price / quantity;
+  const total_price = mode === "unit" ? price * quantity : price;
+
+  try {
+    submitBtn.disabled = true;
+    status.className = "status busy";
+    status.textContent = "Guardando…";
+
+    const payload = { category_id: activePricingCategoryId, quantity, unit_price, total_price };
+    const { error } = editingPricingId
+      ? await sb.from(TABLE_CATEGORY_PRICING).update(payload).eq("id", editingPricingId)
+      : await sb.from(TABLE_CATEGORY_PRICING).upsert(payload, { onConflict: "category_id,quantity" });
+    if (error) throw error;
+
+    status.className = "status ok";
+    status.textContent = "Guardado correctamente.";
+    cancelEditPricing();
+    loadCategoryPricing();
+  } catch (err) {
+    status.className = "status err";
+    status.textContent = "Error: " + err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+async function loadCategoryPricing() {
+  const { data, error } = await sb
+    .from(TABLE_CATEGORY_PRICING)
+    .select("*")
+    .eq("category_id", activePricingCategoryId)
+    .order("sort_order", { ascending: true })
+    .order("quantity", { ascending: true });
+  const tbody = document.getElementById("pricingTableBody");
+  tbody.innerHTML = "";
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="4">Error cargando precios: ${error.message}</td></tr>`;
+    return;
+  }
+  tbody._rows = data;
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="4">Todavía no cargaste ningún precio para esta categoría.</td></tr>`;
+    return;
+  }
+  data.forEach((p, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.quantity}</td>
+      <td>$${Number(p.unit_price).toLocaleString("es-AR", { maximumFractionDigits: 2 })}</td>
+      <td>$${Number(p.total_price).toLocaleString("es-AR")}</td>
+      <td class="row-actions">
+        <button class="btn btn-ghost btn-small" data-move-pricing="${p.id}" data-dir="up" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-ghost btn-small" data-move-pricing="${p.id}" data-dir="down" ${i === data.length - 1 ? "disabled" : ""}>↓</button>
+        <button class="btn btn-edit" data-edit-pricing="${p.id}">Editar</button>
+        <button class="btn btn-danger" data-delete-pricing="${p.id}">Borrar</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("pricingTableBody").addEventListener("click", async (e) => {
+  const rows = document.getElementById("pricingTableBody")._rows || [];
+
+  const moveBtn = e.target.closest("[data-move-pricing]");
+  if (moveBtn) {
+    await reorderList(TABLE_CATEGORY_PRICING, rows, Number(moveBtn.dataset.movePricing), moveBtn.dataset.dir, loadCategoryPricing);
+    return;
+  }
+
+  const editBtn = e.target.closest("[data-edit-pricing]");
+  if (editBtn) {
+    const row = rows.find((r) => String(r.id) === editBtn.dataset.editPricing);
+    if (row) startEditPricing(row);
+    return;
+  }
+
+  const delBtn = e.target.closest("[data-delete-pricing]");
+  if (delBtn) {
+    if (!confirm("¿Borrar este precio?")) return;
+    await sb.from(TABLE_CATEGORY_PRICING).delete().eq("id", delBtn.dataset.deletePricing);
+    loadCategoryPricing();
+  }
 });
 
 // ---------------------------------------------------------------
@@ -2000,7 +2265,8 @@ async function loadGallery(category) {
     .from(TABLE_GALLERY)
     .select("*")
     .eq("category", category)
-    .order("created_at", { ascending: false });
+    .order("sort_order", { ascending: true })
+    .order("id", { ascending: true });
   const tbody = document.getElementById("galleryTableBody");
   tbody.innerHTML = "";
   if (error) {
@@ -2008,7 +2274,7 @@ async function loadGallery(category) {
     return;
   }
   tbody._rows = data;
-  data.forEach((g) => {
+  data.forEach((g, i) => {
     const thumb =
       g.media_type === "video"
         ? `<div class="media-video-thumb" style="width:44px;height:44px">🎬</div>`
@@ -2022,6 +2288,8 @@ async function loadGallery(category) {
       <td>${escapeHtml(g.title || "—")}</td>
       <td>${escapeHtml(g.event_date || "")}</td>
       <td class="row-actions">
+        <button class="btn btn-ghost btn-small" data-move-gallery="${g.id}" data-dir="up" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-ghost btn-small" data-move-gallery="${g.id}" data-dir="down" ${i === data.length - 1 ? "disabled" : ""}>↓</button>
         <button class="btn btn-edit" data-edit-gallery="${g.id}">Editar</button>
         <button class="btn btn-danger" data-delete-gallery="${g.id}" data-path="${g.image_path || ""}">Borrar</button>
       </td>`;
@@ -2030,11 +2298,20 @@ async function loadGallery(category) {
 }
 
 document.getElementById("galleryTableBody").addEventListener("click", async (e) => {
+  const rows = document.getElementById("galleryTableBody")._rows;
+
+  const moveBtn = e.target.closest("[data-move-gallery]");
+  if (moveBtn) {
+    const activeCat = document.querySelector("#galleryFilterTabs .tab.is-active").dataset.gcat;
+    await reorderList(TABLE_GALLERY, rows, Number(moveBtn.dataset.moveGallery), moveBtn.dataset.dir, () =>
+      loadGallery(activeCat)
+    );
+    return;
+  }
+
   const editBtn = e.target.closest("[data-edit-gallery]");
   if (editBtn) {
-    const row = document.getElementById("galleryTableBody")._rows.find(
-      (r) => String(r.id) === editBtn.dataset.editGallery
-    );
+    const row = rows.find((r) => String(r.id) === editBtn.dataset.editGallery);
     if (row) startEditGallery(row);
     return;
   }
