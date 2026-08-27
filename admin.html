@@ -194,6 +194,7 @@
         <div class="tabs" id="c_image_source_tabs">
           <button class="tab is-active" type="button" data-isource="upload">Subir archivo</button>
           <button class="tab" type="button" data-isource="drive">Link de Drive</button>
+          <button class="tab" type="button" data-isource="github">Ruta en GitHub</button>
         </div>
 
         <div id="c_image_upload_block">
@@ -212,6 +213,13 @@
           <input type="text" id="c_image_drive_url" placeholder="https://drive.google.com/file/d/.../view">
           <p class="hint" style="margin-top:0">El archivo tiene que estar compartido como "Cualquiera con el enlace puede ver".</p>
           <button class="btn btn-ghost btn-small" type="button" id="c_image_drive_load">Cargar vista previa</button>
+        </div>
+
+        <div id="c_image_github_block" style="display:none">
+          <label for="c_image_github_path">Ruta del archivo en tu repositorio</label>
+          <input type="text" id="c_image_github_path" placeholder="assets/categorias/cumpleanos.jpg">
+          <p class="hint" style="margin-top:0">El archivo tiene que existir en esa ruta dentro de tu repositorio de GitHub. No consume espacio de Supabase.</p>
+          <button class="btn btn-ghost btn-small" type="button" id="c_image_github_load">Cargar vista previa</button>
         </div>
 
         <div class="focal-wrap" id="c_focal_wrap" style="display:none">
@@ -248,8 +256,9 @@
 
       <div id="cm_image_form">
         <div class="tabs" id="cm_image_source_tabs">
-          <button class="tab is-active" data-isource="upload">Subir archivo</button>
-          <button class="tab" data-isource="drive">Link de Drive</button>
+          <button class="tab is-active" type="button" data-isource="upload">Subir archivo</button>
+          <button class="tab" type="button" data-isource="drive">Link de Drive</button>
+          <button class="tab" type="button" data-isource="github">Ruta en GitHub</button>
         </div>
 
         <div id="cm_image_upload_block">
@@ -269,6 +278,13 @@
           <input type="text" id="cm_image_drive_url" placeholder="https://drive.google.com/file/d/.../view">
           <p class="hint" style="margin-top:0">El archivo tiene que estar compartido como "Cualquiera con el enlace puede ver" — si no, no se va a poder mostrar en la página.</p>
           <button class="btn btn-ghost btn-small" type="button" id="cm_image_drive_load">Cargar vista previa</button>
+        </div>
+
+        <div id="cm_image_github_block" style="display:none">
+          <label for="cm_image_github_path">Ruta del archivo en tu repositorio</label>
+          <input type="text" id="cm_image_github_path" placeholder="assets/categorias/foto.jpg">
+          <p class="hint" style="margin-top:0">El archivo tiene que existir en esa ruta dentro de tu repositorio de GitHub. No consume espacio de Supabase.</p>
+          <button class="btn btn-ghost btn-small" type="button" id="cm_image_github_load">Cargar vista previa</button>
         </div>
 
         <div class="focal-wrap" id="cm_focal_wrap" style="display:none">
@@ -417,6 +433,7 @@
           <div class="tabs" id="g_image_source_tabs">
             <button class="tab is-active" type="button" data-isource="upload">Subir archivo(s)</button>
             <button class="tab" type="button" data-isource="drive">Link de Drive</button>
+            <button class="tab" type="button" data-isource="github">Ruta en GitHub</button>
           </div>
 
           <div id="g_image_upload_block">
@@ -445,6 +462,23 @@
               </div>
               <div class="focal-info">
                 <span class="preview-sizes" id="g_drive_preview_label">Vista previa desde Drive</span>
+                <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="g_image_github_block" style="display:none">
+            <label for="g_image_github_path">Ruta del archivo en tu repositorio</label>
+            <input type="text" id="g_image_github_path" placeholder="assets/prensa/canal-9.jpg">
+            <p class="hint" style="margin-top:0">El archivo tiene que existir en esa ruta dentro de tu repositorio de GitHub. No consume espacio de Supabase.</p>
+            <button class="btn btn-ghost btn-small" type="button" id="g_image_github_load">Cargar vista previa</button>
+            <div class="focal-wrap" id="g_github_focal_wrap" style="display:none">
+              <div class="focal-picker" id="g_github_focal_picker" style="aspect-ratio:4/3">
+                <img id="g_github_preview_img" class="focal-picker-img" alt="">
+                <div class="focal-crosshair" id="g_github_focal_crosshair"></div>
+              </div>
+              <div class="focal-info">
+                <span class="preview-sizes" id="g_github_preview_label">Vista previa desde el repositorio</span>
                 <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
               </div>
             </div>
@@ -523,14 +557,36 @@
         <p class="hint" style="margin-top:0">El texto de "Sobre mí" (bio y línea de tiempo) ahora es fijo en la página — pedile a Claude que lo actualice si querés cambiarlo. Acá solo se administra la foto.</p>
 
         <label>Foto de "Sobre mí"</label>
-        <div class="dropzone" id="s_photo_dropzone" tabindex="0" role="button" aria-label="Elegir o arrastrar la foto de Sobre mí">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 15V4M12 4 8 8M12 4l4 4"/>
-            <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
-          </svg>
-          <p><strong>Arrastrá una foto acá</strong><br>o hacé click para reemplazarla</p>
+        <div class="tabs" id="s_photo_source_tabs">
+          <button class="tab is-active" type="button" data-isource="upload">Subir archivo</button>
+          <button class="tab" type="button" data-isource="drive">Link de Drive</button>
+          <button class="tab" type="button" data-isource="github">Ruta en GitHub</button>
         </div>
-        <input type="file" id="s_profile_photo" accept="image/*" hidden>
+
+        <div id="s_photo_upload_block">
+          <div class="dropzone" id="s_photo_dropzone" tabindex="0" role="button" aria-label="Elegir o arrastrar la foto de Sobre mí">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 15V4M12 4 8 8M12 4l4 4"/>
+              <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+            </svg>
+            <p><strong>Arrastrá una foto acá</strong><br>o hacé click para reemplazarla</p>
+          </div>
+          <input type="file" id="s_profile_photo" accept="image/*" hidden>
+        </div>
+
+        <div id="s_photo_drive_block" style="display:none">
+          <label for="s_photo_drive_url">Link de Google Drive</label>
+          <input type="text" id="s_photo_drive_url" placeholder="https://drive.google.com/file/d/.../view">
+          <p class="hint" style="margin-top:0">El archivo tiene que estar compartido como "Cualquiera con el enlace puede ver".</p>
+          <button class="btn btn-ghost btn-small" type="button" id="s_photo_drive_load">Cargar vista previa</button>
+        </div>
+
+        <div id="s_photo_github_block" style="display:none">
+          <label for="s_photo_github_path">Ruta del archivo en tu repositorio</label>
+          <input type="text" id="s_photo_github_path" placeholder="assets/sobre-mi.jpg">
+          <p class="hint" style="margin-top:0">El archivo tiene que existir en esa ruta dentro de tu repositorio de GitHub (subilo a una carpeta "assets" junto a index.html). No consume espacio de Supabase.</p>
+          <button class="btn btn-ghost btn-small" type="button" id="s_photo_github_load">Cargar vista previa</button>
+        </div>
 
         <div class="focal-wrap" id="s_photo_focal_wrap" style="display:none">
           <div class="focal-picker" id="s_photo_focal_picker" style="aspect-ratio:4/5">
@@ -539,7 +595,7 @@
           </div>
           <div class="focal-info">
             <span class="preview-sizes" id="s_photo_preview_label">Foto actual</span>
-            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible. Para reemplazarla, soltá una nueva arriba.</p>
+            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible. Para reemplazarla, elegí una fuente arriba.</p>
           </div>
         </div>
 
@@ -582,6 +638,26 @@ function driveFileId(url) {
 function driveImageUrl(url) {
   const id = driveFileId(url);
   return id ? `https://lh3.googleusercontent.com/d/${id}` : null;
+}
+
+// ---------------------------------------------------------------
+// ARCHIVOS ESTÁTICOS DEL REPO (GitHub Pages)
+// Convención: cualquier ruta que empiece con "assets/" es un archivo
+// que vive en el propio repositorio (no en Supabase Storage). No hay
+// que subirlo, ni comprimirlo, ni borrarlo de Storage al reemplazar.
+// ---------------------------------------------------------------
+function isStaticAssetPath(path) {
+  return typeof path === "string" && path.trim().startsWith("assets/");
+}
+function normalizeStaticAssetPath(raw) {
+  const trimmed = String(raw || "").trim().replace(/^\/+/, "");
+  return trimmed.startsWith("assets/") ? trimmed : null;
+}
+// Reemplaza a los chequeos sueltos que había antes: solo hay que borrar
+// de Storage lo que efectivamente subiste vos (no links de Drive, no
+// archivos estáticos del repo).
+function isOwnStorageFile(path) {
+  return !!path && !/^https?:\/\//i.test(path) && !isStaticAssetPath(path);
 }
 
 // ---------------------------------------------------------------
@@ -796,14 +872,15 @@ setupDropzone(document.getElementById("c_dropzone"), document.getElementById("c_
   handleCategoryFile(files[0])
 );
 
-// Portada: subir archivo vs. pegar un link de Drive.
+// Portada: subir archivo / link de Drive / ruta en GitHub.
 document.querySelectorAll("#c_image_source_tabs .tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     document.querySelectorAll("#c_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
     tab.classList.add("is-active");
-    const isUpload = tab.dataset.isource === "upload";
-    document.getElementById("c_image_upload_block").style.display = isUpload ? "block" : "none";
-    document.getElementById("c_image_drive_block").style.display = isUpload ? "none" : "block";
+    const source = tab.dataset.isource;
+    document.getElementById("c_image_upload_block").style.display = source === "upload" ? "block" : "none";
+    document.getElementById("c_image_drive_block").style.display = source === "drive" ? "block" : "none";
+    document.getElementById("c_image_github_block").style.display = source === "github" ? "block" : "none";
     document.getElementById("c_focal_wrap").style.display = "none";
     categoryFocalPicker = null;
     categoryDriveUrl = null;
@@ -838,12 +915,41 @@ document.getElementById("c_image_drive_load").addEventListener("click", () => {
   );
 });
 
+document.getElementById("c_image_github_load").addEventListener("click", () => {
+  const status = document.getElementById("c_status");
+  const path = normalizeStaticAssetPath(document.getElementById("c_image_github_path").value);
+  if (!path) {
+    status.className = "status err";
+    status.textContent = 'La ruta tiene que empezar con "assets/", ej: assets/categorias/foto.jpg';
+    return;
+  }
+  status.className = "";
+  status.textContent = "";
+  categoryDriveUrl = path;
+
+  const focalWrap = document.getElementById("c_focal_wrap");
+  const img = document.getElementById("c_preview_img");
+  const label = document.getElementById("c_preview_label");
+  img.src = path;
+  label.textContent = "Vista previa desde el repositorio";
+  focalWrap.style.display = "flex";
+
+  categoryFocalPicker = setupFocalPicker(
+    document.getElementById("c_focal_picker"),
+    document.getElementById("c_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+});
+
 function resetCategoryImageSource() {
   document.querySelectorAll("#c_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
   document.querySelector('#c_image_source_tabs .tab[data-isource="upload"]').classList.add("is-active");
   document.getElementById("c_image_upload_block").style.display = "block";
   document.getElementById("c_image_drive_block").style.display = "none";
+  document.getElementById("c_image_github_block").style.display = "none";
   document.getElementById("c_image_drive_url").value = "";
+  document.getElementById("c_image_github_path").value = "";
   categoryDriveUrl = null;
 }
 
@@ -906,9 +1012,8 @@ document.getElementById("categoryForm").addEventListener("submit", async (e) => 
   const submitBtn = document.getElementById("c_submit");
   const fileInput = document.getElementById("c_image");
   const isEditing = !!editingCategoryId;
-  const isDriveSource = document
-    .querySelector('#c_image_source_tabs .tab[data-isource="drive"]')
-    .classList.contains("is-active");
+  const activeCoverSource = document.querySelector("#c_image_source_tabs .tab.is-active")?.dataset.isource;
+  const isDriveSource = activeCoverSource === "drive" || activeCoverSource === "github";
 
   try {
     submitBtn.disabled = true;
@@ -919,7 +1024,7 @@ document.getElementById("categoryForm").addEventListener("submit", async (e) => 
     const newFile = fileInput.files[0];
 
     if (isDriveSource && categoryDriveUrl) {
-      if (isEditing && editingCategoryOriginal.cover_image_path && !/^https?:\/\//i.test(editingCategoryOriginal.cover_image_path)) {
+      if (isEditing && isOwnStorageFile(editingCategoryOriginal.cover_image_path)) {
         await sb.storage.from(STORAGE_BUCKET).remove([editingCategoryOriginal.cover_image_path]);
       }
       imagePath = categoryDriveUrl;
@@ -927,7 +1032,7 @@ document.getElementById("categoryForm").addEventListener("submit", async (e) => 
       status.textContent = "Optimizando y subiendo foto…";
       const blob = fileInput._compressedBlob || (await compressImage(newFile, 1000, 0.75));
       imagePath = await uploadToStorage(blob, "categorias");
-      if (isEditing && editingCategoryOriginal.cover_image_path && !/^https?:\/\//i.test(editingCategoryOriginal.cover_image_path)) {
+      if (isEditing && isOwnStorageFile(editingCategoryOriginal.cover_image_path)) {
         await sb.storage.from(STORAGE_BUCKET).remove([editingCategoryOriginal.cover_image_path]);
       }
     }
@@ -1008,7 +1113,7 @@ document.getElementById("categoriesTableBody").addEventListener("click", async (
   if (delBtn) {
     if (!confirm("¿Borrar esta categoría? También se borran sus fotos y videos.")) return;
     const path = delBtn.dataset.path;
-    if (path && !/^https?:\/\//i.test(path)) await sb.storage.from(STORAGE_BUCKET).remove([path]);
+    if (isOwnStorageFile(path)) await sb.storage.from(STORAGE_BUCKET).remove([path]);
     await sb.from(TABLE_CATEGORIES).delete().eq("id", delBtn.dataset.deleteCategory);
     if (activeMediaCategoryId === Number(delBtn.dataset.deleteCategory)) {
       document.getElementById("categoryMediaCard").style.display = "none";
@@ -1039,14 +1144,15 @@ document.querySelectorAll("#cm_type_tabs .tab").forEach((tab) => {
   });
 });
 
-// Dentro de "Foto": subir archivo vs. pegar un link de Drive.
+// Dentro de "Foto": subir archivo / link de Drive / ruta en GitHub.
 document.querySelectorAll("#cm_image_source_tabs .tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     document.querySelectorAll("#cm_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
     tab.classList.add("is-active");
-    const isUpload = tab.dataset.isource === "upload";
-    document.getElementById("cm_image_upload_block").style.display = isUpload ? "block" : "none";
-    document.getElementById("cm_image_drive_block").style.display = isUpload ? "none" : "block";
+    const source = tab.dataset.isource;
+    document.getElementById("cm_image_upload_block").style.display = source === "upload" ? "block" : "none";
+    document.getElementById("cm_image_drive_block").style.display = source === "drive" ? "block" : "none";
+    document.getElementById("cm_image_github_block").style.display = source === "github" ? "block" : "none";
     document.getElementById("cm_focal_wrap").style.display = "none";
     categoryMediaFocalPicker = null;
   });
@@ -1056,6 +1162,7 @@ function resetCategoryMediaForm() {
   document.getElementById("cm_image").value = "";
   document.getElementById("cm_image")._compressedBlob = null;
   document.getElementById("cm_image_drive_url").value = "";
+  document.getElementById("cm_image_github_path").value = "";
   document.getElementById("cm_focal_wrap").style.display = "none";
   document.getElementById("cm_video_url").value = "";
   document.getElementById("cm_caption").value = "";
@@ -1065,6 +1172,7 @@ function resetCategoryMediaForm() {
   document.querySelector('#cm_image_source_tabs .tab[data-isource="upload"]').classList.add("is-active");
   document.getElementById("cm_image_upload_block").style.display = "block";
   document.getElementById("cm_image_drive_block").style.display = "none";
+  document.getElementById("cm_image_github_block").style.display = "none";
 }
 
 async function handleCategoryMediaFile(file) {
@@ -1120,6 +1228,33 @@ document.getElementById("cm_image_drive_load").addEventListener("click", () => {
   );
 });
 
+document.getElementById("cm_image_github_load").addEventListener("click", () => {
+  const status = document.getElementById("cm_status");
+  const path = normalizeStaticAssetPath(document.getElementById("cm_image_github_path").value);
+  if (!path) {
+    status.className = "status err";
+    status.textContent = 'La ruta tiene que empezar con "assets/", ej: assets/categorias/foto.jpg';
+    return;
+  }
+  status.className = "";
+  status.textContent = "";
+  categoryMediaDriveUrl = path;
+
+  const focalWrap = document.getElementById("cm_focal_wrap");
+  const img = document.getElementById("cm_preview_img");
+  const label = document.getElementById("cm_preview_label");
+  img.src = path;
+  label.textContent = "Vista previa desde el repositorio";
+  focalWrap.style.display = "flex";
+
+  categoryMediaFocalPicker = setupFocalPicker(
+    document.getElementById("cm_focal_picker"),
+    document.getElementById("cm_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+});
+
 document.getElementById("cm_submit").addEventListener("click", async () => {
   const status = document.getElementById("cm_status");
   const isImageTab = document.querySelector('#cm_type_tabs .tab[data-mtype="image"]').classList.contains("is-active");
@@ -1129,9 +1264,8 @@ document.getElementById("cm_submit").addEventListener("click", async () => {
     status.className = "status busy";
 
     if (isImageTab) {
-      const isDriveSource = document
-        .querySelector('#cm_image_source_tabs .tab[data-isource="drive"]')
-        .classList.contains("is-active");
+      const activeMediaImageSource = document.querySelector("#cm_image_source_tabs .tab.is-active")?.dataset.isource;
+      const isDriveSource = activeMediaImageSource === "drive" || activeMediaImageSource === "github";
 
       let imagePath;
       let focal = categoryMediaFocalPicker ? categoryMediaFocalPicker.get() : { x: 50, y: 50 };
@@ -1139,10 +1273,10 @@ document.getElementById("cm_submit").addEventListener("click", async () => {
       if (isDriveSource) {
         if (!categoryMediaDriveUrl) {
           status.className = "status err";
-          status.textContent = "Pegá el link de Drive y tocá 'Cargar vista previa' primero.";
+          status.textContent = "Cargá la vista previa primero (Drive o GitHub).";
           return;
         }
-        imagePath = categoryMediaDriveUrl; // URL completa — se guarda tal cual, sin subir a Storage
+        imagePath = categoryMediaDriveUrl; // URL completa o ruta del repo — se guarda tal cual, sin subir a Storage
       } else {
         const fileInput = document.getElementById("cm_image");
         const file = fileInput.files[0];
@@ -1241,7 +1375,7 @@ document.getElementById("cm_media_list").addEventListener("click", async (e) => 
   if (!btn) return;
   if (!confirm("¿Borrar este elemento?")) return;
   const path = btn.dataset.path;
-  if (path && !/^https?:\/\//i.test(path)) await sb.storage.from(STORAGE_BUCKET).remove([path]);
+  if (isOwnStorageFile(path)) await sb.storage.from(STORAGE_BUCKET).remove([path]);
   await sb.from(TABLE_CATEGORY_MEDIA).delete().eq("id", btn.dataset.deleteMedia);
   loadCategoryMedia();
 });
@@ -1380,7 +1514,7 @@ document.getElementById("productForm").addEventListener("submit", async (e) => {
       status.textContent = "Optimizando y subiendo imagen…";
       const blob = fileInput._compressedBlob || (await compressImage(fileInput.files[0], 1000, 0.75));
       imagePath = await uploadToStorage(blob, "productos");
-      if (isEditing && editingProductOriginal.image_path) {
+      if (isEditing && isOwnStorageFile(editingProductOriginal.image_path)) {
         await sb.storage.from(STORAGE_BUCKET).remove([editingProductOriginal.image_path]);
       }
     }
@@ -1550,14 +1684,15 @@ document.querySelectorAll("#g_type_tabs .tab").forEach((tab) => {
   });
 });
 
-// Dentro de "Foto": subir archivo(s) vs. pegar un link de Drive.
+// Dentro de "Foto": subir archivo(s) / link de Drive / ruta en GitHub.
 document.querySelectorAll("#g_image_source_tabs .tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     document.querySelectorAll("#g_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
     tab.classList.add("is-active");
-    const isUpload = tab.dataset.isource === "upload";
-    document.getElementById("g_image_upload_block").style.display = isUpload ? "block" : "none";
-    document.getElementById("g_image_drive_block").style.display = isUpload ? "none" : "block";
+    const source = tab.dataset.isource;
+    document.getElementById("g_image_upload_block").style.display = source === "upload" ? "block" : "none";
+    document.getElementById("g_image_drive_block").style.display = source === "drive" ? "block" : "none";
+    document.getElementById("g_image_github_block").style.display = source === "github" ? "block" : "none";
   });
 });
 
@@ -1588,6 +1723,32 @@ document.getElementById("g_image_drive_load").addEventListener("click", () => {
   );
 });
 
+document.getElementById("g_image_github_load").addEventListener("click", () => {
+  const status = document.getElementById("g_status");
+  const path = normalizeStaticAssetPath(document.getElementById("g_image_github_path").value);
+  if (!path) {
+    status.className = "status err";
+    status.textContent = 'La ruta tiene que empezar con "assets/", ej: assets/prensa/foto.jpg';
+    return;
+  }
+  status.className = "";
+  status.textContent = "";
+  galleryDriveUrl = path; // reusa el mismo flujo que Drive: es solo una URL/ruta final ya resuelta
+
+  const focalWrap = document.getElementById("g_github_focal_wrap");
+  const img = document.getElementById("g_github_preview_img");
+  img.src = path;
+  focalWrap.style.display = "flex";
+  document.getElementById("g_github_focal_picker").style.aspectRatio = currentGalleryAspect();
+
+  galleryDriveFocalPicker = setupFocalPicker(
+    document.getElementById("g_github_focal_picker"),
+    document.getElementById("g_github_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+});
+
 function resetGalleryTypeAndSource() {
   document.querySelectorAll("#g_type_tabs .tab").forEach((t) => t.classList.remove("is-active"));
   document.querySelector('#g_type_tabs .tab[data-mtype="image"]').classList.add("is-active");
@@ -1598,9 +1759,12 @@ function resetGalleryTypeAndSource() {
   document.querySelector('#g_image_source_tabs .tab[data-isource="upload"]').classList.add("is-active");
   document.getElementById("g_image_upload_block").style.display = "block";
   document.getElementById("g_image_drive_block").style.display = "none";
+  document.getElementById("g_image_github_block").style.display = "none";
 
   document.getElementById("g_image_drive_url").value = "";
   document.getElementById("g_drive_focal_wrap").style.display = "none";
+  document.getElementById("g_image_github_path").value = "";
+  document.getElementById("g_github_focal_wrap").style.display = "none";
   document.getElementById("g_video_url").value = "";
   galleryDriveUrl = null;
   galleryDriveFocalPicker = null;
@@ -1665,9 +1829,8 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
   const isVideoTab = document
     .querySelector('#g_type_tabs .tab[data-mtype="video"]')
     .classList.contains("is-active");
-  const isDriveSource = document
-    .querySelector('#g_image_source_tabs .tab[data-isource="drive"]')
-    .classList.contains("is-active");
+  const activeImageSource = document.querySelector("#g_image_source_tabs .tab.is-active")?.dataset.isource;
+  const isDriveSource = activeImageSource === "drive" || activeImageSource === "github";
 
   const commonFields = {
     category,
@@ -1677,7 +1840,7 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
   };
 
   function oldPathIsOwnFile(path) {
-    return path && !/^https?:\/\//i.test(path);
+    return isOwnStorageFile(path);
   }
 
   try {
@@ -1717,11 +1880,11 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
       return;
     }
 
-    // ---------- FOTO POR LINK DE DRIVE ----------
+    // ---------- FOTO POR LINK DE DRIVE O RUTA DE GITHUB ----------
     if (isDriveSource) {
       if (!galleryDriveUrl) {
         status.className = "status err";
-        status.textContent = "Pegá el link de Drive y tocá 'Cargar vista previa' primero.";
+        status.textContent = "Cargá la vista previa primero (Drive o GitHub).";
         return;
       }
       const focal = galleryDriveFocalPicker ? galleryDriveFocalPicker.get() : { x: 50, y: 50 };
@@ -1880,7 +2043,7 @@ document.getElementById("galleryTableBody").addEventListener("click", async (e) 
   if (!confirm("¿Borrar esta foto?")) return;
   const id = btn.dataset.deleteGallery;
   const path = btn.dataset.path;
-  if (path && !/^https?:\/\//i.test(path)) await sb.storage.from(STORAGE_BUCKET).remove([path]);
+  if (isOwnStorageFile(path)) await sb.storage.from(STORAGE_BUCKET).remove([path]);
   await sb.from(TABLE_GALLERY).delete().eq("id", id);
   const activeCat = document.querySelector("#galleryFilterTabs .tab.is-active").dataset.gcat;
   loadGallery(activeCat);
@@ -1890,7 +2053,8 @@ document.getElementById("galleryTableBody").addEventListener("click", async (e) 
 // CONFIGURACIÓN DEL SITIO (contacto, bio, fotos)
 // ---------------------------------------------------------------
 let profilePhotoPicker = null;
-let profilePhotoNewBlob = null; // solo se llena si se soltó una foto nueva
+let profilePhotoNewBlob = null; // solo se llena si se soltó una foto nueva (subida)
+let profilePhotoNewPath = null; // solo se llena si se cargó por Drive o GitHub
 
 async function loadSettings() {
   const { data, error } = await sb.from(TABLE_SETTINGS).select("*").eq("id", 1).maybeSingle();
@@ -1931,6 +2095,7 @@ async function handleProfilePhotoFile(file) {
   img.src = URL.createObjectURL(compressed);
   label.textContent = `Nueva foto — Original ${kb(file.size)} → optimizada ${kb(compressed.size)}`;
   profilePhotoNewBlob = compressed;
+  profilePhotoNewPath = null;
 
   profilePhotoPicker = setupFocalPicker(
     document.getElementById("s_photo_focal_picker"),
@@ -1943,6 +2108,61 @@ async function handleProfilePhotoFile(file) {
 setupDropzone(document.getElementById("s_photo_dropzone"), document.getElementById("s_profile_photo"), (files) =>
   handleProfilePhotoFile(files[0])
 );
+
+// Fuente de la foto: Subir archivo / Link de Drive / Ruta en GitHub
+document.querySelectorAll("#s_photo_source_tabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("#s_photo_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    const source = tab.dataset.isource;
+    document.getElementById("s_photo_upload_block").style.display = source === "upload" ? "block" : "none";
+    document.getElementById("s_photo_drive_block").style.display = source === "drive" ? "block" : "none";
+    document.getElementById("s_photo_github_block").style.display = source === "github" ? "block" : "none";
+  });
+});
+
+function loadProfilePhotoPreview(url, label) {
+  const wrap = document.getElementById("s_photo_focal_wrap");
+  const img = document.getElementById("s_photo_preview_img");
+  const labelEl = document.getElementById("s_photo_preview_label");
+  img.src = url;
+  labelEl.textContent = label;
+  wrap.style.display = "flex";
+  profilePhotoNewBlob = null;
+  profilePhotoNewPath = url;
+  profilePhotoPicker = setupFocalPicker(
+    document.getElementById("s_photo_focal_picker"),
+    document.getElementById("s_photo_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+}
+
+document.getElementById("s_photo_drive_load").addEventListener("click", () => {
+  const status = document.getElementById("s_status");
+  const directUrl = driveImageUrl(document.getElementById("s_photo_drive_url").value.trim());
+  if (!directUrl) {
+    status.className = "status err";
+    status.textContent = "No pude leer ese link de Drive. Verificá que sea un link para compartir un archivo.";
+    return;
+  }
+  status.className = "";
+  status.textContent = "";
+  loadProfilePhotoPreview(directUrl, "Vista previa desde Drive");
+});
+
+document.getElementById("s_photo_github_load").addEventListener("click", () => {
+  const status = document.getElementById("s_status");
+  const path = normalizeStaticAssetPath(document.getElementById("s_photo_github_path").value);
+  if (!path) {
+    status.className = "status err";
+    status.textContent = 'La ruta tiene que empezar con "assets/", ej: assets/sobre-mi.jpg';
+    return;
+  }
+  status.className = "";
+  status.textContent = "";
+  loadProfilePhotoPreview(path, "Vista previa desde el repositorio");
+});
 
 document.getElementById("settingsForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -1968,6 +2188,8 @@ document.getElementById("settingsForm").addEventListener("submit", async (e) => 
     if (profilePhotoNewBlob) {
       status.textContent = "Subiendo foto de 'Sobre mí'…";
       update.profile_photo_path = await uploadToStorage(profilePhotoNewBlob, "sitio");
+    } else if (profilePhotoNewPath) {
+      update.profile_photo_path = profilePhotoNewPath;
     }
     if (profilePhotoPicker) {
       const focal = profilePhotoPicker.get();
@@ -1983,6 +2205,7 @@ document.getElementById("settingsForm").addEventListener("submit", async (e) => 
     status.textContent = "Cambios guardados correctamente.";
     document.getElementById("s_profile_photo").value = "";
     profilePhotoNewBlob = null;
+    profilePhotoNewPath = null;
   } catch (err) {
     status.className = "status err";
     status.textContent = "Error: " + err.message;
@@ -1997,6 +2220,7 @@ document.getElementById("settingsForm").addEventListener("submit", async (e) => 
 function imageUrl(path) {
   if (!path) return null;
   if (/^https?:\/\//i.test(path)) return path; // ya es una URL completa (ej: link de Drive)
+  if (isStaticAssetPath(path)) return path; // archivo estático del repo (GitHub Pages)
   return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
 }
 function escapeHtml(str) {
