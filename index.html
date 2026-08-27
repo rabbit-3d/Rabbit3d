@@ -452,8 +452,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   .filter-chip{ flex:0 0 auto; }
 }
 
-.category-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-@media (max-width: 900px){ .category-grid{ grid-template-columns: repeat(2,1fr); } }
+.category-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 @media (max-width: 560px){ .category-grid{ grid-template-columns: 1fr; } }
 
 .category-card{
@@ -504,16 +503,6 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 .check-list li{ padding-left: 1.6em; position:relative; font-size:.95rem; }
 .check-list li::before{ content:'—'; position:absolute; left:0; color: var(--red); font-family: var(--font-mono); }
 
-.pack-card{
-  aspect-ratio: 1/1; border-radius: var(--radius);
-  background: linear-gradient(155deg, var(--slate), var(--slate-dark));
-  color: var(--white); display:flex; flex-direction:column; align-items:center; justify-content:center;
-  margin-bottom: 22px;
-}
-.pack-card-alt{ background: linear-gradient(155deg, var(--red), var(--red-dark)); }
-.pack-size{ font-family: var(--font-display); font-size: 3rem; font-weight:700; }
-.pack-label{ font-family: var(--font-mono); font-size:.78rem; opacity:.85; }
-
 /* ---------- galleries ---------- */
 .gallery-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 @media (max-width: 900px){ .gallery-grid{ grid-template-columns: repeat(3,1fr); } }
@@ -524,6 +513,12 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   background: var(--bg-alt); border: 1px solid var(--line);
 }
 .gallery-item img{ width:100%; height:100%; object-fit:cover; }
+.gallery-item.is-video{ cursor:pointer; background:var(--bg-panel-2); }
+.gallery-item iframe{ width:100%; height:100%; border:0; }
+.gallery-item .play-badge{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background: rgba(0,0,0,.25);
+}
 .gallery-caption{
   position:absolute; left:0; right:0; bottom:0; padding: 8px 10px;
   background: linear-gradient(transparent, rgba(0,0,0,.7));
@@ -549,6 +544,11 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 }
 .press-media{ position:relative; aspect-ratio: 16/9; overflow:hidden; }
 .press-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+.press-media iframe{ width:100%; height:100%; border:0; }
+.press-media .play-badge{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background: rgba(0,0,0,.25);
+}
 .press-badge{
   position:absolute; top:10px; left:10px; font-family: var(--font-mono); font-size:.68rem;
   background: var(--red); color:#fff; padding:3px 10px; border-radius:999px; letter-spacing:.04em;
@@ -562,17 +562,30 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 }
 
 /* ---------- contact ---------- */
-.contact-wrap{ max-width: 480px; margin: 0 auto; text-align:center; }
-.contact-list{ list-style:none; margin: 1.8em 0 0; padding:0; display:flex; flex-direction:column; gap:16px; text-align:left; }
-.contact-list li{ display:flex; flex-direction:column; gap:2px; }
-.contact-label{ font-family: var(--font-mono); font-size:.72rem; color: var(--red); text-transform:uppercase; letter-spacing:.08em; }
-.contact-list a{ text-decoration:none; font-weight:600; transition: color .15s ease; }
-.contact-list a:hover{ color: var(--red); }
-.whatsapp-badge{
-  display:inline-flex; align-items:center; gap:10px; margin-top:2px;
+.contact-wrap{ max-width: 640px; margin: 0 auto; text-align:center; }
+.contact-grid{
+  display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; margin-top:2em; text-align:left;
 }
-.whatsapp-badge:hover{ color: var(--ink); }
-.whatsapp-icon{ flex-shrink:0; border-radius:50%; }
+@media (max-width: 560px){ .contact-grid{ grid-template-columns: 1fr; } }
+
+.contact-card{
+  display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius: var(--radius);
+  background: var(--bg-panel); border: 1px solid var(--line); text-decoration:none; color: inherit;
+  transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+a.contact-card:hover{ border-color: var(--red); transform: translateY(-2px); box-shadow: var(--shadow-soft); }
+.contact-card-static{ cursor:default; }
+
+.contact-icon{
+  flex-shrink:0; width:40px; height:40px; border-radius:50%; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  background: var(--bg-panel-2); border:1px solid var(--line-strong); color: var(--ink);
+}
+.contact-icon-whatsapp{ background:none; border:none; }
+
+.contact-card-body{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.contact-label{ font-family: var(--font-mono); font-size:.7rem; color: var(--red); text-transform:uppercase; letter-spacing:.08em; }
+.contact-value{ font-weight:600; overflow-wrap:break-word; }
 
 /* ==========================================================
    FOOTER
@@ -580,7 +593,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 .site-footer{ background: var(--bg-footer); color: var(--ink-soft); border-top: 1px solid var(--line-soft); }
 
 .footer-grid{
-  display:grid; grid-template-columns: 1.4fr 1fr 1fr 1.2fr; gap: 40px;
+  display:grid; grid-template-columns: repeat(3, 1fr); gap: 40px;
   padding: 56px 24px 40px;
 }
 .footer-col-title{
@@ -594,24 +607,15 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 }
 .footer-col a:hover{ color: var(--red); }
 
-.footer-col-brand .footer-brand{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-.footer-logo-img{ height:34px; width:34px; border-radius:9px; object-fit:cover; }
-.footer-brand-name{ font-family: var(--font-display); font-size:1.1rem; color: var(--ink); font-weight:700; }
-.footer-tagline{ font-size:.88rem; color: var(--ink-soft); margin: 0 0 16px; max-width:26ch; }
-
-.footer-social{ display:flex; gap:10px; }
-.footer-social-btn{
-  display:flex; align-items:center; justify-content:center; width:36px; height:36px;
-  border-radius:50%; border:1px solid var(--line-strong); color: var(--ink-soft);
-  transition: color .15s ease, border-color .15s ease;
-}
-.footer-social-btn:hover{ color: var(--red); border-color: var(--red); }
-
 .footer-contact-row{
   display:flex; align-items:flex-start; gap:10px; font-size:.88rem; margin:0; color: var(--ink-soft);
 }
 .footer-contact-row a{ color: var(--ink-soft); text-decoration:none; }
-.footer-contact-row a:hover{ color: var(--red); }
+.footer-link-btn{
+  background:none; border:none; padding:0; margin:0; font: inherit; text-align:left; cursor:pointer;
+  color: var(--ink-soft);
+}
+.footer-contact-row a:hover, .footer-contact-row .footer-link-btn:hover{ color: var(--red); }
 .footer-contact-icon{ flex-shrink:0; margin-top:2px; color: var(--red); }
 
 .footer-bottom{ border-top: 1px solid var(--line-soft); }
@@ -624,7 +628,6 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 
 @media (max-width: 880px){
   .footer-grid{ grid-template-columns: 1fr 1fr; gap: 32px 24px; padding: 40px 24px 32px; }
-  .footer-col-brand{ grid-column: 1 / -1; }
   .footer-bottom-inner{ flex-direction:column; gap:8px; }
 }
 @media (max-width: 480px){
@@ -646,16 +649,15 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     </a>
 
     <nav class="main-nav" id="main-nav">
-      <a href="#sobre-mi">Sobre mí</a>
-      <a href="#impresion-3d">Cómo imprimo</a>
-      <a href="#categorias">Categorías</a>
+      <a href="#categorias">Productos</a>
       <a href="#mayorista">Mayorista</a>
-      <a href="#encargos">Encargos</a>
+      <a href="#impresion-3d">Cómo imprimo</a>
       <a href="#taller">Taller</a>
-      <a href="#prensa">Prensa</a>
+      <a href="#sobre-mi">Sobre mí</a>
+      <a href="#prensa">Medios</a>
     </nav>
 
-    <a href="#contacto" class="btn btn-small btn-primary header-cta">Contactar</a>
+    <button type="button" class="btn btn-small btn-primary header-cta" id="headerContactBtn">Contactar</button>
 
     <div class="header-icons">
       <button class="icon-btn" id="accountBtn" aria-label="Cuenta">
@@ -713,27 +715,43 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
 
     <div class="category-media-grid" id="categoryModalMedia"></div>
 
-    <a href="#" class="btn btn-primary" id="categoryModalWhatsapp" style="width:100%" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+    <button type="button" class="btn btn-primary" id="categoryModalWhatsapp" style="width:100%">Consultar por WhatsApp</button>
     <button type="button" class="modal-close-link" id="categoryModalCloseLink">Cerrar</button>
+  </div>
+</div>
+
+<!-- ============ MODAL DE CONTACTO POR WHATSAPP ============ -->
+<div class="modal-backdrop" id="waModalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="waModalTitle">
+    <button class="modal-close" id="waModalClose" aria-label="Cerrar">×</button>
+    <h3 id="waModalTitle">Contactar por WhatsApp</h3>
+    <p class="modal-subtitle">Contanos quién sos para armar el mensaje.</p>
+    <form id="waModalForm">
+      <label for="wa_name">Tu nombre</label>
+      <input type="text" id="wa_name" required placeholder="Ej: Ana">
+      <label for="wa_locality">Tu localidad</label>
+      <input type="text" id="wa_locality" required placeholder="Ej: Santa Rosa, La Pampa">
+      <button type="submit" class="btn btn-primary" style="width:100%">Continuar a WhatsApp</button>
+    </form>
+    <button type="button" class="modal-close-link" id="waModalCloseLink">Cerrar</button>
   </div>
 </div>
 
 <main>
 
-<!-- ============ HERO ============ -->
 <section class="hero" id="inicio">
   <div class="wrap hero-inner">
     <div class="hero-copy">
       <p class="eyebrow">Impresión 3D por cantidad — capa a capa</p>
-      <h1>Le doy forma a tus ideas, <span class="accent-underline">por cantidad.</span></h1>
+      <h1>Le doy forma a <span class="accent-underline">tus ideas.</span></h1>
       <p class="hero-lede">
         Me especializo en pedidos por mayor: llaveros y otros productos impresos en 3D
-        para cumpleaños, organizaciones, escuelas y marcas, desde 50 unidades. Elegí una
-        categoría y coordinamos el diseño, la cantidad y el precio.
+        para cumpleaños, organizaciones, escuelas y marcas. Elegí un producto y coordinamos
+        el diseño, la cantidad y el precio.
       </p>
       <div class="hero-actions">
-        <a href="#categorias" class="btn btn-primary">Ver categorías</a>
-        <a href="#encargos" class="btn btn-ghost">Consultar por un pedido</a>
+        <a href="#categorias" class="btn btn-primary">Ver productos</a>
+        <button type="button" class="btn btn-ghost" id="heroContactBtn">Consultar por un pedido</button>
       </div>
     </div>
 
@@ -772,8 +790,100 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
   <div class="layer-divider" aria-hidden="true"></div>
 </section>
 
-<!-- ============ SOBRE MÍ ============ -->
-<section class="section" id="sobre-mi">
+<div class="layer-divider" aria-hidden="true"></div>
+
+<section class="section" id="categorias">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Pedidos por cantidad</p>
+        <h2>Productos</h2>
+      </div>
+      <p class="section-head-note">Cada producto tiene una cantidad mínima de pedido — coordinamos diseño y precio por WhatsApp.</p>
+    </div>
+
+    <div class="category-grid" id="categoryGrid"></div>
+    <p class="empty-note" id="categoryEmpty" hidden>Todavía no hay productos cargados.</p>
+  </div>
+</section>
+
+<div class="layer-divider" aria-hidden="true"></div>
+
+<section class="section section-dark" id="mayorista">
+  <div class="wrap">
+    <p class="eyebrow center">Cómo funciona</p>
+    <h2 class="center">Pedidos por cantidad, no por unidad</h2>
+    <p class="center lede-narrow">
+      Hoy me dedico exclusivamente a pedidos grandes: <strong>mínimo 50 unidades</strong> por
+      diseño, sin importar el producto. Es la forma en la que puedo sostener buenos precios
+      y buenos tiempos de entrega con el tiempo que tengo disponible.
+    </p>
+    <ul class="check-list" style="max-width:420px; margin-left:auto; margin-right:auto;">
+      <li>Mínimo 50 unidades por diseño (algunos productos piden 100)</li>
+      <li>Precio diferencial por volumen — se cotiza según diseño y cantidad</li>
+      <li>Podés combinar variantes de color dentro de un mismo pedido</li>
+      <li>Tiempo de producción según cantidad — se informa al cotizar</li>
+    </ul>
+    <div class="hero-actions center">
+      <button type="button" class="btn btn-primary" id="waMayorista">Cotizar un pedido por WhatsApp</button>
+    </div>
+  </div>
+</section>
+
+<div class="layer-divider" aria-hidden="true"></div>
+
+<section class="section section-alt" id="impresion-3d">
+  <div class="wrap">
+    <p class="eyebrow center">Un poco de contexto</p>
+    <h2 class="center">¿Cómo funciona la impresión 3D?</h2>
+    <p class="center lede-narrow">
+      Todo lo que ves en el catálogo empezó siendo un archivo digital. Así es el camino
+      de la pantalla al objeto que tenés en la mano.
+    </p>
+
+    <ol class="process-grid">
+      <li class="process-card">
+        <span class="process-num">01</span>
+        <h3>Diseño 3D</h3>
+        <p>El objeto se modela en una computadora (o se descarga un diseño ya hecho) hasta tener una malla en 3D lista para imprimir.</p>
+      </li>
+      <li class="process-card">
+        <span class="process-num">02</span>
+        <h3>Laminado</h3>
+        <p>Un programa "corta" el modelo en capas horizontales finísimas y genera las instrucciones que va a seguir la impresora.</p>
+      </li>
+      <li class="process-card">
+        <span class="process-num">03</span>
+        <h3>Impresión</h3>
+        <p>La impresora derrite filamento plástico y lo deposita capa sobre capa, de abajo hacia arriba, hasta formar la pieza completa.</p>
+      </li>
+      <li class="process-card">
+        <span class="process-num">04</span>
+        <h3>Terminación</h3>
+        <p>Se retiran soportes, se lija y en algunos casos se pinta o se sella, según el producto y el uso que va a tener.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<div class="layer-divider" aria-hidden="true"></div>
+
+<section class="section" id="taller">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Detrás de escena</p>
+        <h2>Mi taller</h2>
+      </div>
+      <p class="section-head-note">Las impresoras, el espacio y el proceso día a día.</p>
+    </div>
+    <div class="gallery-grid" id="tallerGallery"></div>
+  </div>
+</section>
+
+<div class="layer-divider" aria-hidden="true"></div>
+
+<section class="section section-alt" id="sobre-mi">
   <div class="wrap section-split">
     <div class="section-media">
       <div class="photo-frame" id="sobreMiPhotoFrame" data-placeholder-for="foto de perfil / retrato en el taller">
@@ -832,45 +942,22 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
 
 <div class="layer-divider" aria-hidden="true"></div>
 
-<!-- ============ CÓMO FUNCIONA LA IMPRESIÓN 3D ============ -->
-<section class="section section-alt" id="impresion-3d">
+<section class="section section-dark" id="prensa">
   <div class="wrap">
-    <p class="eyebrow center">Un poco de contexto</p>
-    <h2 class="center">¿Cómo funciona la impresión 3D?</h2>
-    <p class="center lede-narrow">
-      Todo lo que ves en el catálogo empezó siendo un archivo digital. Así es el camino
-      de la pantalla al objeto que tenés en la mano.
-    </p>
-
-    <ol class="process-grid">
-      <li class="process-card">
-        <span class="process-num">01</span>
-        <h3>Diseño 3D</h3>
-        <p>El objeto se modela en una computadora (o se descarga un diseño ya hecho) hasta tener una malla en 3D lista para imprimir.</p>
-      </li>
-      <li class="process-card">
-        <span class="process-num">02</span>
-        <h3>Laminado</h3>
-        <p>Un programa "corta" el modelo en capas horizontales finísimas y genera las instrucciones que va a seguir la impresora.</p>
-      </li>
-      <li class="process-card">
-        <span class="process-num">03</span>
-        <h3>Impresión</h3>
-        <p>La impresora derrite filamento plástico y lo deposita capa sobre capa, de abajo hacia arriba, hasta formar la pieza completa.</p>
-      </li>
-      <li class="process-card">
-        <span class="process-num">04</span>
-        <h3>Terminación</h3>
-        <p>Se retiran soportes, se lija y en algunos casos se pinta o se sella, según el producto y el uso que va a tener.</p>
-      </li>
-    </ol>
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">En los medios</p>
+        <h2>Entrevistas en TV</h2>
+      </div>
+      <p class="section-head-note">Dos entrevistas que tuve en la tele.</p>
+    </div>
+    <div class="press-grid" id="prensaGallery"></div>
   </div>
 </section>
 
 <div class="layer-divider" aria-hidden="true"></div>
 
-<!-- ============ IMPRESIÓN 3D EN LA INDUSTRIA ============ -->
-<section class="section section-alt" id="industria">
+<section class="section" id="industria">
   <div class="wrap">
     <p class="eyebrow center">Más allá del taller</p>
     <h2 class="center">Impresión 3D en la industria</h2>
@@ -903,121 +990,31 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
       </li>
     </ul>
 
-    <div class="press-grid" id="charlasGallery"></div>
+    <div class="press-grid" id="charlasGallery" style="margin-top:48px"></div>
   </div>
 </section>
 
 <div class="layer-divider" aria-hidden="true"></div>
 
-<!-- ============ CATEGORÍAS (pedidos por cantidad) ============ -->
-<section class="section" id="categorias">
+<section class="section section-alt" id="clientes">
   <div class="wrap">
     <div class="section-head">
       <div>
-        <p class="eyebrow">Pedidos por cantidad</p>
-        <h2>Elegí una categoría</h2>
+        <p class="eyebrow">Con quién trabajé</p>
+        <h2>Clientes destacados</h2>
       </div>
-      <p class="section-head-note">Cada categoría tiene una cantidad mínima de pedido — coordinamos diseño y precio por WhatsApp.</p>
+      <p class="section-head-note">Algunos pedidos fueron para clientes conocidos.</p>
     </div>
-
-    <div class="category-grid" id="categoryGrid"></div>
-    <p class="empty-note" id="categoryEmpty" hidden>Todavía no hay categorías cargadas.</p>
-  </div>
-</section>
-
-<div class="layer-divider" aria-hidden="true"></div>
-
-<!-- ============ MAYORISTA ============ -->
-<section class="section section-dark" id="mayorista">
-  <div class="wrap section-split reverse">
-    <div class="section-copy">
-      <p class="eyebrow">Cómo funciona</p>
-      <h2>Pedidos por cantidad, no por unidad</h2>
-      <p>
-        Hoy me dedico exclusivamente a pedidos grandes: <strong>mínimo 50 unidades</strong> por
-        diseño, sin importar la categoría. Es la forma en la que puedo sostener buenos precios
-        y buenos tiempos de entrega con el tiempo que tengo disponible.
-      </p>
-      <ul class="check-list">
-        <li>Mínimo 50 unidades por diseño (algunas categorías piden 100)</li>
-        <li>Precio diferencial por volumen — se cotiza según diseño y cantidad</li>
-        <li>Podés combinar variantes de color dentro de un mismo pedido</li>
-        <li>Tiempo de producción según cantidad — se informa al cotizar</li>
-      </ul>
-      <div class="hero-actions">
-        <a href="https://wa.me/5490000000000?text=Hola%2C%20quiero%20cotizar%20un%20pedido%20por%20cantidad"
-           class="btn btn-primary" target="_blank" rel="noopener" id="waMayorista" data-wa-text="Hola, quiero cotizar un pedido por cantidad">Cotizar un pedido por WhatsApp</a>
-      </div>
-    </div>
-    <div class="section-media">
-      <div class="pack-card">
-        <span class="pack-size">50</span>
-        <span class="pack-label">unidades, mínimo</span>
-      </div>
-      <div class="pack-card pack-card-alt">
-        <span class="pack-size">100+</span>
-        <span class="pack-label">para pedidos grandes</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="layer-divider" aria-hidden="true"></div>
-
-<!-- ============ ENCARGOS ============ -->
-<section class="section" id="encargos">
-  <div class="wrap">
-    <p class="eyebrow center">Pedidos a medida</p>
-    <h2 class="center">¿Necesitás algo que no está en el catálogo?</h2>
-    <p class="center lede-narrow">
-      También trabajo por encargo: piezas personalizadas, regalos, repuestos, merchandising
-      de marca o cualquier idea que se pueda resolver en 3D. Así es el proceso:
+    <p class="lede-narrow" style="margin-bottom:28px">
+      Uno de ellos fue <strong>Spreen</strong>, streamer y creador de contenido muy
+      conocido en Argentina, que me encargó piezas impresas en 3D.
     </p>
-
-    <ol class="process-grid process-grid-3">
-      <li class="process-card">
-        <span class="process-num">01</span>
-        <h3>Me contás la idea</h3>
-        <p>Por WhatsApp o Instagram: qué necesitás, medidas aproximadas, color y para cuándo lo necesitás.</p>
-      </li>
-      <li class="process-card">
-        <span class="process-num">02</span>
-        <h3>Cotización</h3>
-        <p>Te paso un precio y un tiempo estimado de entrega según la complejidad y el tamaño de la pieza.</p>
-      </li>
-      <li class="process-card">
-        <span class="process-num">03</span>
-        <h3>Impresión y entrega</h3>
-        <p>Confirmado el encargo, lo imprimo, lo termino y coordinamos entrega o envío.</p>
-      </li>
-    </ol>
-
-    <div class="hero-actions center">
-      <a href="https://wa.me/5490000000000?text=Hola%2C%20quiero%20consultar%20por%20un%20encargo"
-         class="btn btn-primary" target="_blank" rel="noopener" id="waEncargos" data-wa-text="Hola, quiero consultar por un encargo">Contar mi idea por WhatsApp</a>
-    </div>
+    <div class="press-grid" id="clientesGallery"></div>
   </div>
 </section>
 
 <div class="layer-divider" aria-hidden="true"></div>
 
-<!-- ============ TALLER ============ -->
-<section class="section section-alt" id="taller">
-  <div class="wrap">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow">Detrás de escena</p>
-        <h2>Mi taller</h2>
-      </div>
-      <p class="section-head-note">Las impresoras, el espacio y el proceso día a día.</p>
-    </div>
-    <div class="gallery-grid" id="tallerGallery"></div>
-  </div>
-</section>
-
-<div class="layer-divider" aria-hidden="true"></div>
-
-<!-- ============ CULTS3D ============ -->
 <section class="section" id="cults3d">
   <div class="wrap">
     <p class="eyebrow center">Alcance internacional</p>
@@ -1041,132 +1038,28 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
   </div>
 </section>
 
-<div class="layer-divider" aria-hidden="true"></div>
-
-<!-- ============ PRENSA ============ -->
-<section class="section section-dark" id="prensa">
-  <div class="wrap">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow">En los medios</p>
-        <h2>Entrevistas en TV</h2>
-      </div>
-      <p class="section-head-note">Dos entrevistas que tuve en la tele.</p>
-    </div>
-    <div class="press-grid" id="prensaGallery"></div>
-  </div>
-</section>
-
-<div class="layer-divider" aria-hidden="true"></div>
-
-<!-- ============ CLIENTES DESTACADOS ============ -->
-<section class="section section-alt" id="clientes">
-  <div class="wrap">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow">Con quién trabajé</p>
-        <h2>Clientes destacados</h2>
-      </div>
-      <p class="section-head-note">Algunos pedidos fueron para clientes conocidos.</p>
-    </div>
-    <p class="lede-narrow" style="margin-bottom:28px">
-      Uno de ellos fue <strong>Spreen</strong>, streamer y creador de contenido muy
-      conocido en Argentina, que me encargó piezas impresas en 3D.
-    </p>
-    <div class="press-grid" id="clientesGallery"></div>
-  </div>
-</section>
-
-<div class="layer-divider" aria-hidden="true"></div>
-
-<!-- ============ CONTACTO ============ -->
-<section class="section" id="contacto">
-  <div class="wrap contact-wrap">
-    <p class="eyebrow center">Hablemos</p>
-    <h2 class="center">Contacto</h2>
-    <p class="center lede-narrow">
-      La forma más rápida de coordinar un pedido, un encargo o un pack mayorista es por
-      WhatsApp o Instagram. Respondo a la brevedad.
-    </p>
-    <ul class="contact-list">
-      <li>
-        <span class="contact-label">WhatsApp</span>
-        <a href="https://wa.me/5490000000000" target="_blank" rel="noopener" id="waContact" class="whatsapp-badge">
-          <svg class="whatsapp-icon" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
-            <circle cx="16" cy="16" r="16" fill="#25D366"/>
-            <path fill="#fff" d="M16 8.5c-4.1 0-7.5 3.4-7.5 7.5 0 1.3.3 2.6 1 3.7l-1.1 4 4.1-1.1c1.1.6 2.3.9 3.5.9 4.1 0 7.5-3.4 7.5-7.5S20.1 8.5 16 8.5Zm4.4 10.6c-.2.5-1.1 1-1.5 1.1-.4.1-.9.1-1.4-.1-.3-.1-.8-.3-1.3-.6-2.3-1-3.8-3.3-3.9-3.5-.1-.2-.9-1.2-.9-2.3s.6-1.6.8-1.9c.2-.2.4-.3.6-.3h.4c.1 0 .3 0 .5.4.2.5.7 1.7.7 1.8.1.1.1.3 0 .4-.1.2-.1.3-.3.4-.1.2-.3.3-.4.5-.1.1-.3.3-.1.6.2.3.7 1.1 1.5 1.8 1 .9 1.9 1.2 2.2 1.3.3.1.4.1.6-.1.2-.2.6-.7.8-1 .2-.2.4-.2.6-.1.2.1 1.4.7 1.7.8.3.1.4.2.5.3.1.1.1.6-.1 1Z"/>
-          </svg>
-          <span id="waContactText">+54 9 00 0000-0000</span>
-        </a>
-      </li>
-      <li>
-        <span class="contact-label">Instagram</span>
-        <a href="https://instagram.com/rabbit3d" target="_blank" rel="noopener" id="instagramLink">@rabbit3d</a>
-      </li>
-      <li>
-        <span class="contact-label">Email</span>
-        <a href="mailto:hola@rabbit3d.com.ar" id="emailLink">hola@rabbit3d.com.ar</a>
-      </li>
-      <li>
-        <span class="contact-label">Zona</span>
-        <span id="zoneText">General Pico, La Pampa, Argentina — envíos a todo el país</span>
-      </li>
-    </ul>
-  </div>
-</section>
-
 </main>
 
 <!-- ============ FOOTER ============ -->
 <footer class="site-footer">
   <div class="wrap footer-grid">
 
-    <div class="footer-col footer-col-brand">
-      <div class="footer-brand">
-        <img src="data:image/webp;base64,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" alt="" class="footer-logo-img">
-        <span class="footer-brand-name">Rabbit3D</span>
-      </div>
-      <p class="footer-tagline">Impresión 3D a medida, capa por capa.</p>
-      <div class="footer-social">
-        <a href="https://instagram.com/rabbit3d" target="_blank" rel="noopener" class="footer-social-btn" id="footerInstagramBtn" aria-label="Instagram">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3.5" y="3.5" width="17" height="17" rx="5"/>
-            <circle cx="12" cy="12" r="4"/>
-            <circle cx="17.2" cy="6.8" r="0.9" fill="currentColor" stroke="none"/>
-          </svg>
-        </a>
-        <a href="https://wa.me/5490000000000" target="_blank" rel="noopener" class="footer-social-btn" id="footerWaBtn" aria-label="WhatsApp">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 20l1.2-3.6A7.5 7.5 0 1 1 8.9 19L4 20Z"/>
-            <path d="M9 10.3c0 2.6 2.1 4.7 4.7 4.7l.6-1.3-1.7-.8-.6.6c-.9-.5-1.6-1.2-2.1-2.1l.6-.6-.8-1.7Z"/>
-          </svg>
-        </a>
-        <a href="https://t.me" target="_blank" rel="noopener" class="footer-social-btn" id="footerTelegramBtn" aria-label="Telegram" hidden>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m21 4-8.5 15.5-3-6.5L3 9.8 21 4Z"/>
-            <path d="m9.5 13 2 6 1-3.5"/>
-          </svg>
-        </a>
-      </div>
-    </div>
-
     <nav class="footer-col" aria-label="Menú">
       <h4 class="footer-col-title">Menú</h4>
       <a href="#inicio">Inicio</a>
-      <a href="#categorias">Categorías</a>
+      <a href="#categorias">Productos</a>
       <a href="#mayorista">Mayorista</a>
-      <a href="#encargos">Encargos</a>
     </nav>
 
     <nav class="footer-col" aria-label="Rabbit3D">
       <h4 class="footer-col-title">Rabbit3D</h4>
-      <a href="#sobre-mi">Sobre mí</a>
       <a href="#impresion-3d">Cómo imprimo</a>
-      <a href="#industria">Impresión 3D en la industria</a>
       <a href="#taller">Taller</a>
-      <a href="#cults3d">Diseños en Cults3D</a>
-      <a href="#prensa">Prensa</a>
+      <a href="#sobre-mi">Sobre mí</a>
+      <a href="#prensa">Medios</a>
+      <a href="#industria">Impresión 3D en la industria</a>
       <a href="#clientes">Clientes destacados</a>
+      <a href="#cults3d">Diseños en Cults3D</a>
     </nav>
 
     <div class="footer-col">
@@ -1182,7 +1075,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="footer-contact-icon">
           <path d="M4 20l1.2-3.6A7.5 7.5 0 1 1 8.9 19L4 20Z"/>
         </svg>
-        <a href="https://wa.me/5490000000000" target="_blank" rel="noopener" id="footerWaText">+54 9 00 0000-0000</a>
+        <button type="button" class="footer-link-btn" id="footerWaText">+54 9 00 0000-0000</button>
       </p>
       <p class="footer-contact-row">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="footer-contact-icon">
@@ -1190,6 +1083,14 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
           <path d="m4 6.5 8 6 8-6"/>
         </svg>
         <a href="mailto:hola@rabbit3d.com.ar" id="footerEmailLink">hola@rabbit3d.com.ar</a>
+      </p>
+      <p class="footer-contact-row">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="footer-contact-icon">
+          <rect x="3.5" y="3.5" width="17" height="17" rx="5"/>
+          <circle cx="12" cy="12" r="4"/>
+          <circle cx="17.2" cy="6.8" r="0.9" fill="currentColor" stroke="none"/>
+        </svg>
+        <a href="https://instagram.com/rabbit3d" target="_blank" rel="noopener" id="footerInstagramLink">@rabbit3d</a>
       </p>
     </div>
 
@@ -1212,15 +1113,13 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     </svg>
     <span>Inicio</span>
   </a>
-  <a href="https://wa.me/5490000000000?text=Hola%2C%20soy%20%5Btu%20nombre%5D%2C%20vengo%20desde%20la%20p%C3%A1gina.%20Mi%20consulta%20es%3A%20"
-     target="_blank" rel="noopener" class="bottom-nav-item bottom-nav-highlight" id="bottomNavWhatsapp"
-     data-wa-text="Hola, soy [tu nombre], vengo desde la página. Mi consulta es: ">
+  <button type="button" class="bottom-nav-item bottom-nav-highlight" id="bottomNavWhatsapp">
     <svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true">
       <circle cx="16" cy="16" r="16" fill="#25D366"/>
       <path fill="#fff" d="M16 8.5c-4.1 0-7.5 3.4-7.5 7.5 0 1.3.3 2.6 1 3.7l-1.1 4 4.1-1.1c1.1.6 2.3.9 3.5.9 4.1 0 7.5-3.4 7.5-7.5S20.1 8.5 16 8.5Zm4.4 10.6c-.2.5-1.1 1-1.5 1.1-.4.1-.9.1-1.4-.1-.3-.1-.8-.3-1.3-.6-2.3-1-3.8-3.3-3.9-3.5-.1-.2-.9-1.2-.9-2.3s.6-1.6.8-1.9c.2-.2.4-.3.6-.3h.4c.1 0 .3 0 .5.4.2.5.7 1.7.7 1.8.1.1.1.3 0 .4-.1.2-.1.3-.3.4-.1.2-.3.3-.4.5-.1.1-.3.3-.1.6.2.3.7 1.1 1.5 1.8 1 .9 1.9 1.2 2.2 1.3.3.1.4.1.6-.1.2-.2.6-.7.8-1 .2-.2.4-.2.6-.1.2.1 1.4.7 1.7.8.3.1.4.2.5.3.1.1.1.6-.1 1Z"/>
     </svg>
     <span>Contacto</span>
-  </a>
+  </button>
   <a href="#categorias" class="bottom-nav-item">
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <rect x="3.5" y="3.5" width="7" height="7" rx="1.3"/>
@@ -1228,7 +1127,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
       <rect x="3.5" y="13.5" width="7" height="7" rx="1.3"/>
       <rect x="13.5" y="13.5" width="7" height="7" rx="1.3"/>
     </svg>
-    <span>Categorías</span>
+    <span>Productos</span>
   </a>
   <button type="button" class="bottom-nav-item" id="bottomNavAccount">
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1424,6 +1323,7 @@ async function init() {
   setupNavToggle();
   setupAuth();
   setupCategoryModal();
+  setupWhatsappModal();
 
   await renderCategories((await safeFetchCategories()) || []);
 
@@ -1475,40 +1375,19 @@ function applySettings(settings) {
   const waNumber = (settings.whatsapp_number || "").replace(/\D/g, "");
   if (waNumber) {
     currentWhatsappNumber = waNumber;
-    const waContact = document.getElementById("waContact");
-    const waContactText = document.getElementById("waContactText");
-    if (waContact) waContact.href = `https://wa.me/${waNumber}`;
-    if (waContactText) waContactText.textContent = `+${waNumber}`;
-    ["waMayorista", "waEncargos", "bottomNavWhatsapp"].forEach((id) => {
-      const a = document.getElementById(id);
-      if (!a) return;
-      const text = encodeURIComponent(a.dataset.waText || "");
-      a.href = `https://wa.me/${waNumber}?text=${text}`;
-    });
-    ["footerWaBtn", "footerWaText"].forEach((id) => {
-      const a = document.getElementById(id);
-      if (a) a.href = `https://wa.me/${waNumber}`;
-    });
     const footerWaText = document.getElementById("footerWaText");
     if (footerWaText) footerWaText.textContent = `+${waNumber}`;
   }
 
   if (settings.instagram_handle) {
-    const ig = document.getElementById("instagramLink");
-    if (ig) {
-      ig.href = `https://instagram.com/${settings.instagram_handle}`;
-      ig.textContent = `@${settings.instagram_handle}`;
+    const footerIg = document.getElementById("footerInstagramLink");
+    if (footerIg) {
+      footerIg.href = `https://instagram.com/${settings.instagram_handle}`;
+      footerIg.textContent = `@${settings.instagram_handle}`;
     }
-    const footerIg = document.getElementById("footerInstagramBtn");
-    if (footerIg) footerIg.href = `https://instagram.com/${settings.instagram_handle}`;
   }
 
   if (settings.contact_email) {
-    const email = document.getElementById("emailLink");
-    if (email) {
-      email.href = `mailto:${settings.contact_email}`;
-      email.textContent = settings.contact_email;
-    }
     const footerEmail = document.getElementById("footerEmailLink");
     if (footerEmail) {
       footerEmail.href = `mailto:${settings.contact_email}`;
@@ -1517,8 +1396,6 @@ function applySettings(settings) {
   }
 
   if (settings.zone_text) {
-    const zone = document.getElementById("zoneText");
-    if (zone) zone.textContent = settings.zone_text;
     const footerZone = document.getElementById("footerZoneText");
     if (footerZone) footerZone.textContent = settings.zone_text;
   }
@@ -1533,11 +1410,6 @@ function applySettings(settings) {
     if (btn) {
       btn.href = settings.telegram_url;
       btn.hidden = false;
-    }
-    const footerTelegram = document.getElementById("footerTelegramBtn");
-    if (footerTelegram) {
-      footerTelegram.href = settings.telegram_url;
-      footerTelegram.hidden = false;
     }
   }
 
@@ -1770,8 +1642,9 @@ async function openCategoryModal(category) {
   document.getElementById("categoryModalPriceNote").textContent = category.price_note || "";
 
   const waBtn = document.getElementById("categoryModalWhatsapp");
-  const text = `Hola, quiero consultar por un pedido de "${category.name}" (mínimo ${category.min_qty} unidades).`;
-  waBtn.href = `https://wa.me/${currentWhatsappNumber}?text=${encodeURIComponent(text)}`;
+  waBtn.onclick = () => {
+    openWhatsappModal(`un pedido de "${category.name}" (mínimo ${category.min_qty} unidades)`);
+  };
 
   const mediaGrid = document.getElementById("categoryModalMedia");
   mediaGrid.innerHTML = `<p class="hint" style="grid-column:1/-1; text-align:center; color:var(--ink-soft)">Cargando fotos y videos…</p>`;
@@ -1780,7 +1653,7 @@ async function openCategoryModal(category) {
   const media = (await safeFetchCategoryMedia(category.id)) || [];
   mediaGrid.innerHTML = "";
   if (!media.length) {
-    mediaGrid.innerHTML = `<p class="hint" style="grid-column:1/-1; text-align:center; color:var(--ink-soft)">Todavía no hay fotos ni videos cargados de esta categoría.</p>`;
+    mediaGrid.innerHTML = `<p class="hint" style="grid-column:1/-1; text-align:center; color:var(--ink-soft)">Todavía no hay fotos ni videos cargados de este producto.</p>`;
     return;
   }
 
@@ -1837,6 +1710,63 @@ function setupCategoryModal() {
 }
 
 // ---------------------------------------------------------------
+// MODAL DE CONTACTO POR WHATSAPP — pide nombre y localidad antes
+// de armar el mensaje, para todos los botones de WhatsApp del sitio.
+// ---------------------------------------------------------------
+let waModalContext = "hacer una consulta";
+
+function openWhatsappModal(contextText) {
+  waModalContext = contextText || "hacer una consulta";
+  document.getElementById("waModalBackdrop").hidden = false;
+  document.getElementById("wa_name").focus();
+}
+
+function setupWhatsappModal() {
+  const backdrop = document.getElementById("waModalBackdrop");
+  const closeBtn = document.getElementById("waModalClose");
+  const closeLink = document.getElementById("waModalCloseLink");
+  const form = document.getElementById("waModalForm");
+
+  function closeModal() {
+    backdrop.hidden = true;
+  }
+  closeBtn.addEventListener("click", closeModal);
+  closeLink.addEventListener("click", closeModal);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !backdrop.hidden) closeModal();
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("wa_name").value.trim();
+    const locality = document.getElementById("wa_locality").value.trim();
+    if (!name || !locality) return;
+
+    const message = `Hola Rabbit3D, soy ${name} de ${locality}, estoy interesado por ${waModalContext}.`;
+    const url = `https://wa.me/${currentWhatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank", "noopener");
+    closeModal();
+    form.reset();
+  });
+
+  // Botones fijos del sitio que abren el modal con su propio contexto.
+  const triggers = [
+    { id: "headerContactBtn", context: "hacer una consulta" },
+    { id: "heroContactBtn", context: "hacer un pedido" },
+    { id: "waMayorista", context: "cotizar un pedido por cantidad" },
+    { id: "bottomNavWhatsapp", context: "hacer una consulta" },
+    { id: "footerWaText", context: "hacer una consulta" },
+  ];
+  triggers.forEach(({ id, context }) => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener("click", () => openWhatsappModal(context));
+  });
+}
+
+// ---------------------------------------------------------------
 // NAV MÓVIL
 // ---------------------------------------------------------------
 function setupNavToggle() {
@@ -1874,15 +1804,44 @@ function renderGallery(category, items) {
   }
 
   items.forEach((item) => {
-    const url = window.Rabbit3DData?.buildImageUrl
-      ? window.Rabbit3DData.buildImageUrl(item.image_path, 480)
-      : item.image_path;
     const div = document.createElement("div");
     div.className = "gallery-item";
-    div.innerHTML = `
-      <img src="${url}" alt="${escapeHtml(item.alt_text || item.title || "")}" loading="lazy" decoding="async" width="480" height="480" style="object-position:${focalPosition(item)}">
-      ${item.title ? `<span class="gallery-caption">${escapeHtml(item.title)}</span>` : ""}
-    `;
+
+    if (item.media_type === "video") {
+      const driveId = driveFileId(item.video_url);
+      const ytId = youtubeEmbedInfo(item.video_url);
+      if (driveId || ytId) {
+        div.classList.add("is-video");
+        div.innerHTML = `
+          <span class="play-badge">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.4)"/><path d="M10 8.5v7l6-3.5z"/></svg>
+          </span>
+          ${item.title ? `<span class="gallery-caption">${escapeHtml(item.title)}</span>` : ""}
+        `;
+        div.addEventListener("click", () => {
+          const src = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : `https://www.youtube.com/embed/${ytId}?autoplay=1`;
+          div.classList.remove("is-video");
+          div.innerHTML = `<iframe src="${src}" title="${escapeHtml(item.title || "Video")}" allow="autoplay" allowfullscreen></iframe>`;
+        });
+      } else {
+        div.innerHTML = `
+          <a href="${item.video_url}" target="_blank" rel="noopener" style="display:block; width:100%; height:100%; background:var(--bg-panel-2)">
+            <span class="play-badge">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.4)"/><path d="M10 8.5v7l6-3.5z"/></svg>
+            </span>
+            ${item.title ? `<span class="gallery-caption">${escapeHtml(item.title)}</span>` : ""}
+          </a>
+        `;
+      }
+    } else {
+      const url = window.Rabbit3DData?.buildImageUrl
+        ? window.Rabbit3DData.buildImageUrl(item.image_path, 480)
+        : item.image_path;
+      div.innerHTML = `
+        <img src="${url}" alt="${escapeHtml(item.alt_text || item.title || "")}" loading="lazy" decoding="async" width="480" height="480" style="object-position:${focalPosition(item)}">
+        ${item.title ? `<span class="gallery-caption">${escapeHtml(item.title)}</span>` : ""}
+      `;
+    }
     el.appendChild(div);
   });
 }
@@ -1914,25 +1873,57 @@ function renderPress(category, items) {
   }
 
   items.forEach((item) => {
-    const url = window.Rabbit3DData?.buildImageUrl
-      ? window.Rabbit3DData.buildImageUrl(item.image_path, 800)
-      : item.image_path;
     const div = document.createElement("div");
     div.className = "press-item";
-    div.innerHTML = `
-      <div class="press-media">
-        <span class="press-badge">${config.badge}</span>
-        <img src="${url}" alt="${escapeHtml(item.alt_text || item.title || "")}" loading="lazy" decoding="async" width="800" height="450" style="object-position:${focalPosition(item)}">
-      </div>
-      ${
-        item.title || item.event_date
-          ? `<div class="press-caption">
-               ${item.title ? `<strong>${escapeHtml(item.title)}</strong>` : ""}
-               ${item.event_date ? `<span>${escapeHtml(item.event_date)}</span>` : ""}
-             </div>`
-          : ""
+
+    if (item.media_type === "video") {
+      const driveId = driveFileId(item.video_url);
+      const ytId = youtubeEmbedInfo(item.video_url);
+      const caption = item.title || item.event_date
+        ? `<div class="press-caption">
+             ${item.title ? `<strong>${escapeHtml(item.title)}</strong>` : ""}
+             ${item.event_date ? `<span>${escapeHtml(item.event_date)}</span>` : ""}
+           </div>`
+        : "";
+      if (driveId || ytId) {
+        const src = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : `https://www.youtube.com/embed/${ytId}`;
+        div.innerHTML = `
+          <div class="press-media">
+            <span class="press-badge">${config.badge}</span>
+            <iframe src="${src}" title="${escapeHtml(item.title || "Video")}" loading="lazy" allowfullscreen></iframe>
+          </div>
+          ${caption}
+        `;
+      } else {
+        div.innerHTML = `
+          <a href="${item.video_url}" target="_blank" rel="noopener" class="press-media" style="display:block; background:var(--bg-panel-2)">
+            <span class="press-badge">${config.badge}</span>
+            <span class="play-badge">
+              <svg viewBox="0 0 24 24" width="34" height="34" fill="#fff"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.4)"/><path d="M10 8.5v7l6-3.5z"/></svg>
+            </span>
+          </a>
+          ${caption}
+        `;
       }
-    `;
+    } else {
+      const url = window.Rabbit3DData?.buildImageUrl
+        ? window.Rabbit3DData.buildImageUrl(item.image_path, 800)
+        : item.image_path;
+      div.innerHTML = `
+        <div class="press-media">
+          <span class="press-badge">${config.badge}</span>
+          <img src="${url}" alt="${escapeHtml(item.alt_text || item.title || "")}" loading="lazy" decoding="async" width="800" height="450" style="object-position:${focalPosition(item)}">
+        </div>
+        ${
+          item.title || item.event_date
+            ? `<div class="press-caption">
+                 ${item.title ? `<strong>${escapeHtml(item.title)}</strong>` : ""}
+                 ${item.event_date ? `<span>${escapeHtml(item.event_date)}</span>` : ""}
+               </div>`
+            : ""
+        }
+      `;
+    }
     el.appendChild(div);
   });
 }
