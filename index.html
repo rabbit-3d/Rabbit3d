@@ -452,38 +452,52 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   .filter-chip{ flex:0 0 auto; }
 }
 
-.product-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-@media (max-width: 900px){ .product-grid{ grid-template-columns: repeat(2,1fr); } }
-@media (max-width: 560px){ .product-grid{ grid-template-columns: 1fr; } }
+.category-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+@media (max-width: 900px){ .category-grid{ grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 560px){ .category-grid{ grid-template-columns: 1fr; } }
 
-.product-card{
+.category-card{
   background: var(--bg-panel); border-radius: var(--radius); overflow:hidden;
-  border: 1px solid var(--line); display:flex; flex-direction:column;
+  border: 1px solid var(--line); display:flex; flex-direction:column; text-align:left;
+  cursor:pointer; width:100%; padding:0; font-family: var(--font-body); color:inherit;
   transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
 }
-.product-card:hover{ box-shadow: var(--shadow-soft); transform: translateY(-3px); border-color: var(--line-strong); }
-.product-media{
+.category-card:hover{ box-shadow: var(--shadow-soft); transform: translateY(-3px); border-color: var(--line-strong); }
+.category-media{
   aspect-ratio: 4/3; background: var(--bg-alt); position:relative; overflow:hidden;
 }
-.product-media img{ width:100%; height:100%; object-fit:cover; }
-.product-tag{
+.category-media img{ width:100%; height:100%; object-fit:cover; }
+.category-tag{
   position:absolute; top:10px; left:10px; font-family: var(--font-mono); font-size:.68rem;
   background: var(--red); color: var(--white); padding:3px 10px; border-radius:999px;
 }
-.product-body{ padding: 18px 18px 20px; display:flex; flex-direction:column; gap:6px; flex:1; }
-.btn-add-cart{
-  width:100%; margin-top:10px; padding:9px 14px; font-size:.82rem;
-  border-color: var(--line-strong);
-}
-.product-body h3{ margin:0; font-size:1.02rem; }
-.product-desc{ font-size:.86rem; margin:0; flex:1; }
-.product-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
-.product-price{ font-family: var(--font-mono); font-weight:600; color: var(--red); }
-.wholesale-badge{
-  font-size:.68rem; font-family: var(--font-mono); color: var(--red); border:1px solid var(--red);
-  padding:2px 8px; border-radius:999px;
-}
+.category-body{ padding: 18px 18px 20px; display:flex; flex-direction:column; gap:6px; flex:1; }
+.category-body h3{ margin:0; font-size:1.02rem; }
+.category-desc{ font-size:.86rem; margin:0; flex:1; color: var(--ink-soft); }
+.category-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:8px; font-size:.8rem; color: var(--ink-soft); }
+.category-price{ font-family: var(--font-mono); font-weight:600; color: var(--red); }
 .empty-note{ text-align:center; color: var(--ink-soft); font-size:.9rem; }
+
+.modal-category{ max-width:560px; }
+.category-media-grid{
+  display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin:16px 0;
+  max-height:360px; overflow-y:auto;
+}
+.category-media-item{
+  position:relative; aspect-ratio:4/3; border-radius:8px; overflow:hidden; background:var(--bg-panel-2);
+}
+.category-media-item img{ width:100%; height:100%; object-fit:cover; }
+.category-media-item.is-video{ cursor:pointer; }
+.category-media-item .play-badge{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.35);
+}
+.category-media-item .play-badge svg{ filter:drop-shadow(0 2px 6px rgba(0,0,0,.6)); }
+.category-media-item iframe{ width:100%; height:100%; border:0; }
+.category-media-caption{
+  position:absolute; left:0; right:0; bottom:0; padding:6px 8px; font-size:.68rem;
+  background:linear-gradient(transparent, rgba(0,0,0,.75)); color:#fff;
+}
 
 /* ---------- wholesale packs ---------- */
 .check-list{ list-style:none; margin:1.2em 0; padding:0; display:flex; flex-direction:column; gap:10px; }
@@ -634,7 +648,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     <nav class="main-nav" id="main-nav">
       <a href="#sobre-mi">Sobre mí</a>
       <a href="#impresion-3d">Cómo imprimo</a>
-      <a href="#catalogo">Catálogo</a>
+      <a href="#categorias">Categorías</a>
       <a href="#mayorista">Mayorista</a>
       <a href="#encargos">Encargos</a>
       <a href="#taller">Taller</a>
@@ -649,14 +663,6 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
           <circle cx="12" cy="8" r="4"/>
           <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
         </svg>
-      </button>
-      <button class="icon-btn" id="cartBtn" aria-label="Carrito de pedido">
-        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2.5 3h2l2.2 11.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H6"/>
-          <circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none"/>
-          <circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/>
-        </svg>
-        <span class="icon-badge cart-count-badge" id="cartBadge" hidden>0</span>
       </button>
     </div>
 
@@ -696,18 +702,19 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
   </div>
 </div>
 
-<!-- ============ MODAL DE CARRITO ============ -->
-<div class="modal-backdrop" id="cartModalBackdrop" hidden>
-  <div class="modal modal-cart" role="dialog" aria-modal="true" aria-labelledby="cartModalTitle">
-    <button class="modal-close" id="cartModalClose" aria-label="Cerrar">×</button>
-    <h3 id="cartModalTitle">Tu pedido</h3>
-    <p class="modal-subtitle">Sumá los productos que te interesan — no hace falta crear una cuenta, coordinamos todo por WhatsApp.</p>
+<!-- ============ MODAL DE DETALLE DE CATEGORÍA ============ -->
+<div class="modal-backdrop" id="categoryModalBackdrop" hidden>
+  <div class="modal modal-category" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+    <button class="modal-close" id="categoryModalClose" aria-label="Cerrar">×</button>
+    <p class="eyebrow" id="categoryModalMinQty"></p>
+    <h3 id="categoryModalTitle"></h3>
+    <p class="modal-subtitle" id="categoryModalDescription"></p>
+    <p class="modal-subtitle" id="categoryModalPriceNote"></p>
 
-    <div class="cart-items" id="cartItemsList"></div>
-    <p class="cart-empty" id="cartEmptyMsg">Todavía no agregaste productos.</p>
+    <div class="category-media-grid" id="categoryModalMedia"></div>
 
-    <a href="#" class="btn btn-primary" id="cartWhatsappBtn" style="width:100%" target="_blank" rel="noopener">Continuar por WhatsApp</a>
-    <button type="button" class="modal-close-link" id="cartModalCloseLink">Cerrar</button>
+    <a href="#" class="btn btn-primary" id="categoryModalWhatsapp" style="width:100%" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+    <button type="button" class="modal-close-link" id="categoryModalCloseLink">Cerrar</button>
   </div>
 </div>
 
@@ -717,16 +724,16 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
 <section class="hero" id="inicio">
   <div class="wrap hero-inner">
     <div class="hero-copy">
-      <p class="eyebrow">Taller de impresión 3D — capa a capa</p>
-      <h1>Le doy forma a tus ideas, <span class="accent-underline">un filamento a la vez.</span></h1>
+      <p class="eyebrow">Impresión 3D por cantidad — capa a capa</p>
+      <h1>Le doy forma a tus ideas, <span class="accent-underline">por cantidad.</span></h1>
       <p class="hero-lede">
-        Soy diseñador y hago impresión 3D por encargo: piezas únicas, regalos personalizados,
-        merchandising para marcas y packs mayoristas de llaveros para quienes
-        quieren revender. Cada objeto sale de mi taller, capa sobre capa, hasta tomar forma.
+        Me especializo en pedidos por mayor: llaveros y otros productos impresos en 3D
+        para cumpleaños, organizaciones, escuelas y marcas, desde 50 unidades. Elegí una
+        categoría y coordinamos el diseño, la cantidad y el precio.
       </p>
       <div class="hero-actions">
-        <a href="#catalogo" class="btn btn-primary">Ver catálogo</a>
-        <a href="#encargos" class="btn btn-ghost">Pedir un encargo</a>
+        <a href="#categorias" class="btn btn-primary">Ver categorías</a>
+        <a href="#encargos" class="btn btn-ghost">Consultar por un pedido</a>
       </div>
     </div>
 
@@ -902,29 +909,19 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
 
 <div class="layer-divider" aria-hidden="true"></div>
 
-<!-- ============ CATÁLOGO ============ -->
-<section class="section" id="catalogo">
+<!-- ============ CATEGORÍAS (pedidos por cantidad) ============ -->
+<section class="section" id="categorias">
   <div class="wrap">
     <div class="section-head">
       <div>
-        <p class="eyebrow">Catálogo</p>
-        <h2>Productos disponibles</h2>
+        <p class="eyebrow">Pedidos por cantidad</p>
+        <h2>Elegí una categoría</h2>
       </div>
-      <p class="section-head-note">Se actualiza seguido — todo lo que ves acá también se puede pedir por encargo en otro color o tamaño.</p>
+      <p class="section-head-note">Cada categoría tiene una cantidad mínima de pedido — coordinamos diseño y precio por WhatsApp.</p>
     </div>
 
-    <div class="filter-row" id="catalogFilters">
-      <button class="filter-chip is-active" data-filter="all">Todos</button>
-      <button class="filter-chip" data-filter="llaveros">Llaveros</button>
-      <button class="filter-chip" data-filter="figuras">Figuras y decoración</button>
-      <button class="filter-chip" data-filter="hogar">Hogar y utilidad</button>
-      <button class="filter-chip" data-filter="personalizado">Personalizados</button>
-    </div>
-
-    <div class="product-grid" id="productGrid">
-      <!-- Las cards se generan por JS (Supabase o datos de ejemplo) -->
-    </div>
-    <p class="empty-note" id="catalogEmpty" hidden>Todavía no hay productos cargados en esta categoría.</p>
+    <div class="category-grid" id="categoryGrid"></div>
+    <p class="empty-note" id="categoryEmpty" hidden>Todavía no hay categorías cargadas.</p>
   </div>
 </section>
 
@@ -934,33 +931,32 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
 <section class="section section-dark" id="mayorista">
   <div class="wrap section-split reverse">
     <div class="section-copy">
-      <p class="eyebrow">Para locales y emprendedores</p>
-      <h2>Packs de llaveros para reventa</h2>
+      <p class="eyebrow">Cómo funciona</p>
+      <h2>Pedidos por cantidad, no por unidad</h2>
       <p>
-        Además de la venta individual, armo <strong>packs de 50 y 100 llaveros</strong> pensados
-        para locales que quieran sumar llaveros a su vidriera y para emprendedores que revenden
-        por su cuenta. Este esquema de pack es exclusivo de los llaveros —el resto del catálogo
-        se vende de a una unidad, salvo que se cotice un caso puntual.
+        Hoy me dedico exclusivamente a pedidos grandes: <strong>mínimo 50 unidades</strong> por
+        diseño, sin importar la categoría. Es la forma en la que puedo sostener buenos precios
+        y buenos tiempos de entrega con el tiempo que tengo disponible.
       </p>
       <ul class="check-list">
-        <li>Packs cerrados de 50 o 100 llaveros por diseño</li>
-        <li>Precio diferencial por volumen</li>
-        <li>Se pueden combinar diseños de llaveros dentro de un mismo pack (a confirmar según stock)</li>
+        <li>Mínimo 50 unidades por diseño (algunas categorías piden 100)</li>
+        <li>Precio diferencial por volumen — se cotiza según diseño y cantidad</li>
+        <li>Podés combinar variantes de color dentro de un mismo pedido</li>
         <li>Tiempo de producción según cantidad — se informa al cotizar</li>
       </ul>
       <div class="hero-actions">
-        <a href="https://wa.me/5490000000000?text=Hola%2C%20quiero%20cotizar%20un%20pack%20mayorista%20de%20llaveros"
-           class="btn btn-primary" target="_blank" rel="noopener" id="waMayorista" data-wa-text="Hola, quiero cotizar un pack mayorista de llaveros">Cotizar un pack por WhatsApp</a>
+        <a href="https://wa.me/5490000000000?text=Hola%2C%20quiero%20cotizar%20un%20pedido%20por%20cantidad"
+           class="btn btn-primary" target="_blank" rel="noopener" id="waMayorista" data-wa-text="Hola, quiero cotizar un pedido por cantidad">Cotizar un pedido por WhatsApp</a>
       </div>
     </div>
     <div class="section-media">
       <div class="pack-card">
         <span class="pack-size">50</span>
-        <span class="pack-label">llaveros por diseño</span>
+        <span class="pack-label">unidades, mínimo</span>
       </div>
       <div class="pack-card pack-card-alt">
-        <span class="pack-size">100</span>
-        <span class="pack-label">llaveros por diseño</span>
+        <span class="pack-size">100+</span>
+        <span class="pack-label">para pedidos grandes</span>
       </div>
     </div>
   </div>
@@ -1157,7 +1153,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     <nav class="footer-col" aria-label="Menú">
       <h4 class="footer-col-title">Menú</h4>
       <a href="#inicio">Inicio</a>
-      <a href="#catalogo">Catálogo</a>
+      <a href="#categorias">Categorías</a>
       <a href="#mayorista">Mayorista</a>
       <a href="#encargos">Encargos</a>
     </nav>
@@ -1225,15 +1221,15 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     </svg>
     <span>Contacto</span>
   </a>
-  <button type="button" class="bottom-nav-item" id="bottomNavCart">
+  <a href="#categorias" class="bottom-nav-item">
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M2.5 3h2l2.2 11.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H6"/>
-      <circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none"/>
-      <circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/>
+      <rect x="3.5" y="3.5" width="7" height="7" rx="1.3"/>
+      <rect x="13.5" y="3.5" width="7" height="7" rx="1.3"/>
+      <rect x="3.5" y="13.5" width="7" height="7" rx="1.3"/>
+      <rect x="13.5" y="13.5" width="7" height="7" rx="1.3"/>
     </svg>
-    <span class="icon-badge cart-count-badge" id="cartBadgeMobile" hidden>0</span>
-    <span>Carrito</span>
-  </button>
+    <span>Categorías</span>
+  </a>
   <button type="button" class="bottom-nav-item" id="bottomNavAccount">
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="8" r="4"/>
@@ -1372,7 +1368,43 @@ window.RABBIT3D_CONFIG = {
     return data;
   }
 
-  window.Rabbit3DData = { client, buildImageUrl, fetchProducts, fetchGallery, fetchSettings };
+  async function fetchCategories() {
+    if (!client) return null;
+    const { data, error } = await client
+      .from("rabbit3d_categories")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error) {
+      console.warn("[rabbit3d] Error trayendo categorías:", error.message);
+      return null;
+    }
+    return data;
+  }
+
+  async function fetchCategoryMedia(categoryId) {
+    if (!client) return null;
+    const { data, error } = await client
+      .from("rabbit3d_category_media")
+      .select("*")
+      .eq("category_id", categoryId)
+      .order("sort_order", { ascending: true });
+    if (error) {
+      console.warn("[rabbit3d] Error trayendo fotos/videos de la categoría:", error.message);
+      return null;
+    }
+    return data;
+  }
+
+  window.Rabbit3DData = {
+    client,
+    buildImageUrl,
+    fetchProducts,
+    fetchGallery,
+    fetchSettings,
+    fetchCategories,
+    fetchCategoryMedia,
+  };
 })();
 
 
@@ -1383,63 +1415,6 @@ document.addEventListener("DOMContentLoaded", init);
 // todavía, o si una tabla está vacía). Reemplazá / borrá esto
 // cargando tus propios datos en Supabase — ver sql/schema.sql.
 // ---------------------------------------------------------------
-const SAMPLE_PRODUCTS = [
-  {
-    id: 1,
-    name: "Llavero personalizado",
-    description: "Nombre, logo o diseño a elección. Ideal para regalos y merchandising.",
-    category: "llaveros",
-    price: "$3.500",
-    allows_wholesale: true,
-    image_path: null,
-  },
-  {
-    id: 2,
-    name: "Figura decorativa low-poly",
-    description: "Piezas decorativas de diseño geométrico en distintos colores de filamento.",
-    category: "figuras",
-    price: "$9.000",
-    allows_wholesale: false,
-    image_path: null,
-  },
-  {
-    id: 3,
-    name: "Organizador de escritorio",
-    description: "Para lápices, cargadores y accesorios. Varios colores disponibles.",
-    category: "hogar",
-    price: "$7.200",
-    allows_wholesale: false,
-    image_path: null,
-  },
-  {
-    id: 4,
-    name: "Maceta geométrica chica",
-    description: "Con plato incorporado, apta para interior.",
-    category: "hogar",
-    price: "$5.800",
-    allows_wholesale: false,
-    image_path: null,
-  },
-  {
-    id: 5,
-    name: "Topper / figura para torta",
-    description: "Diseño a pedido según el evento.",
-    category: "personalizado",
-    price: "Desde $4.000",
-    allows_wholesale: false,
-    image_path: null,
-  },
-  {
-    id: 6,
-    name: "Llavero mascota de marca",
-    description: "Reproducimos el isologo de tu emprendimiento en llavero.",
-    category: "llaveros",
-    price: "Consultar",
-    allows_wholesale: true,
-    image_path: null,
-  },
-];
-
 const GALLERY_PLACEHOLDER_TEXT = {
   taller: "Sumá una foto de tu taller",
 };
@@ -1447,12 +1422,10 @@ const GALLERY_PLACEHOLDER_TEXT = {
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
   setupNavToggle();
-  setupCatalogFilters();
   setupAuth();
-  setupCart();
+  setupCategoryModal();
 
-  const products = (await safeFetchProducts()) || SAMPLE_PRODUCTS;
-  renderCatalog(products);
+  await renderCategories((await safeFetchCategories()) || []);
 
   renderGallery("taller", (await safeFetchGallery("taller")) || []);
   renderPress("prensa", (await safeFetchGallery("prensa")) || []);
@@ -1462,13 +1435,21 @@ async function init() {
   applySettings(await safeFetchSettings());
 }
 
-async function safeFetchProducts() {
+async function safeFetchCategories() {
   try {
-    return (await window.Rabbit3DData?.fetchProducts()) || null;
+    return (await window.Rabbit3DData?.fetchCategories()) || null;
   } catch {
     return null;
   }
 }
+async function safeFetchCategoryMedia(id) {
+  try {
+    return (await window.Rabbit3DData?.fetchCategoryMedia(id)) || null;
+  } catch {
+    return null;
+  }
+}
+
 async function safeFetchGallery(category) {
   try {
     return (await window.Rabbit3DData?.fetchGallery(category)) || null;
@@ -1702,102 +1683,149 @@ function setupAuth() {
 }
 
 // ---------------------------------------------------------------
-// CARRITO DE PEDIDO (sin cuenta — arma un mensaje para WhatsApp)
+// WHATSAPP (número resuelto dinámicamente desde applySettings)
 // ---------------------------------------------------------------
-const CART_STORAGE_KEY = "rabbit3d_cart";
 let currentWhatsappNumber = "5490000000000"; // se actualiza desde applySettings() si hay Supabase configurado
 
-function getCart() {
-  try {
-    return JSON.parse(localStorage.getItem(CART_STORAGE_KEY)) || [];
-  } catch {
-    return [];
+// ---------------------------------------------------------------
+// CATEGORÍAS (pedidos por cantidad)
+// ---------------------------------------------------------------
+function categoryCard(c, fallbackMedia) {
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = "category-card";
+
+  let imgUrl = window.Rabbit3DData?.buildImageUrl
+    ? window.Rabbit3DData.buildImageUrl(c.cover_image_path, 480)
+    : null;
+  let focalX = c.cover_focal_x;
+  let focalY = c.cover_focal_y;
+
+  // Si no cargaste una foto de portada, usamos la primera foto que
+  // hayas subido en "Fotos/videos" de esa categoría como respaldo.
+  if (!imgUrl && fallbackMedia) {
+    imgUrl = window.Rabbit3DData?.buildImageUrl
+      ? window.Rabbit3DData.buildImageUrl(fallbackMedia.image_path, 480)
+      : fallbackMedia.image_path;
+    focalX = fallbackMedia.focal_x;
+    focalY = fallbackMedia.focal_y;
+  }
+
+  card.innerHTML = `
+    <div class="category-media">
+      <span class="category-tag">Desde ${c.min_qty} unidades</span>
+      ${
+        imgUrl
+          ? `<img src="${imgUrl}" alt="${escapeHtml(c.name)}" loading="lazy" decoding="async" width="480" height="360" style="object-position:${focalPosition({ focal_x: focalX, focal_y: focalY })}">`
+          : `<div class="gallery-placeholder">📦<br>Foto pendiente</div>`
+      }
+    </div>
+    <div class="category-body">
+      <h3>${escapeHtml(c.name)}</h3>
+      <p class="category-desc">${escapeHtml(c.description || "")}</p>
+      <div class="category-footer">
+        <span class="category-price">${escapeHtml(c.price_note || "Consultar precio")}</span>
+        <span>Ver más →</span>
+      </div>
+    </div>
+  `;
+  card.addEventListener("click", () => openCategoryModal(c));
+  return card;
+}
+
+async function renderCategories(categories) {
+  const grid = document.getElementById("categoryGrid");
+  const empty = document.getElementById("categoryEmpty");
+  if (!grid) return;
+  grid.innerHTML = "";
+  empty.hidden = categories.length > 0;
+
+  for (const c of categories) {
+    let fallbackMedia = null;
+    if (!c.cover_image_path) {
+      const media = (await safeFetchCategoryMedia(c.id)) || [];
+      fallbackMedia = media.find((m) => m.media_type === "image") || null;
+    }
+    grid.appendChild(categoryCard(c, fallbackMedia));
   }
 }
-function saveCart(cart) {
-  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-  updateCartBadge();
+
+function youtubeEmbedInfo(url) {
+  const match = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return match ? match[1] : null;
 }
-function addToCart(product) {
-  const cart = getCart();
-  const existing = cart.find((item) => item.id === product.id);
-  if (existing) {
-    existing.qty += 1;
-  } else {
-    cart.push({ id: product.id, name: product.name, price: product.price || product.price_label || "", qty: 1 });
+
+function driveFileId(url) {
+  const m =
+    String(url).match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+    String(url).match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+async function openCategoryModal(category) {
+  const backdrop = document.getElementById("categoryModalBackdrop");
+  document.getElementById("categoryModalMinQty").textContent = `Mínimo ${category.min_qty} unidades`;
+  document.getElementById("categoryModalTitle").textContent = category.name;
+  document.getElementById("categoryModalDescription").textContent = category.description || "";
+  document.getElementById("categoryModalPriceNote").textContent = category.price_note || "";
+
+  const waBtn = document.getElementById("categoryModalWhatsapp");
+  const text = `Hola, quiero consultar por un pedido de "${category.name}" (mínimo ${category.min_qty} unidades).`;
+  waBtn.href = `https://wa.me/${currentWhatsappNumber}?text=${encodeURIComponent(text)}`;
+
+  const mediaGrid = document.getElementById("categoryModalMedia");
+  mediaGrid.innerHTML = `<p class="hint" style="grid-column:1/-1; text-align:center; color:var(--ink-soft)">Cargando fotos y videos…</p>`;
+  backdrop.hidden = false;
+
+  const media = (await safeFetchCategoryMedia(category.id)) || [];
+  mediaGrid.innerHTML = "";
+  if (!media.length) {
+    mediaGrid.innerHTML = `<p class="hint" style="grid-column:1/-1; text-align:center; color:var(--ink-soft)">Todavía no hay fotos ni videos cargados de esta categoría.</p>`;
+    return;
   }
-  saveCart(cart);
-}
-function changeQty(id, delta) {
-  const cart = getCart();
-  const item = cart.find((i) => i.id === id);
-  if (!item) return;
-  item.qty += delta;
-  const filtered = item.qty <= 0 ? cart.filter((i) => i.id !== id) : cart;
-  saveCart(filtered);
-  renderCartModal();
-}
-function removeFromCart(id) {
-  saveCart(getCart().filter((i) => i.id !== id));
-  renderCartModal();
-}
-function updateCartBadge() {
-  const count = getCart().reduce((sum, i) => sum + i.qty, 0);
-  document.querySelectorAll(".cart-count-badge").forEach((badge) => {
-    badge.hidden = count === 0;
-    badge.textContent = String(count);
+
+  media.forEach((m) => {
+    const item = document.createElement("div");
+    if (m.media_type === "image") {
+      item.className = "category-media-item";
+      const url = window.Rabbit3DData?.buildImageUrl
+        ? window.Rabbit3DData.buildImageUrl(m.image_path, 480)
+        : m.image_path;
+      item.innerHTML = `
+        <img src="${url}" alt="${escapeHtml(m.caption || "")}" loading="lazy" style="object-position:${focalPosition(m)}">
+        ${m.caption ? `<span class="category-media-caption">${escapeHtml(m.caption)}</span>` : ""}
+      `;
+    } else {
+      item.className = "category-media-item is-video";
+      const driveId = driveFileId(m.video_url);
+      const ytId = youtubeEmbedInfo(m.video_url);
+      if (driveId) {
+        item.innerHTML = `<iframe src="https://drive.google.com/file/d/${driveId}/preview" title="${escapeHtml(m.caption || "Video")}" loading="lazy" allow="autoplay" allowfullscreen></iframe>`;
+      } else if (ytId) {
+        item.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" title="${escapeHtml(m.caption || "Video")}" loading="lazy" allowfullscreen></iframe>`;
+      } else {
+        item.innerHTML = `
+          <a href="${m.video_url}" target="_blank" rel="noopener" style="display:block; width:100%; height:100%; background:var(--bg-panel-2)">
+            <span class="play-badge">
+              <svg viewBox="0 0 24 24" width="34" height="34" fill="#fff"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.4)"/><path d="M10 8.5v7l6-3.5z"/></svg>
+            </span>
+            ${m.caption ? `<span class="category-media-caption">${escapeHtml(m.caption)}</span>` : ""}
+          </a>`;
+      }
+    }
+    mediaGrid.appendChild(item);
   });
 }
 
-function renderCartModal() {
-  const list = document.getElementById("cartItemsList");
-  const emptyMsg = document.getElementById("cartEmptyMsg");
-  const waBtn = document.getElementById("cartWhatsappBtn");
-  const cart = getCart();
+function setupCategoryModal() {
+  const backdrop = document.getElementById("categoryModalBackdrop");
+  const closeBtn = document.getElementById("categoryModalClose");
+  const closeLink = document.getElementById("categoryModalCloseLink");
 
-  list.innerHTML = "";
-  emptyMsg.hidden = cart.length > 0;
-  waBtn.style.display = cart.length > 0 ? "inline-flex" : "none";
-
-  cart.forEach((item) => {
-    const row = document.createElement("div");
-    row.className = "cart-item";
-    row.innerHTML = `
-      <span class="cart-item-name">${escapeHtml(item.name)}</span>
-      <span class="cart-item-price">${escapeHtml(item.price || "")}</span>
-      <span class="cart-item-qty">
-        <button type="button" class="cart-qty-btn" data-qty-minus="${item.id}">−</button>
-        <span>${item.qty}</span>
-        <button type="button" class="cart-qty-btn" data-qty-plus="${item.id}">+</button>
-      </span>
-      <button type="button" class="cart-item-remove" data-remove="${item.id}" aria-label="Quitar">×</button>
-    `;
-    list.appendChild(row);
-  });
-
-  if (cart.length > 0) {
-    const lines = cart.map((i) => `• ${i.name} x${i.qty}${i.price ? ` (${i.price})` : ""}`);
-    const message = `Hola, quiero consultar por este pedido:\n${lines.join("\n")}`;
-    waBtn.href = `https://wa.me/${currentWhatsappNumber}?text=${encodeURIComponent(message)}`;
-  }
-}
-
-function setupCart() {
-  const cartTriggers = document.querySelectorAll("#cartBtn, #bottomNavCart");
-  const backdrop = document.getElementById("cartModalBackdrop");
-  const closeBtn = document.getElementById("cartModalClose");
-  const closeLink = document.getElementById("cartModalCloseLink");
-  const list = document.getElementById("cartItemsList");
-
-  function openModal() {
-    renderCartModal();
-    backdrop.hidden = false;
-  }
   function closeModal() {
     backdrop.hidden = true;
+    document.getElementById("categoryModalMedia").innerHTML = "";
   }
-
-  cartTriggers.forEach((btn) => btn.addEventListener("click", openModal));
   closeBtn.addEventListener("click", closeModal);
   closeLink.addEventListener("click", closeModal);
   backdrop.addEventListener("click", (e) => {
@@ -1806,17 +1834,6 @@ function setupCart() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !backdrop.hidden) closeModal();
   });
-
-  list.addEventListener("click", (e) => {
-    const plus = e.target.closest("[data-qty-plus]");
-    const minus = e.target.closest("[data-qty-minus]");
-    const remove = e.target.closest("[data-remove]");
-    if (plus) changeQty(Number(plus.dataset.qtyPlus), 1);
-    if (minus) changeQty(Number(minus.dataset.qtyMinus), -1);
-    if (remove) removeFromCart(Number(remove.dataset.remove));
-  });
-
-  updateCartBadge();
 }
 
 // ---------------------------------------------------------------
@@ -1835,81 +1852,6 @@ function setupNavToggle() {
       toggle.setAttribute("aria-expanded", "false");
     })
   );
-}
-
-// ---------------------------------------------------------------
-// CATÁLOGO
-// ---------------------------------------------------------------
-let CURRENT_PRODUCTS = [];
-
-function renderCatalog(products) {
-  CURRENT_PRODUCTS = products;
-  paintCatalog("all");
-}
-
-function setupCatalogFilters() {
-  document.getElementById("catalogFilters").addEventListener("click", (e) => {
-    const btn = e.target.closest(".filter-chip");
-    if (!btn) return;
-    document
-      .querySelectorAll(".filter-chip")
-      .forEach((c) => c.classList.remove("is-active"));
-    btn.classList.add("is-active");
-    paintCatalog(btn.dataset.filter);
-  });
-}
-
-function paintCatalog(filter) {
-  const grid = document.getElementById("productGrid");
-  const empty = document.getElementById("catalogEmpty");
-  const list =
-    filter === "all"
-      ? CURRENT_PRODUCTS
-      : CURRENT_PRODUCTS.filter((p) => p.category === filter);
-
-  grid.innerHTML = "";
-  empty.hidden = list.length > 0;
-
-  list.forEach((p) => grid.appendChild(productCard(p)));
-}
-
-function productCard(p) {
-  const card = document.createElement("article");
-  card.className = "product-card";
-
-  const imgUrl = window.Rabbit3DData?.buildImageUrl
-    ? window.Rabbit3DData.buildImageUrl(p.image_path, 480)
-    : null;
-  const priceLabel = p.price || p.price_label || "Consultar";
-
-  card.innerHTML = `
-    <div class="product-media">
-      ${p.allows_wholesale ? '<span class="product-tag">Disponible por mayor</span>' : ""}
-      ${
-        imgUrl
-          ? `<img src="${imgUrl}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async" width="480" height="360" style="object-position:${focalPosition(p)}">`
-          : `<div class="gallery-placeholder">📦<br>Foto de "${escapeHtml(p.name)}" pendiente</div>`
-      }
-    </div>
-    <div class="product-body">
-      <h3>${escapeHtml(p.name)}</h3>
-      <p class="product-desc">${escapeHtml(p.description || "")}</p>
-      <div class="product-footer">
-        <span class="product-price">${escapeHtml(priceLabel)}</span>
-        ${p.allows_wholesale ? '<span class="wholesale-badge">Packs 50/100</span>' : ""}
-      </div>
-      <button type="button" class="btn btn-ghost btn-add-cart" data-add-to-cart="${p.id}">Agregar al pedido</button>
-    </div>
-  `;
-
-  card.querySelector("[data-add-to-cart]").addEventListener("click", () => {
-    addToCart(p);
-    const btn = card.querySelector("[data-add-to-cart]");
-    const original = btn.textContent;
-    btn.textContent = "Agregado ✓";
-    setTimeout(() => (btn.textContent = original), 1200);
-  });
-  return card;
 }
 
 // ---------------------------------------------------------------

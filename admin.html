@@ -89,6 +89,18 @@
   .focal-list-item .focal-info{ font-size:.82rem; }
   .focal-list-item .file-name{ font-size:.82rem; font-weight:600; word-break:break-all; margin-bottom:4px; }
 
+  .media-video-item{
+    display:flex; gap:14px; align-items:center; padding:12px; border:1px solid var(--line);
+    border-radius:10px; flex-wrap:wrap;
+  }
+  .media-video-thumb{
+    width:90px; height:68px; border-radius:8px; background:var(--bg-panel-alt);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden;
+  }
+  .media-video-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .media-video-info{ flex:1; min-width:160px; font-size:.82rem; }
+  .media-video-info a{ color:var(--ink); word-break:break-all; }
+
   table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.86rem;}
   th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle;}
   th{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em;}
@@ -143,15 +155,154 @@
   </div>
 
   <div class="tabs">
-    <button class="tab is-active" data-tab="productos">Producto</button>
+    <button class="tab is-active" data-tab="categorias">Categorías</button>
+    <button class="tab" data-tab="productos">Producto</button>
     <button class="tab" data-tab="galeria">Foto de galería</button>
     <button class="tab" data-tab="sitio">Sitio</button>
   </div>
 
+  <!-- -------- CATEGORÍAS (pedidos por cantidad) -------- -->
+  <div class="panel is-active" id="panel-categorias">
+    <div class="card">
+      <h2 id="c_form_title">Nueva categoría</h2>
+      <p class="hint" style="margin-top:0">Ej: "Llaveros para cumpleaños", "Llaveros corporativos", "Regalos para docentes". Cada una puede tener sus propias fotos y videos de ejemplo.</p>
+      <a href="#" id="c_cancel_edit" class="edit-link" style="display:none">← Cancelar edición y crear una nueva</a>
+      <form id="categoryForm">
+        <label for="c_name">Nombre de la categoría</label>
+        <input type="text" id="c_name" required placeholder="Ej: Llaveros para cumpleaños">
+
+        <label for="c_description">Descripción</label>
+        <textarea id="c_description" placeholder="Ej: Souvenirs personalizados para cumpleaños infantiles, con el diseño que elijas."></textarea>
+
+        <div class="grid-2">
+          <div>
+            <label for="c_min_qty">Cantidad mínima de pedido</label>
+            <input type="number" id="c_min_qty" min="1" value="50" required>
+          </div>
+          <div>
+            <label for="c_price_note">Nota de precio (opcional)</label>
+            <input type="text" id="c_price_note" placeholder="Ej: Desde $2.500 c/u según diseño">
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="c_active" checked>
+          <label for="c_active" style="margin:0">Visible en la página</label>
+        </div>
+
+        <label style="margin-top:14px">Foto de portada</label>
+        <div class="tabs" id="c_image_source_tabs">
+          <button class="tab is-active" type="button" data-isource="upload">Subir archivo</button>
+          <button class="tab" type="button" data-isource="drive">Link de Drive</button>
+        </div>
+
+        <div id="c_image_upload_block">
+          <div class="dropzone" id="c_dropzone" tabindex="0" role="button" aria-label="Elegir o arrastrar la foto de portada">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 15V4M12 4 8 8M12 4l4 4"/>
+              <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+            </svg>
+            <p><strong>Arrastrá una foto acá</strong><br>o hacé click para elegirla</p>
+          </div>
+          <input type="file" id="c_image" accept="image/*" hidden>
+        </div>
+
+        <div id="c_image_drive_block" style="display:none">
+          <label for="c_image_drive_url">Link de Google Drive</label>
+          <input type="text" id="c_image_drive_url" placeholder="https://drive.google.com/file/d/.../view">
+          <p class="hint" style="margin-top:0">El archivo tiene que estar compartido como "Cualquiera con el enlace puede ver".</p>
+          <button class="btn btn-ghost btn-small" type="button" id="c_image_drive_load">Cargar vista previa</button>
+        </div>
+
+        <div class="focal-wrap" id="c_focal_wrap" style="display:none">
+          <div class="focal-picker" id="c_focal_picker" style="aspect-ratio:4/3">
+            <img id="c_preview_img" class="focal-picker-img" alt="">
+            <div class="focal-crosshair" id="c_focal_crosshair"></div>
+          </div>
+          <div class="focal-info">
+            <span class="preview-sizes" id="c_preview_label"></span>
+            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit" id="c_submit">Crear categoría</button>
+        <div class="status" id="c_status"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Categorías cargadas</h2>
+      <table>
+        <thead><tr><th></th><th>Nombre</th><th>Mínimo</th><th>Visible</th><th></th></tr></thead>
+        <tbody id="categoriesTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card" id="categoryMediaCard" style="display:none">
+      <h2>Fotos y videos de: <span id="cm_category_name"></span></h2>
+
+      <div class="tabs" id="cm_type_tabs">
+        <button class="tab is-active" data-mtype="image">Foto</button>
+        <button class="tab" data-mtype="video">Video (link externo)</button>
+      </div>
+
+      <div id="cm_image_form">
+        <div class="tabs" id="cm_image_source_tabs">
+          <button class="tab is-active" data-isource="upload">Subir archivo</button>
+          <button class="tab" data-isource="drive">Link de Drive</button>
+        </div>
+
+        <div id="cm_image_upload_block">
+          <label>Foto</label>
+          <div class="dropzone" id="cm_dropzone" tabindex="0" role="button" aria-label="Elegir o arrastrar una foto">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 15V4M12 4 8 8M12 4l4 4"/>
+              <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+            </svg>
+            <p><strong>Arrastrá una foto acá</strong><br>o hacé click para elegirla</p>
+          </div>
+          <input type="file" id="cm_image" accept="image/*" hidden>
+        </div>
+
+        <div id="cm_image_drive_block" style="display:none">
+          <label for="cm_image_drive_url">Link de Google Drive</label>
+          <input type="text" id="cm_image_drive_url" placeholder="https://drive.google.com/file/d/.../view">
+          <p class="hint" style="margin-top:0">El archivo tiene que estar compartido como "Cualquiera con el enlace puede ver" — si no, no se va a poder mostrar en la página.</p>
+          <button class="btn btn-ghost btn-small" type="button" id="cm_image_drive_load">Cargar vista previa</button>
+        </div>
+
+        <div class="focal-wrap" id="cm_focal_wrap" style="display:none">
+          <div class="focal-picker" id="cm_focal_picker" style="aspect-ratio:4/3">
+            <img id="cm_preview_img" class="focal-picker-img" alt="">
+            <div class="focal-crosshair" id="cm_focal_crosshair"></div>
+          </div>
+          <div class="focal-info">
+            <span class="preview-sizes" id="cm_preview_label"></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="cm_video_form" style="display:none">
+        <label for="cm_video_url">Link del video</label>
+        <input type="text" id="cm_video_url" placeholder="https://drive.google.com/file/d/... o youtube.com/watch?v=...">
+        <p class="hint" style="margin-top:0">Funciona con YouTube (podés dejarlo "Oculto") y con Google Drive — en los dos casos el video se reproduce dentro de tu página, sin redirigir a otro sitio. Con Drive, el archivo tiene que estar compartido como "Cualquiera con el enlace puede ver". Con otros links (Instagram, etc.) se muestra como botón para abrir el video aparte.</p>
+      </div>
+
+      <label for="cm_caption" style="margin-top:14px">Texto/caption (opcional)</label>
+      <input type="text" id="cm_caption" placeholder="Ej: Pack de 100 llaveros para egresados">
+
+      <button class="btn btn-primary" type="button" id="cm_submit">Agregar</button>
+      <div class="status" id="cm_status"></div>
+
+      <div class="focal-list" id="cm_media_list" style="margin-top:20px"></div>
+    </div>
+  </div>
+
   <!-- -------- FORM: PRODUCTO -------- -->
-  <div class="panel is-active" id="panel-productos">
+  <div class="panel" id="panel-productos">
     <div class="card">
       <h2 id="p_form_title">Nuevo producto</h2>
+      <p class="hint" style="margin-top:0">Esto es para ítems individuales sueltos (ya no es la sección principal — para pedidos por cantidad usá la pestaña "Categorías").</p>
       <a href="#" id="p_cancel_edit" class="edit-link" style="display:none">← Cancelar edición y crear uno nuevo</a>
       <form id="productForm">
         <label for="p_name">Nombre</label>
@@ -370,8 +521,26 @@ const STORAGE_BUCKET = "rabbit3d-media";
 const TABLE_PRODUCTS = "rabbit3d_products";
 const TABLE_GALLERY = "rabbit3d_gallery";
 const TABLE_SETTINGS = "rabbit3d_settings";
+const TABLE_CATEGORIES = "rabbit3d_categories";
+const TABLE_CATEGORY_MEDIA = "rabbit3d_category_media";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ---------------------------------------------------------------
+// GOOGLE DRIVE — links directos para mostrar fotos/videos sin
+// redirigir fuera de la página (el archivo debe estar compartido
+// como "Cualquiera con el enlace puede ver").
+// ---------------------------------------------------------------
+function driveFileId(url) {
+  const m =
+    String(url).match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+    String(url).match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+function driveImageUrl(url) {
+  const id = driveFileId(url);
+  return id ? `https://lh3.googleusercontent.com/d/${id}` : null;
+}
 
 // ---------------------------------------------------------------
 // COMPRESIÓN DE IMÁGENES EN EL NAVEGADOR
@@ -528,6 +697,7 @@ async function enterPanel() {
   loadProducts();
   loadGallery("taller");
   loadSettings();
+  loadCategories();
 }
 
 // Si ya había una sesión activa (recarga de página), entrar directo.
@@ -545,6 +715,493 @@ document.querySelectorAll(".tabs .tab[data-tab]").forEach((tab) => {
     document.querySelectorAll(".panel").forEach((p) => p.classList.remove("is-active"));
     document.getElementById(`panel-${tab.dataset.tab}`).classList.add("is-active");
   });
+});
+
+// ---------------------------------------------------------------
+// CATEGORÍAS (pedidos por cantidad): CRUD + fotos/videos por categoría
+// ---------------------------------------------------------------
+let categoryFocalPicker = null;
+let categoryDriveUrl = null;
+let editingCategoryId = null;
+let editingCategoryOriginal = null;
+let activeMediaCategoryId = null;
+let activeMediaCategoryName = null;
+let categoryMediaFocalPicker = null;
+
+async function handleCategoryFile(file) {
+  const fileInput = document.getElementById("c_image");
+  const focalWrap = document.getElementById("c_focal_wrap");
+  const img = document.getElementById("c_preview_img");
+  const label = document.getElementById("c_preview_label");
+
+  label.textContent = "Comprimiendo…";
+  focalWrap.style.display = "flex";
+
+  const compressed = await compressImage(file, 1000, 0.75);
+  img.src = URL.createObjectURL(compressed);
+  label.textContent = `Original ${kb(file.size)} → optimizada ${kb(compressed.size)}`;
+  fileInput._compressedBlob = compressed;
+
+  categoryFocalPicker = setupFocalPicker(
+    document.getElementById("c_focal_picker"),
+    document.getElementById("c_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+}
+
+setupDropzone(document.getElementById("c_dropzone"), document.getElementById("c_image"), (files) =>
+  handleCategoryFile(files[0])
+);
+
+// Portada: subir archivo vs. pegar un link de Drive.
+document.querySelectorAll("#c_image_source_tabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("#c_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    const isUpload = tab.dataset.isource === "upload";
+    document.getElementById("c_image_upload_block").style.display = isUpload ? "block" : "none";
+    document.getElementById("c_image_drive_block").style.display = isUpload ? "none" : "block";
+    document.getElementById("c_focal_wrap").style.display = "none";
+    categoryFocalPicker = null;
+    categoryDriveUrl = null;
+  });
+});
+
+document.getElementById("c_image_drive_load").addEventListener("click", () => {
+  const status = document.getElementById("c_status");
+  const rawUrl = document.getElementById("c_image_drive_url").value.trim();
+  const directUrl = driveImageUrl(rawUrl);
+  if (!directUrl) {
+    status.className = "status err";
+    status.textContent = "No pude leer ese link de Drive. Verificá que sea un link para compartir un archivo.";
+    return;
+  }
+  status.className = "";
+  status.textContent = "";
+  categoryDriveUrl = directUrl;
+
+  const focalWrap = document.getElementById("c_focal_wrap");
+  const img = document.getElementById("c_preview_img");
+  const label = document.getElementById("c_preview_label");
+  img.src = directUrl;
+  label.textContent = "Vista previa desde Drive";
+  focalWrap.style.display = "flex";
+
+  categoryFocalPicker = setupFocalPicker(
+    document.getElementById("c_focal_picker"),
+    document.getElementById("c_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+});
+
+function resetCategoryImageSource() {
+  document.querySelectorAll("#c_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+  document.querySelector('#c_image_source_tabs .tab[data-isource="upload"]').classList.add("is-active");
+  document.getElementById("c_image_upload_block").style.display = "block";
+  document.getElementById("c_image_drive_block").style.display = "none";
+  document.getElementById("c_image_drive_url").value = "";
+  categoryDriveUrl = null;
+}
+
+function startEditCategory(c) {
+  editingCategoryId = c.id;
+  editingCategoryOriginal = c;
+
+  document.getElementById("c_name").value = c.name || "";
+  document.getElementById("c_description").value = c.description || "";
+  document.getElementById("c_min_qty").value = c.min_qty ?? 50;
+  document.getElementById("c_price_note").value = c.price_note || "";
+  document.getElementById("c_active").checked = !!c.is_active;
+
+  document.getElementById("c_image")._compressedBlob = null;
+  resetCategoryImageSource();
+  const focalWrap = document.getElementById("c_focal_wrap");
+  const img = document.getElementById("c_preview_img");
+  const label = document.getElementById("c_preview_label");
+  if (c.cover_image_path) {
+    img.src = imageUrl(c.cover_image_path) || "";
+    label.textContent = "Foto actual — soltá una nueva arriba (o pegá un link de Drive) para reemplazarla";
+    focalWrap.style.display = "flex";
+  } else {
+    focalWrap.style.display = "none";
+  }
+  categoryFocalPicker = setupFocalPicker(
+    document.getElementById("c_focal_picker"),
+    document.getElementById("c_focal_crosshair"),
+    { x: c.cover_focal_x ?? 50, y: c.cover_focal_y ?? 50 },
+    () => {}
+  );
+
+  document.getElementById("c_form_title").textContent = `Editando: ${c.name}`;
+  document.getElementById("c_cancel_edit").style.display = "inline-block";
+  document.getElementById("c_submit").textContent = "Guardar cambios";
+  document.getElementById("panel-categorias").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function cancelEditCategory() {
+  editingCategoryId = null;
+  editingCategoryOriginal = null;
+  categoryFocalPicker = null;
+  document.getElementById("categoryForm").reset();
+  document.getElementById("c_min_qty").value = 50;
+  document.getElementById("c_active").checked = true;
+  document.getElementById("c_focal_wrap").style.display = "none";
+  resetCategoryImageSource();
+  document.getElementById("c_form_title").textContent = "Nueva categoría";
+  document.getElementById("c_cancel_edit").style.display = "none";
+  document.getElementById("c_submit").textContent = "Crear categoría";
+}
+document.getElementById("c_cancel_edit").addEventListener("click", (e) => {
+  e.preventDefault();
+  cancelEditCategory();
+});
+
+document.getElementById("categoryForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("c_status");
+  const submitBtn = document.getElementById("c_submit");
+  const fileInput = document.getElementById("c_image");
+  const isEditing = !!editingCategoryId;
+  const isDriveSource = document
+    .querySelector('#c_image_source_tabs .tab[data-isource="drive"]')
+    .classList.contains("is-active");
+
+  try {
+    submitBtn.disabled = true;
+    status.className = "status busy";
+
+    let imagePath = isEditing ? editingCategoryOriginal.cover_image_path : null;
+    let focal = categoryFocalPicker ? categoryFocalPicker.get() : { x: 50, y: 50 };
+    const newFile = fileInput.files[0];
+
+    if (isDriveSource && categoryDriveUrl) {
+      if (isEditing && editingCategoryOriginal.cover_image_path && !/^https?:\/\//i.test(editingCategoryOriginal.cover_image_path)) {
+        await sb.storage.from(STORAGE_BUCKET).remove([editingCategoryOriginal.cover_image_path]);
+      }
+      imagePath = categoryDriveUrl;
+    } else if (newFile) {
+      status.textContent = "Optimizando y subiendo foto…";
+      const blob = fileInput._compressedBlob || (await compressImage(newFile, 1000, 0.75));
+      imagePath = await uploadToStorage(blob, "categorias");
+      if (isEditing && editingCategoryOriginal.cover_image_path && !/^https?:\/\//i.test(editingCategoryOriginal.cover_image_path)) {
+        await sb.storage.from(STORAGE_BUCKET).remove([editingCategoryOriginal.cover_image_path]);
+      }
+    }
+
+    const payload = {
+      name: document.getElementById("c_name").value.trim(),
+      description: document.getElementById("c_description").value.trim() || null,
+      min_qty: Number(document.getElementById("c_min_qty").value) || 50,
+      price_note: document.getElementById("c_price_note").value.trim() || null,
+      is_active: document.getElementById("c_active").checked,
+      cover_image_path: imagePath,
+      cover_focal_x: focal.x,
+      cover_focal_y: focal.y,
+    };
+
+    status.textContent = isEditing ? "Guardando cambios…" : "Creando categoría…";
+    const { error } = isEditing
+      ? await sb.from(TABLE_CATEGORIES).update(payload).eq("id", editingCategoryId)
+      : await sb.from(TABLE_CATEGORIES).insert(payload);
+    if (error) throw error;
+
+    status.className = "status ok";
+    status.textContent = isEditing ? "Categoría actualizada correctamente." : "Categoría creada correctamente.";
+    cancelEditCategory();
+    loadCategories();
+  } catch (err) {
+    status.className = "status err";
+    status.textContent = "Error: " + err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+async function loadCategories() {
+  const { data, error } = await sb.from(TABLE_CATEGORIES).select("*").order("sort_order", { ascending: true });
+  const tbody = document.getElementById("categoriesTableBody");
+  tbody.innerHTML = "";
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="5">Error cargando categorías: ${error.message}</td></tr>`;
+    return;
+  }
+  tbody._rows = data;
+  data.forEach((c) => {
+    const url = imageUrl(c.cover_image_path);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${url ? `<img src="${url}" alt="">` : ""}</td>
+      <td>${escapeHtml(c.name)}</td>
+      <td>${c.min_qty}</td>
+      <td>${c.is_active ? "Sí" : "No"}</td>
+      <td class="row-actions">
+        <button class="btn btn-edit" data-manage-media="${c.id}">Fotos/videos</button>
+        <button class="btn btn-edit" data-edit-category="${c.id}">Editar</button>
+        <button class="btn btn-danger" data-delete-category="${c.id}" data-path="${c.cover_image_path || ""}">Borrar</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("categoriesTableBody").addEventListener("click", async (e) => {
+  const rows = document.getElementById("categoriesTableBody")._rows;
+
+  const editBtn = e.target.closest("[data-edit-category]");
+  if (editBtn) {
+    const row = rows.find((r) => String(r.id) === editBtn.dataset.editCategory);
+    if (row) startEditCategory(row);
+    return;
+  }
+
+  const mediaBtn = e.target.closest("[data-manage-media]");
+  if (mediaBtn) {
+    const row = rows.find((r) => String(r.id) === mediaBtn.dataset.manageMedia);
+    if (row) openCategoryMedia(row);
+    return;
+  }
+
+  const delBtn = e.target.closest("[data-delete-category]");
+  if (delBtn) {
+    if (!confirm("¿Borrar esta categoría? También se borran sus fotos y videos.")) return;
+    const path = delBtn.dataset.path;
+    if (path && !/^https?:\/\//i.test(path)) await sb.storage.from(STORAGE_BUCKET).remove([path]);
+    await sb.from(TABLE_CATEGORIES).delete().eq("id", delBtn.dataset.deleteCategory);
+    if (activeMediaCategoryId === Number(delBtn.dataset.deleteCategory)) {
+      document.getElementById("categoryMediaCard").style.display = "none";
+      activeMediaCategoryId = null;
+    }
+    loadCategories();
+  }
+});
+
+// ---------- Fotos y videos de una categoría puntual ----------
+function openCategoryMedia(category) {
+  activeMediaCategoryId = category.id;
+  activeMediaCategoryName = category.name;
+  document.getElementById("cm_category_name").textContent = category.name;
+  document.getElementById("categoryMediaCard").style.display = "block";
+  document.getElementById("categoryMediaCard").scrollIntoView({ behavior: "smooth", block: "start" });
+  resetCategoryMediaForm();
+  loadCategoryMedia();
+}
+
+document.querySelectorAll("#cm_type_tabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("#cm_type_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    const isImage = tab.dataset.mtype === "image";
+    document.getElementById("cm_image_form").style.display = isImage ? "block" : "none";
+    document.getElementById("cm_video_form").style.display = isImage ? "none" : "block";
+  });
+});
+
+// Dentro de "Foto": subir archivo vs. pegar un link de Drive.
+document.querySelectorAll("#cm_image_source_tabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("#cm_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    const isUpload = tab.dataset.isource === "upload";
+    document.getElementById("cm_image_upload_block").style.display = isUpload ? "block" : "none";
+    document.getElementById("cm_image_drive_block").style.display = isUpload ? "none" : "block";
+    document.getElementById("cm_focal_wrap").style.display = "none";
+    categoryMediaFocalPicker = null;
+  });
+});
+
+function resetCategoryMediaForm() {
+  document.getElementById("cm_image").value = "";
+  document.getElementById("cm_image")._compressedBlob = null;
+  document.getElementById("cm_image_drive_url").value = "";
+  document.getElementById("cm_focal_wrap").style.display = "none";
+  document.getElementById("cm_video_url").value = "";
+  document.getElementById("cm_caption").value = "";
+  categoryMediaFocalPicker = null;
+  categoryMediaDriveUrl = null;
+  document.querySelectorAll("#cm_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+  document.querySelector('#cm_image_source_tabs .tab[data-isource="upload"]').classList.add("is-active");
+  document.getElementById("cm_image_upload_block").style.display = "block";
+  document.getElementById("cm_image_drive_block").style.display = "none";
+}
+
+async function handleCategoryMediaFile(file) {
+  const focalWrap = document.getElementById("cm_focal_wrap");
+  const img = document.getElementById("cm_preview_img");
+  const label = document.getElementById("cm_preview_label");
+  label.textContent = "Comprimiendo…";
+  focalWrap.style.display = "flex";
+
+  const compressed = await compressImage(file, 1200, 0.75);
+  img.src = URL.createObjectURL(compressed);
+  label.textContent = `Original ${kb(file.size)} → optimizada ${kb(compressed.size)}`;
+  document.getElementById("cm_image")._compressedBlob = compressed;
+
+  categoryMediaFocalPicker = setupFocalPicker(
+    document.getElementById("cm_focal_picker"),
+    document.getElementById("cm_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+}
+setupDropzone(document.getElementById("cm_dropzone"), document.getElementById("cm_image"), (files) =>
+  handleCategoryMediaFile(files[0])
+);
+
+let categoryMediaDriveUrl = null;
+
+document.getElementById("cm_image_drive_load").addEventListener("click", () => {
+  const status = document.getElementById("cm_status");
+  const rawUrl = document.getElementById("cm_image_drive_url").value.trim();
+  const directUrl = driveImageUrl(rawUrl);
+  if (!directUrl) {
+    status.className = "status err";
+    status.textContent = "No pude leer ese link de Drive. Verificá que sea un link para compartir un archivo.";
+    return;
+  }
+  status.className = "";
+  status.textContent = "";
+  categoryMediaDriveUrl = directUrl;
+
+  const focalWrap = document.getElementById("cm_focal_wrap");
+  const img = document.getElementById("cm_preview_img");
+  const label = document.getElementById("cm_preview_label");
+  img.src = directUrl;
+  label.textContent = "Vista previa desde Drive";
+  focalWrap.style.display = "flex";
+
+  categoryMediaFocalPicker = setupFocalPicker(
+    document.getElementById("cm_focal_picker"),
+    document.getElementById("cm_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+});
+
+document.getElementById("cm_submit").addEventListener("click", async () => {
+  const status = document.getElementById("cm_status");
+  const isImageTab = document.querySelector('#cm_type_tabs .tab[data-mtype="image"]').classList.contains("is-active");
+  const caption = document.getElementById("cm_caption").value.trim() || null;
+
+  try {
+    status.className = "status busy";
+
+    if (isImageTab) {
+      const isDriveSource = document
+        .querySelector('#cm_image_source_tabs .tab[data-isource="drive"]')
+        .classList.contains("is-active");
+
+      let imagePath;
+      let focal = categoryMediaFocalPicker ? categoryMediaFocalPicker.get() : { x: 50, y: 50 };
+
+      if (isDriveSource) {
+        if (!categoryMediaDriveUrl) {
+          status.className = "status err";
+          status.textContent = "Pegá el link de Drive y tocá 'Cargar vista previa' primero.";
+          return;
+        }
+        imagePath = categoryMediaDriveUrl; // URL completa — se guarda tal cual, sin subir a Storage
+      } else {
+        const fileInput = document.getElementById("cm_image");
+        const file = fileInput.files[0];
+        if (!file) {
+          status.className = "status err";
+          status.textContent = "Elegí una foto primero.";
+          return;
+        }
+        status.textContent = "Subiendo foto…";
+        const blob = fileInput._compressedBlob || (await compressImage(file, 1200, 0.75));
+        imagePath = await uploadToStorage(blob, "categorias");
+      }
+
+      const { error } = await sb.from(TABLE_CATEGORY_MEDIA).insert({
+        category_id: activeMediaCategoryId,
+        media_type: "image",
+        image_path: imagePath,
+        focal_x: focal.x,
+        focal_y: focal.y,
+        caption,
+      });
+      if (error) throw error;
+    } else {
+      const videoUrl = document.getElementById("cm_video_url").value.trim();
+      if (!videoUrl) {
+        status.className = "status err";
+        status.textContent = "Pegá el link del video.";
+        return;
+      }
+      status.textContent = "Guardando video…";
+      const { error } = await sb.from(TABLE_CATEGORY_MEDIA).insert({
+        category_id: activeMediaCategoryId,
+        media_type: "video",
+        video_url: videoUrl,
+        caption,
+      });
+      if (error) throw error;
+    }
+
+    status.className = "status ok";
+    status.textContent = "Agregado correctamente.";
+    resetCategoryMediaForm();
+    loadCategoryMedia();
+  } catch (err) {
+    status.className = "status err";
+    status.textContent = "Error: " + err.message;
+  }
+});
+
+function youtubeThumbnail(url) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null;
+}
+
+async function loadCategoryMedia() {
+  const { data, error } = await sb
+    .from(TABLE_CATEGORY_MEDIA)
+    .select("*")
+    .eq("category_id", activeMediaCategoryId)
+    .order("sort_order", { ascending: true });
+  const list = document.getElementById("cm_media_list");
+  list.innerHTML = "";
+  if (error) {
+    list.innerHTML = `<p class="hint">Error cargando: ${error.message}</p>`;
+    return;
+  }
+  data.forEach((m) => {
+    const div = document.createElement("div");
+    if (m.media_type === "image") {
+      div.className = "focal-list-item";
+      div.innerHTML = `
+        <div class="focal-picker" style="aspect-ratio:4/3; max-width:140px; cursor:default">
+          <img class="focal-picker-img" src="${imageUrl(m.image_path)}" alt="" style="object-position:${m.focal_x}% ${m.focal_y}%">
+        </div>
+        <div class="focal-info">
+          <div class="file-name">${escapeHtml(m.caption || "Foto")}</div>
+          <button class="btn btn-danger" data-delete-media="${m.id}" data-path="${m.image_path}">Borrar</button>
+        </div>`;
+    } else {
+      const thumb = youtubeThumbnail(m.video_url);
+      div.className = "media-video-item";
+      div.innerHTML = `
+        <div class="media-video-thumb">${thumb ? `<img src="${thumb}" alt="">` : "🎬"}</div>
+        <div class="media-video-info">
+          <div class="file-name">${escapeHtml(m.caption || "Video")}</div>
+          <a href="${m.video_url}" target="_blank" rel="noopener">${escapeHtml(m.video_url)}</a>
+        </div>
+        <button class="btn btn-danger" data-delete-media="${m.id}">Borrar</button>`;
+    }
+    list.appendChild(div);
+  });
+}
+
+document.getElementById("cm_media_list").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-delete-media]");
+  if (!btn) return;
+  if (!confirm("¿Borrar este elemento?")) return;
+  const path = btn.dataset.path;
+  if (path && !/^https?:\/\//i.test(path)) await sb.storage.from(STORAGE_BUCKET).remove([path]);
+  await sb.from(TABLE_CATEGORY_MEDIA).delete().eq("id", btn.dataset.deleteMedia);
+  loadCategoryMedia();
 });
 
 // ---------------------------------------------------------------
@@ -1126,6 +1783,7 @@ document.getElementById("settingsForm").addEventListener("submit", async (e) => 
 // ---------------------------------------------------------------
 function imageUrl(path) {
   if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path; // ya es una URL completa (ej: link de Drive)
   return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
 }
 function escapeHtml(str) {
