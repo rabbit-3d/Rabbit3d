@@ -123,10 +123,24 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   display:flex; align-items:center; justify-content:space-between;
   gap: 20px; padding-top:12px; padding-bottom:12px;
 }
-.logo{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+.logo{ display:flex; align-items:center; gap:11px; text-decoration:none; }
 .logo-img{
-  height:44px; width:44px; border-radius:12px; object-fit:cover;
-  box-shadow: 0 0 0 1px var(--line-strong);
+  height:48px; width:48px; border-radius:13px; object-fit:cover;
+  box-shadow: 0 0 0 1px var(--line-strong), 0 4px 14px rgba(0,0,0,.4);
+  transition: box-shadow .2s ease, transform .15s ease;
+}
+.logo:hover .logo-img{
+  box-shadow: 0 0 0 1px var(--red), 0 4px 16px rgba(0,0,0,.45);
+  transform: scale(1.03);
+}
+.logo-word{
+  font-family: var(--font-display); font-size:1.2rem; font-weight:700;
+  color: var(--ink); letter-spacing:-.01em; white-space:nowrap;
+}
+.logo-word-accent{ color: var(--red); }
+@media (max-width: 700px){
+  .logo-word{ display:none; }
+  .logo-img{ height:40px; width:40px; }
 }
 .main-nav{ display:flex; gap: 26px; flex:1; justify-content:center; }
 .main-nav a{
@@ -305,8 +319,12 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 .hero-lede{ max-width: 46ch; }
 
 /* impresora 3D dibujada, imprimiendo una pieza capa por capa */
-.hero-visual{ position:relative; max-width: 55%; margin: 0 auto; }
-.printer-svg{ width:100%; height:auto; overflow:visible; }
+.hero-visual{
+  position:relative; max-width: 55%; margin: 0 auto;
+  background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 28px; box-shadow: var(--shadow-soft);
+}
+.printer-svg{ width:100%; height:auto; overflow:visible; display:block; }
 .printer-frame{ fill: var(--bg-panel); stroke: var(--line-strong); stroke-width: 3; }
 .printer-frame-thin{ fill: none; stroke: var(--line-strong); stroke-width: 2.5; }
 .printer-spool{ fill: none; stroke: var(--red); stroke-width: 3; }
@@ -336,8 +354,14 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 }
 
 @media (max-width: 880px){
-  .hero-inner{ grid-template-columns: 1fr; }
-  .hero-visual{ order:-1; max-width:280px; margin:0 auto; }
+  .hero-inner{ grid-template-columns: 1fr; gap: 28px; }
+  .hero-visual{ order:-1; max-width:220px; padding:20px; margin:0 auto; }
+}
+
+@media (max-width: 700px){
+  .hero-copy{ text-align:center; }
+  .hero-copy .hero-actions{ justify-content:center; }
+  .hero-lede{ margin-left:auto; margin-right:auto; }
 }
 
 /* ==========================================================
@@ -646,6 +670,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
   <div class="wrap header-inner">
     <a href="#inicio" class="logo">
       <img src="data:image/webp;base64,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" alt="Rabbit3D" class="logo-img">
+      <span class="logo-word">Rabbit<span class="logo-word-accent">3D</span></span>
     </a>
 
     <nav class="main-nav" id="main-nav">
@@ -984,9 +1009,9 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
         <p>Se imprimen prótesis e implantes a medida, y se investiga la impresión de tejidos biológicos para el futuro de la salud.</p>
       </li>
       <li class="process-card">
-        <span class="process-num">🎤</span>
-        <h3>Investigación y difusión</h3>
-        <p>Expongo sobre estos avances en charlas y presentaciones, para que más gente conozca hacia dónde va esta tecnología.</p>
+        <span class="process-num">🏭</span>
+        <h3>Industria manufacturera</h3>
+        <p>Se usa para fabricar piezas, herramientas y prototipos rápidos, ahorrando tiempo y dinero al no requerir moldes ni procesos tradicionales.</p>
       </li>
     </ul>
 
@@ -994,6 +1019,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
   </div>
 </section>
 
+<div id="clientesWrapper" hidden>
 <div class="layer-divider" aria-hidden="true"></div>
 
 <section class="section section-alt" id="clientes">
@@ -1012,6 +1038,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     <div class="press-grid" id="clientesGallery"></div>
   </div>
 </section>
+</div>
 
 <div class="layer-divider" aria-hidden="true"></div>
 
@@ -1058,7 +1085,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
       <a href="#sobre-mi">Sobre mí</a>
       <a href="#prensa">Medios</a>
       <a href="#industria">Impresión 3D en la industria</a>
-      <a href="#clientes">Clientes destacados</a>
+      <a href="#clientes" id="footerClientesLink">Clientes destacados</a>
       <a href="#cults3d">Diseños en Cults3D</a>
     </nav>
 
@@ -1371,6 +1398,12 @@ async function safeFetchSettings() {
 // ---------------------------------------------------------------
 function applySettings(settings) {
   if (!settings) return; // sin Supabase configurado, se mantiene el contenido de ejemplo del HTML
+
+  const clientesWrapper = document.getElementById("clientesWrapper");
+  const footerClientesLink = document.getElementById("footerClientesLink");
+  const showClientes = !!settings.show_clientes;
+  if (clientesWrapper) clientesWrapper.hidden = !showClientes;
+  if (footerClientesLink) footerClientesLink.hidden = !showClientes;
 
   const waNumber = (settings.whatsapp_number || "").replace(/\D/g, "");
   if (waNumber) {

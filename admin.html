@@ -513,6 +513,12 @@
           </div>
         </div>
 
+        <div class="checkbox-row" style="margin-top:18px">
+          <input type="checkbox" id="s_show_clientes">
+          <label for="s_show_clientes" style="margin:0">Mostrar la sección "Clientes destacados" en la página</label>
+        </div>
+        <p class="hint" style="margin-top:0">Está apagada por defecto. Tildá esto para que vuelva a aparecer en el inicio.</p>
+
         <h2 style="margin-top:28px">Sobre mí</h2>
         <p class="hint" style="margin-top:0">El texto de "Sobre mí" (bio y línea de tiempo) ahora es fijo en la página — pedile a Claude que lo actualice si querés cambiarlo. Acá solo se administra la foto.</p>
 
@@ -1895,6 +1901,7 @@ async function loadSettings() {
   document.getElementById("s_zone").value = data.zone_text || "";
   document.getElementById("s_cults3d").value = data.cults3d_url || "";
   document.getElementById("s_telegram").value = data.telegram_url || "";
+  document.getElementById("s_show_clientes").checked = !!data.show_clientes;
 
   // Mostrar la foto YA cargada (antes esto quedaba invisible y parecía que no había nada).
   if (data.profile_photo_path) {
@@ -1955,6 +1962,7 @@ document.getElementById("settingsForm").addEventListener("submit", async (e) => 
       zone_text: document.getElementById("s_zone").value.trim() || null,
       cults3d_url: document.getElementById("s_cults3d").value.trim() || null,
       telegram_url: document.getElementById("s_telegram").value.trim() || null,
+      show_clientes: document.getElementById("s_show_clientes").checked,
     };
 
     if (profilePhotoNewBlob) {
