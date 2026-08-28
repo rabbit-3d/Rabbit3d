@@ -42,7 +42,7 @@
 
   --radius: 14px;
   --radius-sm: 8px;
-  --wrap: 1180px;
+  --wrap: 1240px;
 
   --shadow-soft: 0 14px 34px rgba(0,0,0,0.5);
 }
@@ -320,7 +320,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 
 /* impresora 3D dibujada, imprimiendo una pieza capa por capa */
 .hero-visual{
-  position:relative; max-width: 55%; margin: 0 auto;
+  position:relative; max-width: 85%; margin: 0 auto;
   background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 28px; box-shadow: var(--shadow-soft);
 }
@@ -483,64 +483,107 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   background: var(--bg-panel); border-radius: var(--radius); overflow:hidden;
   border: 1px solid var(--line); display:flex; flex-direction:column; text-align:left;
   cursor:pointer; width:100%; padding:0; font-family: var(--font-body); color:inherit;
-  transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+  transition: box-shadow .25s ease, transform .25s ease, border-color .25s ease;
 }
-.category-card:hover{ box-shadow: var(--shadow-soft); transform: translateY(-3px); border-color: var(--line-strong); }
+.category-card:hover{ box-shadow: var(--shadow-soft); transform: translateY(-5px); border-color: var(--line-strong); }
+
 .category-media{
   aspect-ratio: 4/3; background: var(--bg-alt); position:relative; overflow:hidden;
 }
-.category-media img{ width:100%; height:100%; object-fit:cover; }
+.category-media img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  transition: transform .5s ease;
+}
+.category-card:hover .category-media img{ transform: scale(1.06); }
+
 .category-tag{
-  position:absolute; top:10px; left:10px; font-family: var(--font-mono); font-size:.68rem;
+  position:absolute; top:10px; left:10px; z-index:2; font-family: var(--font-mono); font-size:.68rem;
   background: var(--red); color: var(--white); padding:3px 10px; border-radius:999px;
 }
-.category-body{ padding: 18px 18px 20px; display:flex; flex-direction:column; gap:6px; flex:1; }
-.category-body h3{ margin:0; font-size:1.02rem; }
-.category-desc{ font-size:.86rem; margin:0; flex:1; color: var(--ink-soft); }
-.category-price-list{
-  display:flex; flex-direction:column; gap:4px; margin:8px 0 0;
-  padding-top:8px; border-top:1px solid var(--line);
+.category-price-badge{
+  position:absolute; top:10px; right:10px; z-index:2;
+  background: rgba(10,15,26,.82); backdrop-filter: blur(4px);
+  border:1px solid rgba(255,255,255,.18); color:#fff;
+  font-family: var(--font-display); font-weight:700; font-size:.82rem;
+  padding:5px 12px; border-radius:999px; white-space:nowrap;
 }
-.category-price-item{
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-  font-size:.85rem;
+
+.category-body{ padding: 20px 20px 18px; display:flex; flex-direction:column; gap:6px; flex:1; }
+.category-body h3{ margin:0; font-size:1.1rem; }
+.category-desc{
+  font-size:.86rem; margin:0 0 4px; color: var(--ink-soft);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
-.cpi-qty{ font-family: var(--font-mono); font-size:.78rem; color: var(--ink-soft); }
-.cpi-price{ font-family: var(--font-display); font-weight:700; color: var(--red); }
-.category-footer{ display:flex; align-items:center; justify-content:flex-end; margin-top:8px; font-size:.8rem; color: var(--ink-soft); }
-.category-price{ font-family: var(--font-mono); font-weight:600; color: var(--red); }
+
+/* lista de precios, estilo "carta de menú": cantidad ...... precio */
+.category-price-rows{
+  display:flex; flex-direction:column; gap:6px; margin:6px 0 0;
+  padding-top:12px; border-top:1px solid var(--line);
+}
+.category-price-row{ display:flex; align-items:baseline; gap:8px; }
+.cpr-qty{ font-family: var(--font-mono); font-size:.76rem; color: var(--ink-soft); white-space:nowrap; }
+.cpr-leader{ flex:1; border-bottom:2px dotted var(--line-strong); margin-bottom:4px; min-width:14px; }
+.cpr-price{ font-family: var(--font-display); font-weight:700; font-size:.95rem; color: var(--red); white-space:nowrap; }
+.category-price-note{
+  font-size:.85rem; color: var(--ink-soft); margin:6px 0 0; padding-top:12px; border-top:1px solid var(--line);
+}
+
+.category-cta{
+  display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+  font-weight:600; font-size:.88rem; color: var(--ink); transition: gap .2s ease, color .2s ease;
+}
+.category-card:hover .category-cta{ color: var(--red); gap:10px; }
+.category-cta svg{ transition: transform .2s ease; flex-shrink:0; }
+.category-card:hover .category-cta svg{ transform: translateX(2px); }
+
 .empty-note{ text-align:center; color: var(--ink-soft); font-size:.9rem; }
 
-.modal-category{ max-width:560px; }
+.modal-category{
+  max-width:620px; max-height:88vh; padding:0;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.modal-category .modal-close{ z-index:2; background: rgba(10,15,26,.55); border-radius:50%; width:32px; height:32px; }
+.category-modal-scroll{ overflow-y:auto; padding:30px 26px 6px; }
+.category-modal-footer{
+  padding:16px 26px calc(16px + env(safe-area-inset-bottom)); border-top:1px solid var(--line);
+  background: var(--bg-panel); flex-shrink:0;
+}
+.category-modal-footer .btn{ margin-top:0; }
+.category-modal-footer .modal-close-link{ margin-top:8px; }
 
-.category-pricing-list{ display:flex; flex-direction:column; gap:8px; margin:16px 0; }
-.category-pricing-row{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:12px 16px; border-radius: var(--radius-sm); background: var(--bg-panel-2);
-  border:1px solid var(--line);
+/* galería: imagen/video grande arriba + tira de miniaturas */
+.category-modal-gallery{ margin:18px 0 4px; }
+.category-modal-main{
+  position:relative; aspect-ratio:4/3; border-radius: var(--radius); overflow:hidden;
+  background: var(--bg-panel-2); border:1px solid var(--line);
 }
-.category-pricing-qty{ font-family: var(--font-mono); font-size:.85rem; color: var(--ink-soft); }
-.category-pricing-total{ font-family: var(--font-display); font-weight:700; font-size:1.15rem; color: var(--red); }
-
-.category-media-grid{
-  display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin:16px 0;
-  max-height:360px; overflow-y:auto;
-}
-.category-media-item{
-  position:relative; aspect-ratio:4/3; border-radius:8px; overflow:hidden; background:var(--bg-panel-2);
-}
-.category-media-item img{ width:100%; height:100%; object-fit:cover; }
-.category-media-item.is-video{ cursor:pointer; }
-.category-media-item .play-badge{
+.category-modal-main img, .category-modal-main iframe{ width:100%; height:100%; object-fit:cover; border:0; display:block; }
+.category-modal-main .play-badge{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.35);
+  background:rgba(0,0,0,.3); cursor:pointer;
 }
-.category-media-item .play-badge svg{ filter:drop-shadow(0 2px 6px rgba(0,0,0,.6)); }
-.category-media-item iframe{ width:100%; height:100%; border:0; }
-.category-media-caption{
-  position:absolute; left:0; right:0; bottom:0; padding:6px 8px; font-size:.68rem;
-  background:linear-gradient(transparent, rgba(0,0,0,.75)); color:#fff;
+.category-modal-main .play-badge svg{ filter:drop-shadow(0 2px 8px rgba(0,0,0,.6)); }
+.category-modal-thumbs{ display:flex; gap:8px; margin-top:10px; overflow-x:auto; padding-bottom:4px; }
+.category-modal-thumb{
+  flex:0 0 auto; width:60px; height:60px; border-radius:8px; overflow:hidden; cursor:pointer;
+  border:2px solid transparent; opacity:.65; transition: opacity .15s ease, border-color .15s ease; position:relative;
+  background: var(--bg-panel-2);
 }
+.category-modal-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.category-modal-thumb.is-active{ opacity:1; border-color: var(--red); }
+.category-modal-thumb .thumb-play{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.3); color:#fff; font-size:1rem;
+}
+
+/* precios como chips compactos, no cajas grandes */
+.category-pricing-chips{ display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 4px; }
+.category-pricing-chip{
+  display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px;
+  background: var(--bg-panel-2); border:1px solid var(--line); font-size:.85rem;
+}
+.category-pricing-chip .cpi-qty{ color: var(--ink-soft); font-family: var(--font-mono); font-size:.78rem; }
+.category-pricing-chip .cpi-price{ font-family: var(--font-display); font-weight:700; color: var(--red); }
 
 /* ---------- wholesale packs ---------- */
 .check-list{ list-style:none; margin:1.2em 0; padding:0; display:flex; flex-direction:column; gap:10px; }
@@ -753,16 +796,25 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
 <div class="modal-backdrop" id="categoryModalBackdrop" hidden>
   <div class="modal modal-category" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
     <button class="modal-close" id="categoryModalClose" aria-label="Cerrar">×</button>
-    <p class="eyebrow" id="categoryModalMinQty"></p>
-    <h3 id="categoryModalTitle"></h3>
-    <p class="modal-subtitle" id="categoryModalDescription"></p>
-    <p class="modal-subtitle" id="categoryModalPriceNote"></p>
-    <div class="category-pricing-list" id="categoryModalPricing"></div>
 
-    <div class="category-media-grid" id="categoryModalMedia"></div>
+    <div class="category-modal-scroll">
+      <p class="eyebrow" id="categoryModalMinQty"></p>
+      <h3 id="categoryModalTitle"></h3>
+      <p class="modal-subtitle" id="categoryModalDescription"></p>
 
-    <button type="button" class="btn btn-primary" id="categoryModalWhatsapp" style="width:100%">Consultar por WhatsApp</button>
-    <button type="button" class="modal-close-link" id="categoryModalCloseLink">Cerrar</button>
+      <div class="category-modal-gallery" id="categoryModalGallery">
+        <div class="category-modal-main" id="categoryModalMain"></div>
+        <div class="category-modal-thumbs" id="categoryModalThumbs"></div>
+      </div>
+
+      <div class="category-pricing-chips" id="categoryModalPricing"></div>
+      <p class="modal-subtitle" id="categoryModalPriceNote"></p>
+    </div>
+
+    <div class="category-modal-footer">
+      <button type="button" class="btn btn-primary" id="categoryModalWhatsapp" style="width:100%">Consultar por WhatsApp</button>
+      <button type="button" class="modal-close-link" id="categoryModalCloseLink">Cerrar</button>
+    </div>
   </div>
 </div>
 
@@ -972,9 +1024,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
       </p>
       <p>
         Actualmente estoy en la etapa final de mis estudios, por lo que no puedo dedicarle
-        tanto tiempo al emprendimiento como antes. Sin embargo, sigo disfrutando de diseñar,
-        crear y compartir mis proyectos, y quién sabe hasta dónde puede llegar todo esto en el
-        futuro.
+        tanto tiempo al emprendimiento como antes.
       </p>
 
       <ul class="about-stats">
@@ -1699,24 +1749,36 @@ function categoryCard(c, fallbackMedia, priceTiers) {
     focalY = fallbackMedia.focal_y;
   }
 
-  // Precio: si ya cargaste precios por cantidad, se muestran TODOS acá
-  // (lo que realmente paga el cliente por cada pack). Si no cargaste
-  // ninguno, cae a la nota de precio libre, y si tampoco hay, "Consultar precio".
-  const priceHtml =
-    priceTiers && priceTiers.length
-      ? `<div class="category-price-list">
-          ${priceTiers
-            .map(
-              (p) =>
-                `<span class="category-price-item"><span class="cpi-qty">${p.quantity} un.</span><span class="cpi-price">$${Number(p.total_price).toLocaleString("es-AR")}</span></span>`
-            )
-            .join("")}
-        </div>`
-      : `<span class="category-price">${escapeHtml(c.price_note || "Consultar precio")}</span>`;
+  const hasTiers = priceTiers && priceTiers.length > 0;
+
+  // Precio de entrada, visible de un vistazo sobre la propia foto —
+  // usamos el primer tramo (normalmente el de menor cantidad).
+  const startingPriceBadge = hasTiers
+    ? `<span class="category-price-badge">Desde $${Number(priceTiers[0].total_price).toLocaleString("es-AR")}</span>`
+    : "";
+
+  // Debajo, el detalle completo: TODAS las cantidades cargadas, en un
+  // formato tipo "carta de menú" (cantidad ...... precio). Si todavía no
+  // cargaste ningún precio, cae a la nota de precio libre, o "Consultar precio".
+  const priceHtml = hasTiers
+    ? `<div class="category-price-rows">
+        ${priceTiers
+          .map(
+            (p) => `
+          <div class="category-price-row">
+            <span class="cpr-qty">${p.quantity} unidades</span>
+            <span class="cpr-leader"></span>
+            <span class="cpr-price">$${Number(p.total_price).toLocaleString("es-AR")}</span>
+          </div>`
+          )
+          .join("")}
+      </div>`
+    : `<p class="category-price-note">${escapeHtml(c.price_note || "Consultar precio")}</p>`;
 
   card.innerHTML = `
     <div class="category-media">
       <span class="category-tag">Desde ${MIN_ORDER_QTY} unidades</span>
+      ${startingPriceBadge}
       ${
         imgUrl
           ? `<img src="${imgUrl}" alt="${escapeHtml(c.name)}" loading="lazy" decoding="async" width="480" height="360" style="object-position:${focalPosition({ focal_x: focalX, focal_y: focalY })}">`
@@ -1727,9 +1789,10 @@ function categoryCard(c, fallbackMedia, priceTiers) {
       <h3>${escapeHtml(c.name)}</h3>
       <p class="category-desc">${escapeHtml(c.description || "")}</p>
       ${priceHtml}
-      <div class="category-footer">
-        <span>Ver más →</span>
-      </div>
+      <span class="category-cta">
+        Ver detalles
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
     </div>
   `;
   card.addEventListener("click", () => openCategoryModal(c));
@@ -1756,7 +1819,17 @@ async function renderCategories(categories) {
     let fallbackMedia = null;
     if (!c.cover_image_path) {
       const media = (await safeFetchCategoryMedia(c.id)) || [];
-      fallbackMedia = media.find((m) => m.media_type === "image") || null;
+      const imageItem = media.find((m) => m.media_type === "image");
+      if (imageItem) {
+        fallbackMedia = imageItem;
+      } else {
+        // Si lo único cargado son videos, usamos la miniatura del primero
+        // que tenga (en vez de dejar la tarjeta con "Foto pendiente").
+        const videoItem = media.find((m) => m.media_type === "video" && anyVideoThumbnail(m.video_url));
+        if (videoItem) {
+          fallbackMedia = { image_path: anyVideoThumbnail(videoItem.video_url), focal_x: 50, focal_y: 50 };
+        }
+      }
     }
     grid.appendChild(categoryCard(c, fallbackMedia, pricingByCategory[c.id] || null));
   }
@@ -1773,6 +1846,42 @@ function driveFileId(url) {
     String(url).match(/[?&]id=([a-zA-Z0-9_-]+)/);
   return m ? m[1] : null;
 }
+// Miniatura de un video de Drive (Google genera una automáticamente para
+// casi cualquier archivo, siempre que esté compartido públicamente).
+function driveThumbnail(url) {
+  const id = driveFileId(url);
+  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w320` : null;
+}
+function anyVideoThumbnail(url) {
+  return driveThumbnail(url) || youtubeThumbnail(url);
+}
+
+function renderCategoryMainMedia(m) {
+  const main = document.getElementById("categoryModalMain");
+  if (!m) {
+    main.innerHTML = "";
+    return;
+  }
+  if (m.media_type === "image") {
+    const url = window.Rabbit3DData?.buildImageUrl
+      ? window.Rabbit3DData.buildImageUrl(m.image_path, 800)
+      : m.image_path;
+    main.innerHTML = `<img src="${url}" alt="${escapeHtml(m.caption || "")}" style="object-position:${focalPosition(m)}">`;
+    return;
+  }
+  const driveId = driveFileId(m.video_url);
+  const ytId = youtubeEmbedInfo(m.video_url);
+  if (driveId) {
+    main.innerHTML = `<iframe src="https://drive.google.com/file/d/${driveId}/preview" title="${escapeHtml(m.caption || "Video")}" allow="autoplay" allowfullscreen></iframe>`;
+  } else if (ytId) {
+    main.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" title="${escapeHtml(m.caption || "Video")}" allowfullscreen></iframe>`;
+  } else {
+    main.innerHTML = `
+      <a href="${m.video_url}" target="_blank" rel="noopener" class="play-badge" style="position:static; height:100%">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="#fff"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.4)"/><path d="M10 8.5v7l6-3.5z"/></svg>
+      </a>`;
+  }
+}
 
 async function openCategoryModal(category) {
   const backdrop = document.getElementById("categoryModalBackdrop");
@@ -1786,64 +1895,69 @@ async function openCategoryModal(category) {
     openWhatsappModal(`un pedido de "${category.name}" (mínimo ${MIN_ORDER_QTY} unidades)`);
   };
 
-  const pricingList = document.getElementById("categoryModalPricing");
-  pricingList.innerHTML = "";
+  const pricingWrap = document.getElementById("categoryModalPricing");
+  pricingWrap.innerHTML = "";
+  const gallery = document.getElementById("categoryModalGallery");
+  const main = document.getElementById("categoryModalMain");
+  const thumbs = document.getElementById("categoryModalThumbs");
+  gallery.style.display = "none";
+  main.innerHTML = "";
+  thumbs.innerHTML = "";
   backdrop.hidden = false;
+  backdrop.querySelector(".category-modal-scroll").scrollTop = 0;
 
   safeFetchCategoryPricing(category.id).then((pricing) => {
     if (!pricing || !pricing.length) return;
-    pricingList.innerHTML = pricing
+    pricingWrap.innerHTML = pricing
       .map(
         (p) => `
-        <div class="category-pricing-row">
-          <span class="category-pricing-qty">${p.quantity} unidades</span>
-          <span class="category-pricing-total">$${Number(p.total_price).toLocaleString("es-AR")}</span>
-        </div>`
+        <span class="category-pricing-chip">
+          <span class="cpi-qty">${p.quantity} un.</span>
+          <span class="cpi-price">$${Number(p.total_price).toLocaleString("es-AR")}</span>
+        </span>`
       )
       .join("");
   });
 
-  const mediaGrid = document.getElementById("categoryModalMedia");
-  mediaGrid.innerHTML = `<p class="hint" style="grid-column:1/-1; text-align:center; color:var(--ink-soft)">Cargando fotos y videos…</p>`;
-
   const media = (await safeFetchCategoryMedia(category.id)) || [];
-  mediaGrid.innerHTML = "";
   if (!media.length) {
-    mediaGrid.innerHTML = `<p class="hint" style="grid-column:1/-1; text-align:center; color:var(--ink-soft)">Todavía no hay fotos ni videos cargados de este producto.</p>`;
+    gallery.style.display = "block";
+    main.innerHTML = `<div class="gallery-placeholder">📦<br>Todavía no hay fotos ni videos cargados de este producto.</div>`;
     return;
   }
 
-  media.forEach((m) => {
-    const item = document.createElement("div");
-    if (m.media_type === "image") {
-      item.className = "category-media-item";
-      const url = window.Rabbit3DData?.buildImageUrl
-        ? window.Rabbit3DData.buildImageUrl(m.image_path, 480)
-        : m.image_path;
-      item.innerHTML = `
-        <img src="${url}" alt="${escapeHtml(m.caption || "")}" loading="lazy" style="object-position:${focalPosition(m)}">
-        ${m.caption ? `<span class="category-media-caption">${escapeHtml(m.caption)}</span>` : ""}
-      `;
-    } else {
-      item.className = "category-media-item is-video";
-      const driveId = driveFileId(m.video_url);
-      const ytId = youtubeEmbedInfo(m.video_url);
-      if (driveId) {
-        item.innerHTML = `<iframe src="https://drive.google.com/file/d/${driveId}/preview" title="${escapeHtml(m.caption || "Video")}" loading="lazy" allow="autoplay" allowfullscreen></iframe>`;
-      } else if (ytId) {
-        item.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" title="${escapeHtml(m.caption || "Video")}" loading="lazy" allowfullscreen></iframe>`;
+  gallery.style.display = "block";
+  renderCategoryMainMedia(media[0]);
+
+  if (media.length > 1) {
+    media.forEach((m, i) => {
+      const thumb = document.createElement("button");
+      thumb.type = "button";
+      thumb.className = "category-modal-thumb" + (i === 0 ? " is-active" : "");
+      if (m.media_type === "image") {
+        const url = window.Rabbit3DData?.buildImageUrl
+          ? window.Rabbit3DData.buildImageUrl(m.image_path, 120)
+          : m.image_path;
+        thumb.innerHTML = `<img src="${url}" alt="" style="object-position:${focalPosition(m)}">`;
       } else {
-        item.innerHTML = `
-          <a href="${m.video_url}" target="_blank" rel="noopener" style="display:block; width:100%; height:100%; background:var(--bg-panel-2)">
-            <span class="play-badge">
-              <svg viewBox="0 0 24 24" width="34" height="34" fill="#fff"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.4)"/><path d="M10 8.5v7l6-3.5z"/></svg>
-            </span>
-            ${m.caption ? `<span class="category-media-caption">${escapeHtml(m.caption)}</span>` : ""}
-          </a>`;
+        const thumbUrl = anyVideoThumbnail(m.video_url);
+        thumb.innerHTML = thumbUrl
+          ? `<img src="${thumbUrl}" alt=""><span class="thumb-play">▶</span>`
+          : `<span class="thumb-play">🎬</span>`;
       }
-    }
-    mediaGrid.appendChild(item);
-  });
+      thumb.addEventListener("click", () => {
+        thumbs.querySelectorAll(".category-modal-thumb").forEach((t) => t.classList.remove("is-active"));
+        thumb.classList.add("is-active");
+        renderCategoryMainMedia(m);
+      });
+      thumbs.appendChild(thumb);
+    });
+  }
+}
+
+function youtubeThumbnail(url) {
+  const match = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null;
 }
 
 function setupCategoryModal() {
@@ -1853,7 +1967,8 @@ function setupCategoryModal() {
 
   function closeModal() {
     backdrop.hidden = true;
-    document.getElementById("categoryModalMedia").innerHTML = "";
+    document.getElementById("categoryModalMain").innerHTML = "";
+    document.getElementById("categoryModalThumbs").innerHTML = "";
     document.getElementById("categoryModalPricing").innerHTML = "";
   }
   closeBtn.addEventListener("click", closeModal);

@@ -680,6 +680,12 @@ function driveImageUrl(url) {
   const id = driveFileId(url);
   return id ? `https://lh3.googleusercontent.com/d/${id}` : null;
 }
+// Miniatura de un video de Drive (Google genera una automáticamente para
+// casi cualquier archivo, siempre que esté compartido públicamente).
+function driveThumbnail(url) {
+  const id = driveFileId(url);
+  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w320` : null;
+}
 
 // ---------------------------------------------------------------
 // ARCHIVOS ESTÁTICOS DEL REPO (GitHub Pages)
@@ -1134,11 +1140,45 @@ async function loadCategories() {
     return;
   }
   tbody._rows = data;
-  data.forEach((c, i) => {
-    const url = imageUrl(c.cover_image_path);
+
+  for (const [i, c] of data.entries()) {
+    let url = imageUrl(c.cover_image_path);
+    let isFallback = false;
+
+    // Si no hay portada, usamos de respaldo la primera foto (o miniatura
+    // de video) que haya en "Fotos/videos" de esa categoría — así el
+    // panel muestra lo mismo que ya ve el visitante en el sitio público.
+    if (!url) {
+      const { data: media } = await sb
+        .from(TABLE_CATEGORY_MEDIA)
+        .select("*")
+        .eq("category_id", c.id)
+        .order("sort_order", { ascending: true })
+        .order("id", { ascending: true });
+      const imageItem = (media || []).find((m) => m.media_type === "image");
+      if (imageItem) {
+        url = imageUrl(imageItem.image_path);
+        isFallback = true;
+      } else {
+        const videoItem = (media || []).find(
+          (m) => m.media_type === "video" && (driveThumbnail(m.video_url) || youtubeThumbnail(m.video_url))
+        );
+        if (videoItem) {
+          url = driveThumbnail(videoItem.video_url) || youtubeThumbnail(videoItem.video_url);
+          isFallback = true;
+        }
+      }
+    }
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${url ? `<img class="cat-cover-img" src="${url}" alt="Portada de ${escapeHtml(c.name)}">` : `<div class="cat-cover-empty">Sin foto</div>`}</td>
+      <td>
+        ${
+          url
+            ? `<img class="cat-cover-img" src="${url}" alt="Portada de ${escapeHtml(c.name)}">`
+            : `<div class="cat-cover-empty">Sin foto</div>`
+        }
+      </td>
       <td>${escapeHtml(c.name)}</td>
       <td>${c.is_active ? "Sí" : "No"}</td>
       <td class="row-actions">
@@ -1150,7 +1190,7 @@ async function loadCategories() {
         <button class="btn btn-danger" data-delete-category="${c.id}" data-path="${c.cover_image_path || ""}">Borrar</button>
       </td>`;
     tbody.appendChild(tr);
-  });
+  }
 }
 
 document.getElementById("categoriesTableBody").addEventListener("click", async (e) => {
@@ -1438,7 +1478,7 @@ async function loadCategoryMedia() {
           ${moveBtns}
         </div>`;
     } else {
-      const thumb = youtubeThumbnail(m.video_url);
+      const thumb = driveThumbnail(m.video_url) || youtubeThumbnail(m.video_url);
       div.className = "media-video-item";
       div.innerHTML = `
         <div class="media-video-thumb">${thumb ? `<img src="${thumb}" alt="">` : "🎬"}</div>
@@ -2277,7 +2317,12 @@ async function loadGallery(category) {
   data.forEach((g, i) => {
     const thumb =
       g.media_type === "video"
-        ? `<div class="media-video-thumb" style="width:44px;height:44px">🎬</div>`
+        ? (() => {
+            const vThumb = driveThumbnail(g.video_url) || youtubeThumbnail(g.video_url);
+            return vThumb
+              ? `<div class="media-video-thumb" style="width:44px;height:44px"><img src="${vThumb}" alt=""></div>`
+              : `<div class="media-video-thumb" style="width:44px;height:44px">🎬</div>`;
+          })()
         : (() => {
             const url = imageUrl(g.image_path);
             return url ? `<img src="${url}" alt="">` : "";
