@@ -450,6 +450,22 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   font-family: var(--font-mono); color: var(--red); font-weight:600; font-size:.85rem;
 }
 #industria .process-num{ font-size:1.8rem; font-family:initial; display:block; }
+
+/* tarjetas de "industria" con foto que se revela al pasar el mouse */
+#industriaCardsGrid .process-card{
+  position:relative; overflow:hidden; cursor:pointer;
+  transition: transform .2s ease, border-color .2s ease;
+}
+#industriaCardsGrid .process-card:hover{ transform: translateY(-3px); border-color: var(--line-strong); }
+#industriaCardsGrid .process-card > *{ position:relative; z-index:1; }
+#industriaCardsGrid .process-card.has-image::before{
+  content:''; position:absolute; inset:0; z-index:0;
+  background-image: linear-gradient(rgba(10,15,26,.78), rgba(10,15,26,.78)), var(--ind-bg-image);
+  background-size:cover; background-position: var(--ind-focal, 50% 50%);
+  opacity:0; transition: opacity .35s ease;
+}
+#industriaCardsGrid .process-card.has-image:hover::before,
+#industriaCardsGrid .process-card.has-image:focus-visible::before{ opacity:1; }
 @media (max-width: 900px){
   .process-grid, .process-grid-3{ grid-template-columns: repeat(2,1fr); }
 }
@@ -835,6 +851,20 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
   </div>
 </div>
 
+<!-- ============ LIGHTBOX: foto de tarjeta de "industria" ============ -->
+<div class="modal-backdrop" id="industriaLightboxBackdrop" hidden>
+  <div class="modal modal-category" role="dialog" aria-modal="true" aria-labelledby="industriaLightboxTitle">
+    <button class="modal-close" id="industriaLightboxClose" aria-label="Cerrar">×</button>
+    <div class="category-modal-scroll">
+      <h3 id="industriaLightboxTitle"></h3>
+      <div class="category-modal-gallery">
+        <div class="category-modal-main" id="industriaLightboxMain"></div>
+        <div class="category-modal-thumbs" id="industriaLightboxThumbs"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <main>
 
 <section class="hero" id="inicio">
@@ -1059,27 +1089,27 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     <h2 class="center">Impresión 3D en la industria</h2>
     <p class="center lede-narrow">
       Además de imprimir, me interesa investigar cómo esta tecnología se aplica en otros
-      campos, y expongo sobre el tema para acercarlo a más gente. Estos son algunos de los
-      usos que más me sorprenden.
+      campos, y me gusta estar al tanto de los avances que se van dando en el mundo. Estos
+      son algunos de los usos que más me sorprenden.
     </p>
 
-    <ul class="process-grid">
-      <li class="process-card">
+    <ul class="process-grid" id="industriaCardsGrid">
+      <li class="process-card" data-industria-key="alimentos">
         <span class="process-num">🍫</span>
         <h3>Alimentos</h3>
-        <p>Ya existen impresoras capaces de imprimir comida capa por capa, desde chocolate hasta preparaciones más elaboradas.</p>
+        <p>Ya existen impresoras capaces de imprimir alimentos capa por capa. Lo que más me sorprende es que ya se está logrando imprimir carne, además de chocolate y otras preparaciones.</p>
       </li>
-      <li class="process-card">
+      <li class="process-card" data-industria-key="construccion">
         <span class="process-num">🏗️</span>
         <h3>Construcción</h3>
         <p>Impresoras de gran escala levantan paredes y viviendas completas en cuestión de horas, con menos costo y desperdicio de material.</p>
       </li>
-      <li class="process-card">
+      <li class="process-card" data-industria-key="medicina">
         <span class="process-num">🩺</span>
         <h3>Medicina</h3>
         <p>Se imprimen prótesis e implantes a medida, y se investiga la impresión de tejidos biológicos para el futuro de la salud.</p>
       </li>
-      <li class="process-card">
+      <li class="process-card" data-industria-key="manufactura">
         <span class="process-num">🏭</span>
         <h3>Industria manufacturera</h3>
         <p>Se usa para fabricar piezas, herramientas y prototipos rápidos, ahorrando tiempo y dinero al no requerir moldes ni procesos tradicionales.</p>
@@ -1433,6 +1463,37 @@ window.RABBIT3D_CONFIG = {
     return data;
   }
 
+  // Fotos/videos de las tarjetas de "Impresión 3D en la industria" —
+  // una sola consulta trae las de las 4 tarjetas juntas.
+  async function fetchAllIndustriaMedia() {
+    if (!client) return null;
+    const { data, error } = await client
+      .from("rabbit3d_industria_media")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("id", { ascending: true });
+    if (error) {
+      console.warn("[rabbit3d] Error trayendo fotos/videos de industria:", error.message);
+      return null;
+    }
+    return data;
+  }
+
+  async function fetchIndustriaMediaByKey(cardKey) {
+    if (!client) return null;
+    const { data, error } = await client
+      .from("rabbit3d_industria_media")
+      .select("*")
+      .eq("card_key", cardKey)
+      .order("sort_order", { ascending: true })
+      .order("id", { ascending: true });
+    if (error) {
+      console.warn("[rabbit3d] Error trayendo fotos/videos de la tarjeta:", error.message);
+      return null;
+    }
+    return data;
+  }
+
   window.Rabbit3DData = {
     client,
     buildImageUrl,
@@ -1443,6 +1504,8 @@ window.RABBIT3D_CONFIG = {
     fetchCategoryMedia,
     fetchCategoryPricing,
     fetchAllCategoryPricing,
+    fetchAllIndustriaMedia,
+    fetchIndustriaMediaByKey,
   };
 })();
 
@@ -1464,6 +1527,7 @@ async function init() {
   setupAuth();
   setupCategoryModal();
   setupWhatsappModal();
+  setupIndustriaLightbox();
 
   // Todo esto se pide en paralelo (no uno atrás del otro), así ninguna
   // sección espera a las demás — por ejemplo, la foto de "Sobre mí" ya
@@ -1477,6 +1541,7 @@ async function init() {
     safeFetchGallery("prensa").then((data) => renderPress("prensa", data || [])),
     safeFetchGallery("charlas").then((data) => renderPress("charlas", data || [])),
     safeFetchGallery("clientes").then((data) => renderPress("clientes", data || [])),
+    setupIndustriaCardImages(),
   ]);
 }
 
@@ -1508,6 +1573,20 @@ async function safeFetchAllCategoryPricing() {
     return null;
   }
 }
+async function safeFetchAllIndustriaMedia() {
+  try {
+    return (await window.Rabbit3DData?.fetchAllIndustriaMedia()) || null;
+  } catch {
+    return null;
+  }
+}
+async function safeFetchIndustriaMediaByKey(cardKey) {
+  try {
+    return (await window.Rabbit3DData?.fetchIndustriaMediaByKey(cardKey)) || null;
+  } catch {
+    return null;
+  }
+}
 
 async function safeFetchGallery(category) {
   try {
@@ -1528,6 +1607,135 @@ async function safeFetchSettings() {
 // CONFIGURACIÓN DEL SITIO (contacto, bio, fotos) — se pisa lo
 // hardcodeado en el HTML solo si hay datos cargados en Supabase.
 // ---------------------------------------------------------------
+// ---------------------------------------------------------------
+// FOTOS DE LAS TARJETAS DE "IMPRESIÓN 3D EN LA INDUSTRIA"
+// ---------------------------------------------------------------
+async function setupIndustriaCardImages() {
+  const allMedia = (await safeFetchAllIndustriaMedia()) || [];
+  const byKey = {};
+  allMedia.forEach((m) => {
+    (byKey[m.card_key] = byKey[m.card_key] || []).push(m);
+  });
+
+  document.querySelectorAll("#industriaCardsGrid .process-card").forEach((card) => {
+    const key = card.dataset.industriaKey;
+    const items = byKey[key];
+    if (!items || !items.length) return;
+    const first = items[0];
+
+    const bgUrl =
+      first.media_type === "image"
+        ? window.Rabbit3DData?.buildImageUrl
+          ? window.Rabbit3DData.buildImageUrl(first.image_path, 480)
+          : first.image_path
+        : anyVideoThumbnail(first.video_url);
+    if (!bgUrl) return;
+
+    card.classList.add("has-image");
+    card.style.setProperty("--ind-bg-image", `url("${bgUrl}")`);
+    card.style.setProperty("--ind-focal", `${first.focal_x ?? 50}% ${first.focal_y ?? 50}%`);
+    card.setAttribute("tabindex", "0");
+
+    const cardTitle = card.querySelector("h3")?.textContent || "";
+    const open = () => openIndustriaLightbox(key, cardTitle);
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
+    });
+  });
+}
+
+function renderIndustriaMainMedia(m) {
+  const main = document.getElementById("industriaLightboxMain");
+  if (!m) {
+    main.innerHTML = "";
+    return;
+  }
+  if (m.media_type === "image") {
+    const url = window.Rabbit3DData?.buildImageUrl
+      ? window.Rabbit3DData.buildImageUrl(m.image_path, 800)
+      : m.image_path;
+    main.innerHTML = `<img src="${url}" alt="${escapeHtml(m.caption || "")}" style="object-position:${focalPosition(m)}">`;
+    return;
+  }
+  const driveId = driveFileId(m.video_url);
+  const ytId = youtubeEmbedInfo(m.video_url);
+  if (driveId) {
+    main.innerHTML = `<iframe src="https://drive.google.com/file/d/${driveId}/preview" title="${escapeHtml(m.caption || "Video")}" allow="autoplay" allowfullscreen></iframe>`;
+  } else if (ytId) {
+    main.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" title="${escapeHtml(m.caption || "Video")}" allowfullscreen></iframe>`;
+  } else {
+    main.innerHTML = `
+      <a href="${m.video_url}" target="_blank" rel="noopener" class="play-badge" style="position:static; height:100%">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="#fff"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.4)"/><path d="M10 8.5v7l6-3.5z"/></svg>
+      </a>`;
+  }
+}
+
+async function openIndustriaLightbox(cardKey, cardTitle) {
+  const backdrop = document.getElementById("industriaLightboxBackdrop");
+  document.getElementById("industriaLightboxTitle").textContent = cardTitle || "";
+  const main = document.getElementById("industriaLightboxMain");
+  const thumbs = document.getElementById("industriaLightboxThumbs");
+  main.innerHTML = "";
+  thumbs.innerHTML = "";
+  backdrop.hidden = false;
+
+  const media = (await safeFetchIndustriaMediaByKey(cardKey)) || [];
+  if (!media.length) {
+    main.innerHTML = `<div class="gallery-placeholder">📦<br>Todavía no hay fotos ni videos cargados.</div>`;
+    return;
+  }
+
+  renderIndustriaMainMedia(media[0]);
+
+  if (media.length > 1) {
+    media.forEach((m, i) => {
+      const thumb = document.createElement("button");
+      thumb.type = "button";
+      thumb.className = "category-modal-thumb" + (i === 0 ? " is-active" : "");
+      if (m.media_type === "image") {
+        const url = window.Rabbit3DData?.buildImageUrl
+          ? window.Rabbit3DData.buildImageUrl(m.image_path, 120)
+          : m.image_path;
+        thumb.innerHTML = `<img src="${url}" alt="" style="object-position:${focalPosition(m)}">`;
+      } else {
+        const thumbUrl = anyVideoThumbnail(m.video_url);
+        thumb.innerHTML = thumbUrl
+          ? `<img src="${thumbUrl}" alt=""><span class="thumb-play">▶</span>`
+          : `<span class="thumb-play">🎬</span>`;
+      }
+      thumb.addEventListener("click", () => {
+        thumbs.querySelectorAll(".category-modal-thumb").forEach((t) => t.classList.remove("is-active"));
+        thumb.classList.add("is-active");
+        renderIndustriaMainMedia(m);
+      });
+      thumbs.appendChild(thumb);
+    });
+  }
+}
+
+function setupIndustriaLightbox() {
+  const backdrop = document.getElementById("industriaLightboxBackdrop");
+  const closeBtn = document.getElementById("industriaLightboxClose");
+
+  function closeModal() {
+    backdrop.hidden = true;
+    document.getElementById("industriaLightboxMain").innerHTML = "";
+    document.getElementById("industriaLightboxThumbs").innerHTML = "";
+  }
+  closeBtn.addEventListener("click", closeModal);
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !backdrop.hidden) closeModal();
+  });
+}
+
 function applySettings(settings) {
   if (!settings) return; // sin Supabase configurado, se mantiene el contenido de ejemplo del HTML
 
@@ -2084,7 +2292,9 @@ function renderGallery(category, items) {
       const ytId = youtubeEmbedInfo(item.video_url);
       if (driveId || ytId) {
         div.classList.add("is-video");
+        const thumbUrl = anyVideoThumbnail(item.video_url);
         div.innerHTML = `
+          ${thumbUrl ? `<img src="${thumbUrl}" alt="" loading="lazy">` : ""}
           <span class="play-badge">
             <svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.4)"/><path d="M10 8.5v7l6-3.5z"/></svg>
           </span>

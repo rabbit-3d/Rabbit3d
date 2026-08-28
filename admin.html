@@ -487,53 +487,101 @@
             </div>
             <input type="file" id="g_images" accept="image/*" multiple hidden>
             <p class="hint">Podés seleccionar varias a la vez. Cada una se optimiza (máx. 1200px, WebP) antes de subirse.</p>
-            <div class="focal-list" id="g_focal_list"></div>
           </div>
 
           <div id="g_image_drive_block" style="display:none">
             <label for="g_image_drive_url">Link de Google Drive</label>
             <input type="text" id="g_image_drive_url" placeholder="https://drive.google.com/file/d/.../view">
-            <p class="hint" style="margin-top:0">El archivo tiene que estar compartido como "Cualquiera con el enlace puede ver".</p>
-            <button class="btn btn-ghost btn-small" type="button" id="g_image_drive_load">Cargar vista previa</button>
-            <div class="focal-wrap" id="g_drive_focal_wrap" style="display:none">
-              <div class="focal-picker" id="g_drive_focal_picker" style="aspect-ratio:4/3">
-                <img id="g_drive_preview_img" class="focal-picker-img" alt="">
-                <div class="focal-crosshair" id="g_drive_focal_crosshair"></div>
-              </div>
-              <div class="focal-info">
-                <span class="preview-sizes" id="g_drive_preview_label">Vista previa desde Drive</span>
-                <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
-              </div>
-            </div>
+            <p class="hint" style="margin-top:0">El archivo tiene que estar compartido como "Cualquiera con el enlace puede ver". Podés agregar varias, una por una.</p>
+            <button class="btn btn-ghost btn-small" type="button" id="g_image_drive_load">Agregar a la lista</button>
           </div>
 
           <div id="g_image_github_block" style="display:none">
             <label for="g_image_github_path">Ruta del archivo en tu repositorio</label>
             <input type="text" id="g_image_github_path" placeholder="assets/prensa/canal-9.jpg">
-            <p class="hint" style="margin-top:0">El archivo tiene que existir en esa ruta dentro de tu repositorio de GitHub. No consume espacio de Supabase.</p>
-            <button class="btn btn-ghost btn-small" type="button" id="g_image_github_load">Cargar vista previa</button>
-            <div class="focal-wrap" id="g_github_focal_wrap" style="display:none">
-              <div class="focal-picker" id="g_github_focal_picker" style="aspect-ratio:4/3">
-                <img id="g_github_preview_img" class="focal-picker-img" alt="">
-                <div class="focal-crosshair" id="g_github_focal_crosshair"></div>
-              </div>
-              <div class="focal-info">
-                <span class="preview-sizes" id="g_github_preview_label">Vista previa desde el repositorio</span>
-                <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
-              </div>
-            </div>
+            <p class="hint" style="margin-top:0">El archivo tiene que existir en esa ruta dentro de tu repositorio de GitHub. No consume espacio de Supabase. Podés agregar varias, una por una.</p>
+            <button class="btn btn-ghost btn-small" type="button" id="g_image_github_load">Agregar a la lista</button>
           </div>
+
+          <div class="focal-list" id="g_focal_list"></div>
         </div>
 
         <div id="g_video_form" style="display:none">
           <label for="g_video_url">Link del video</label>
           <input type="text" id="g_video_url" placeholder="https://drive.google.com/file/d/... o youtube.com/watch?v=...">
-          <p class="hint" style="margin-top:0">Funciona con YouTube (podés dejarlo "Oculto") y con Google Drive — el video se reproduce dentro de tu página. Con Drive, el archivo tiene que estar compartido como "Cualquiera con el enlace puede ver".</p>
+          <p class="hint" style="margin-top:0">Funciona con YouTube (incluidos los Shorts, podés dejarlo "Oculto") y con Google Drive — el video se reproduce dentro de tu página, sin redirigir a otro sitio. Con Drive, el archivo tiene que estar compartido como "Cualquiera con el enlace puede ver".</p>
         </div>
 
         <button class="btn btn-primary" type="submit" id="g_submit">Subir foto(s)</button>
         <div class="status" id="g_status"></div>
       </form>
+
+      <div id="g_industria_section" style="display:none; margin-top:32px; padding-top:24px; border-top:1px solid var(--line)">
+        <h2 style="margin-top:0">Fotos y videos de "Impresión 3D en la industria"</h2>
+        <p class="hint" style="margin-top:0">Elegí para qué tarjeta vas a cargar contenido. Podés agregar varias fotos y videos por tarjeta — esto es aparte de las fotos/videos de Charlas de arriba.</p>
+
+        <div class="tabs" id="im_card_tabs">
+          <button class="tab is-active" type="button" data-cardkey="alimentos">🍫 Alimentos</button>
+          <button class="tab" type="button" data-cardkey="construccion">🏗️ Construcción</button>
+          <button class="tab" type="button" data-cardkey="medicina">🩺 Medicina</button>
+          <button class="tab" type="button" data-cardkey="manufactura">🏭 Manufactura</button>
+        </div>
+
+        <div class="tabs" id="im_type_tabs">
+          <button class="tab is-active" type="button" data-mtype="image">Foto</button>
+          <button class="tab" type="button" data-mtype="video">Video (link externo)</button>
+        </div>
+
+        <div id="im_image_form">
+          <div class="tabs" id="im_image_source_tabs">
+            <button class="tab is-active" type="button" data-isource="upload">Subir archivo</button>
+            <button class="tab" type="button" data-isource="drive">Link de Drive</button>
+            <button class="tab" type="button" data-isource="github">Ruta en GitHub</button>
+          </div>
+
+          <div id="im_image_upload_block">
+            <div class="dropzone" id="im_dropzone" tabindex="0" role="button" aria-label="Elegir o arrastrar una foto">
+              <p><strong>Arrastrá una foto acá</strong><br>o hacé click para elegirla</p>
+            </div>
+            <input type="file" id="im_image" accept="image/*" hidden>
+          </div>
+
+          <div id="im_image_drive_block" style="display:none">
+            <label for="im_image_drive_url">Link de Google Drive</label>
+            <input type="text" id="im_image_drive_url" placeholder="https://drive.google.com/file/d/.../view">
+            <p class="hint" style="margin-top:0">El archivo tiene que estar compartido como "Cualquiera con el enlace puede ver".</p>
+            <button class="btn btn-ghost btn-small" type="button" id="im_image_drive_load">Cargar vista previa</button>
+          </div>
+
+          <div id="im_image_github_block" style="display:none">
+            <label for="im_image_github_path">Ruta del archivo en tu repositorio</label>
+            <input type="text" id="im_image_github_path" placeholder="assets/industria/alimentos.jpg">
+            <button class="btn btn-ghost btn-small" type="button" id="im_image_github_load">Cargar vista previa</button>
+          </div>
+
+          <div class="focal-wrap" id="im_focal_wrap" style="display:none">
+            <div class="focal-picker" id="im_focal_picker" style="aspect-ratio:4/3">
+              <img id="im_preview_img" class="focal-picker-img" alt="">
+              <div class="focal-crosshair" id="im_focal_crosshair"></div>
+            </div>
+            <div class="focal-info"><span class="preview-sizes" id="im_preview_label"></span></div>
+          </div>
+        </div>
+
+        <div id="im_video_form" style="display:none">
+          <label for="im_video_url">Link del video</label>
+          <input type="text" id="im_video_url" placeholder="https://drive.google.com/file/d/... o youtube.com/watch?v=...">
+          <p class="hint" style="margin-top:0">Funciona con YouTube (incluidos los Shorts) y con Google Drive.</p>
+        </div>
+
+        <label for="im_caption" style="margin-top:14px">Texto/caption (opcional)</label>
+        <input type="text" id="im_caption" placeholder="Ej: Carne impresa en 3D">
+
+        <button class="btn btn-primary btn-small" type="button" id="im_submit">Agregar</button>
+        <div class="status" id="im_status"></div>
+
+        <div class="focal-list" id="im_media_list" style="margin-top:20px"></div>
+      </div>
     </div>
 
     <div class="card">
@@ -1908,9 +1956,7 @@ document.getElementById("productsTableBody").addEventListener("click", async (e)
 // submit (múltiples archivos, o edición de una sola) + listado
 // ---------------------------------------------------------------
 const GALLERY_ASPECT = { taller: "1/1", prensa: "16/9", charlas: "16/9", clientes: "16/9" };
-let galleryEntries = []; // [{ file, blob, picker }] — modo "subir archivo(s)"
-let galleryDriveUrl = null;
-let galleryDriveFocalPicker = null;
+let galleryEntries = []; // [{ blob, picker, imagePath?, keepExisting? }] — fotos por subir, Drive o GitHub, todas juntas
 let editingGalleryId = null;
 let editingGalleryOriginal = null;
 
@@ -1948,31 +1994,46 @@ function addFocalListItem(imgBlob, label, initial) {
   return picker;
 }
 
+// En edición, cualquier fuente nueva (archivo, Drive o GitHub) reemplaza
+// a la única foto que se está editando. Fuera de edición, se van
+// agregando una tras otra a la misma lista.
+function clearGalleryQueueIfEditing() {
+  if (!editingGalleryId) return;
+  document.getElementById("g_focal_list").innerHTML = "";
+  galleryEntries = [];
+}
+
 async function handleGalleryFiles(fileList) {
   if (editingGalleryId) {
-    // En edición, una foto nueva reemplaza a la única que se está editando.
-    document.getElementById("g_focal_list").innerHTML = "";
-    galleryEntries = [];
+    clearGalleryQueueIfEditing();
     const file = fileList[0];
     const compressed = await compressImage(file, 1200, 0.75);
     const picker = addFocalListItem(compressed, `${file.name} (reemplazo)`, { x: 50, y: 50 });
-    galleryEntries.push({ file, blob: compressed, picker });
+    galleryEntries.push({ blob: compressed, picker });
     return;
   }
   for (const file of Array.from(fileList)) {
     const compressed = await compressImage(file, 1200, 0.75);
     const sizeLabel = `${file.name} — Original ${kb(file.size)} → optimizada ${kb(compressed.size)}`;
     const picker = addFocalListItem(compressed, sizeLabel, { x: 50, y: 50 });
-    galleryEntries.push({ file, blob: compressed, picker });
+    galleryEntries.push({ blob: compressed, picker });
   }
 }
 
 document.getElementById("g_category").addEventListener("change", () => {
   const aspect = currentGalleryAspect();
-  document.querySelectorAll("#g_focal_list .focal-picker, #g_drive_focal_picker").forEach((el) => {
+  document.querySelectorAll("#g_focal_list .focal-picker").forEach((el) => {
     el.style.aspectRatio = aspect;
   });
+  const showIndustria = document.getElementById("g_category").value === "charlas";
+  document.getElementById("g_industria_section").style.display = showIndustria ? "block" : "none";
+  if (showIndustria) loadIndustriaMedia();
 });
+// Estado inicial al cargar la página (por si "Charlas" ya viene seleccionada).
+if (document.getElementById("g_category").value === "charlas") {
+  document.getElementById("g_industria_section").style.display = "block";
+  loadIndustriaMedia();
+}
 
 setupDropzone(document.getElementById("g_dropzone"), document.getElementById("g_images"), (files) =>
   handleGalleryFiles(files)
@@ -1989,7 +2050,8 @@ document.querySelectorAll("#g_type_tabs .tab").forEach((tab) => {
   });
 });
 
-// Dentro de "Foto": subir archivo(s) / link de Drive / ruta en GitHub.
+// Dentro de "Foto": subir archivo(s) / link de Drive / ruta en GitHub —
+// las tres alimentan la MISMA lista de abajo, se pueden combinar.
 document.querySelectorAll("#g_image_source_tabs .tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     document.querySelectorAll("#g_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
@@ -2003,8 +2065,8 @@ document.querySelectorAll("#g_image_source_tabs .tab").forEach((tab) => {
 
 document.getElementById("g_image_drive_load").addEventListener("click", () => {
   const status = document.getElementById("g_status");
-  const rawUrl = document.getElementById("g_image_drive_url").value.trim();
-  const directUrl = driveImageUrl(rawUrl);
+  const input = document.getElementById("g_image_drive_url");
+  const directUrl = driveImageUrl(input.value.trim());
   if (!directUrl) {
     status.className = "status err";
     status.textContent = "No pude leer ese link de Drive. Verificá que sea un link para compartir un archivo.";
@@ -2012,25 +2074,17 @@ document.getElementById("g_image_drive_load").addEventListener("click", () => {
   }
   status.className = "";
   status.textContent = "";
-  galleryDriveUrl = directUrl;
+  clearGalleryQueueIfEditing();
 
-  const focalWrap = document.getElementById("g_drive_focal_wrap");
-  const img = document.getElementById("g_drive_preview_img");
-  img.src = directUrl;
-  focalWrap.style.display = "flex";
-  document.getElementById("g_drive_focal_picker").style.aspectRatio = currentGalleryAspect();
-
-  galleryDriveFocalPicker = setupFocalPicker(
-    document.getElementById("g_drive_focal_picker"),
-    document.getElementById("g_drive_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
-  );
+  const picker = addFocalListItem(directUrl, "Foto desde Drive", { x: 50, y: 50 });
+  galleryEntries.push({ blob: null, picker, imagePath: directUrl });
+  input.value = "";
 });
 
 document.getElementById("g_image_github_load").addEventListener("click", () => {
   const status = document.getElementById("g_status");
-  const path = normalizeStaticAssetPath(document.getElementById("g_image_github_path").value);
+  const input = document.getElementById("g_image_github_path");
+  const path = normalizeStaticAssetPath(input.value);
   if (!path) {
     status.className = "status err";
     status.textContent = 'La ruta tiene que empezar con "assets/", ej: assets/prensa/foto.jpg';
@@ -2038,20 +2092,11 @@ document.getElementById("g_image_github_load").addEventListener("click", () => {
   }
   status.className = "";
   status.textContent = "";
-  galleryDriveUrl = path; // reusa el mismo flujo que Drive: es solo una URL/ruta final ya resuelta
+  clearGalleryQueueIfEditing();
 
-  const focalWrap = document.getElementById("g_github_focal_wrap");
-  const img = document.getElementById("g_github_preview_img");
-  img.src = path;
-  focalWrap.style.display = "flex";
-  document.getElementById("g_github_focal_picker").style.aspectRatio = currentGalleryAspect();
-
-  galleryDriveFocalPicker = setupFocalPicker(
-    document.getElementById("g_github_focal_picker"),
-    document.getElementById("g_github_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
-  );
+  const picker = addFocalListItem(path, "Foto desde el repositorio", { x: 50, y: 50 });
+  galleryEntries.push({ blob: null, picker, imagePath: path });
+  input.value = "";
 });
 
 function resetGalleryTypeAndSource() {
@@ -2067,12 +2112,8 @@ function resetGalleryTypeAndSource() {
   document.getElementById("g_image_github_block").style.display = "none";
 
   document.getElementById("g_image_drive_url").value = "";
-  document.getElementById("g_drive_focal_wrap").style.display = "none";
   document.getElementById("g_image_github_path").value = "";
-  document.getElementById("g_github_focal_wrap").style.display = "none";
   document.getElementById("g_video_url").value = "";
-  galleryDriveUrl = null;
-  galleryDriveFocalPicker = null;
 }
 
 function startEditGallery(g) {
@@ -2134,8 +2175,6 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
   const isVideoTab = document
     .querySelector('#g_type_tabs .tab[data-mtype="video"]')
     .classList.contains("is-active");
-  const activeImageSource = document.querySelector("#g_image_source_tabs .tab.is-active")?.dataset.isource;
-  const isDriveSource = activeImageSource === "drive" || activeImageSource === "github";
 
   const commonFields = {
     category,
@@ -2185,50 +2224,10 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
       return;
     }
 
-    // ---------- FOTO POR LINK DE DRIVE O RUTA DE GITHUB ----------
-    if (isDriveSource) {
-      if (!galleryDriveUrl) {
-        status.className = "status err";
-        status.textContent = "Cargá la vista previa primero (Drive o GitHub).";
-        return;
-      }
-      const focal = galleryDriveFocalPicker ? galleryDriveFocalPicker.get() : { x: 50, y: 50 };
-      const payload = {
-        ...commonFields,
-        media_type: "image",
-        image_path: galleryDriveUrl,
-        video_url: null,
-        focal_x: focal.x,
-        focal_y: focal.y,
-      };
-
-      if (isEditing) {
-        status.textContent = "Guardando cambios…";
-        if (oldPathIsOwnFile(editingGalleryOriginal.image_path)) {
-          await sb.storage.from(STORAGE_BUCKET).remove([editingGalleryOriginal.image_path]);
-        }
-        const { error } = await sb.from(TABLE_GALLERY).update(payload).eq("id", editingGalleryId);
-        if (error) throw error;
-        status.className = "status ok";
-        status.textContent = "Actualizado correctamente.";
-        cancelEditGallery();
-      } else {
-        status.textContent = "Guardando foto…";
-        const { error } = await sb.from(TABLE_GALLERY).insert(payload);
-        if (error) throw error;
-        status.className = "status ok";
-        status.textContent = "Foto cargada correctamente.";
-        e.target.reset();
-        resetGalleryTypeAndSource();
-      }
-      loadGallery(category);
-      return;
-    }
-
-    // ---------- FOTO SUBIDA (una o varias) ----------
+    // ---------- FOTO(S) — subidas, por Drive o por GitHub, todas juntas ----------
     if (!galleryEntries.length) {
       status.className = "status err";
-      status.textContent = "Elegí al menos una foto.";
+      status.textContent = "Elegí o agregá al menos una foto.";
       return;
     }
 
@@ -2236,9 +2235,15 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
       status.textContent = "Guardando cambios…";
       const entry = galleryEntries[0];
       let imagePath = editingGalleryOriginal.image_path;
-      let focal = entry.picker.get();
+      const focal = entry.picker.get();
 
-      if (!entry.keepExisting || entry.blob) {
+      if (entry.imagePath) {
+        // Reemplazo por Drive o GitHub: ya es una URL/ruta final.
+        imagePath = entry.imagePath;
+        if (oldPathIsOwnFile(editingGalleryOriginal.image_path)) {
+          await sb.storage.from(STORAGE_BUCKET).remove([editingGalleryOriginal.image_path]);
+        }
+      } else if (!entry.keepExisting || entry.blob) {
         imagePath = await uploadToStorage(entry.blob, category);
         if (oldPathIsOwnFile(editingGalleryOriginal.image_path)) {
           await sb.storage.from(STORAGE_BUCKET).remove([editingGalleryOriginal.image_path]);
@@ -2261,9 +2266,9 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
     let count = 0;
     for (const entry of galleryEntries) {
       count++;
-      status.textContent = `Subiendo ${count} de ${galleryEntries.length}…`;
+      status.textContent = `Guardando ${count} de ${galleryEntries.length}…`;
 
-      const imagePath = await uploadToStorage(entry.blob, category);
+      const imagePath = entry.imagePath || (await uploadToStorage(entry.blob, category));
       const focal = entry.picker.get();
 
       const { error } = await sb.from(TABLE_GALLERY).insert({
@@ -2374,6 +2379,283 @@ document.getElementById("galleryTableBody").addEventListener("click", async (e) 
 // ---------------------------------------------------------------
 // CONFIGURACIÓN DEL SITIO (contacto, bio, fotos)
 // ---------------------------------------------------------------
+// ---------------------------------------------------------------
+// FOTOS Y VIDEOS DE "IMPRESIÓN 3D EN LA INDUSTRIA"
+// Varias por tarjeta, en su propia tabla (rabbit3d_industria_media) —
+// mismo patrón que el gestor de fotos/videos de categorías.
+// ---------------------------------------------------------------
+const TABLE_INDUSTRIA_MEDIA = "rabbit3d_industria_media";
+const INDUSTRIA_KEYS = ["alimentos", "construccion", "medicina", "manufactura"];
+let activeIndustriaCardKey = "alimentos";
+let industriaMediaFocalPicker = null;
+let industriaMediaDriveUrl = null;
+
+document.querySelectorAll("#im_card_tabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("#im_card_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    activeIndustriaCardKey = tab.dataset.cardkey;
+    resetIndustriaMediaForm();
+    loadIndustriaMedia();
+  });
+});
+
+document.querySelectorAll("#im_type_tabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("#im_type_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    const isImage = tab.dataset.mtype === "image";
+    document.getElementById("im_image_form").style.display = isImage ? "block" : "none";
+    document.getElementById("im_video_form").style.display = isImage ? "none" : "block";
+  });
+});
+
+document.querySelectorAll("#im_image_source_tabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll("#im_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    const source = tab.dataset.isource;
+    document.getElementById("im_image_upload_block").style.display = source === "upload" ? "block" : "none";
+    document.getElementById("im_image_drive_block").style.display = source === "drive" ? "block" : "none";
+    document.getElementById("im_image_github_block").style.display = source === "github" ? "block" : "none";
+  });
+});
+
+function resetIndustriaMediaForm() {
+  document.getElementById("im_image").value = "";
+  document.getElementById("im_image")._compressedBlob = null;
+  document.getElementById("im_image_drive_url").value = "";
+  document.getElementById("im_image_github_path").value = "";
+  document.getElementById("im_focal_wrap").style.display = "none";
+  document.getElementById("im_video_url").value = "";
+  document.getElementById("im_caption").value = "";
+  industriaMediaFocalPicker = null;
+  industriaMediaDriveUrl = null;
+  document.querySelectorAll("#im_type_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+  document.querySelector('#im_type_tabs .tab[data-mtype="image"]').classList.add("is-active");
+  document.getElementById("im_image_form").style.display = "block";
+  document.getElementById("im_video_form").style.display = "none";
+  document.querySelectorAll("#im_image_source_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+  document.querySelector('#im_image_source_tabs .tab[data-isource="upload"]').classList.add("is-active");
+  document.getElementById("im_image_upload_block").style.display = "block";
+  document.getElementById("im_image_drive_block").style.display = "none";
+  document.getElementById("im_image_github_block").style.display = "none";
+}
+
+async function handleIndustriaMediaFile(file) {
+  const focalWrap = document.getElementById("im_focal_wrap");
+  const img = document.getElementById("im_preview_img");
+  const label = document.getElementById("im_preview_label");
+  label.textContent = "Comprimiendo…";
+  focalWrap.style.display = "flex";
+
+  const compressed = await compressImage(file, 1200, 0.75);
+  img.src = URL.createObjectURL(compressed);
+  label.textContent = `Original ${kb(file.size)} → optimizada ${kb(compressed.size)}`;
+  document.getElementById("im_image")._compressedBlob = compressed;
+
+  industriaMediaFocalPicker = setupFocalPicker(
+    document.getElementById("im_focal_picker"),
+    document.getElementById("im_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+}
+setupDropzone(document.getElementById("im_dropzone"), document.getElementById("im_image"), (files) =>
+  handleIndustriaMediaFile(files[0])
+);
+
+document.getElementById("im_image_drive_load").addEventListener("click", () => {
+  const status = document.getElementById("im_status");
+  const directUrl = driveImageUrl(document.getElementById("im_image_drive_url").value.trim());
+  if (!directUrl) {
+    status.className = "status err";
+    status.textContent = "No pude leer ese link de Drive. Verificá que sea un link para compartir un archivo.";
+    return;
+  }
+  status.className = "";
+  status.textContent = "";
+  industriaMediaDriveUrl = directUrl;
+
+  const focalWrap = document.getElementById("im_focal_wrap");
+  const img = document.getElementById("im_preview_img");
+  const label = document.getElementById("im_preview_label");
+  img.src = directUrl;
+  label.textContent = "Vista previa desde Drive";
+  focalWrap.style.display = "flex";
+
+  industriaMediaFocalPicker = setupFocalPicker(
+    document.getElementById("im_focal_picker"),
+    document.getElementById("im_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+});
+
+document.getElementById("im_image_github_load").addEventListener("click", () => {
+  const status = document.getElementById("im_status");
+  const path = normalizeStaticAssetPath(document.getElementById("im_image_github_path").value);
+  if (!path) {
+    status.className = "status err";
+    status.textContent = 'La ruta tiene que empezar con "assets/", ej: assets/industria/foto.jpg';
+    return;
+  }
+  status.className = "";
+  status.textContent = "";
+  industriaMediaDriveUrl = path;
+
+  const focalWrap = document.getElementById("im_focal_wrap");
+  const img = document.getElementById("im_preview_img");
+  const label = document.getElementById("im_preview_label");
+  img.src = path;
+  label.textContent = "Vista previa desde el repositorio";
+  focalWrap.style.display = "flex";
+
+  industriaMediaFocalPicker = setupFocalPicker(
+    document.getElementById("im_focal_picker"),
+    document.getElementById("im_focal_crosshair"),
+    { x: 50, y: 50 },
+    () => {}
+  );
+});
+
+document.getElementById("im_submit").addEventListener("click", async () => {
+  const status = document.getElementById("im_status");
+  const isImageTab = document.querySelector('#im_type_tabs .tab[data-mtype="image"]').classList.contains("is-active");
+  const caption = document.getElementById("im_caption").value.trim() || null;
+
+  try {
+    status.className = "status busy";
+
+    if (isImageTab) {
+      const isDriveSource = document.querySelector("#im_image_source_tabs .tab.is-active")?.dataset.isource !== "upload";
+      let imagePath;
+      let focal = industriaMediaFocalPicker ? industriaMediaFocalPicker.get() : { x: 50, y: 50 };
+
+      if (isDriveSource) {
+        if (!industriaMediaDriveUrl) {
+          status.className = "status err";
+          status.textContent = "Cargá la vista previa primero (Drive o GitHub).";
+          return;
+        }
+        imagePath = industriaMediaDriveUrl;
+      } else {
+        const fileInput = document.getElementById("im_image");
+        const file = fileInput.files[0];
+        if (!file) {
+          status.className = "status err";
+          status.textContent = "Elegí una foto primero.";
+          return;
+        }
+        status.textContent = "Subiendo foto…";
+        const blob = fileInput._compressedBlob || (await compressImage(file, 1200, 0.75));
+        imagePath = await uploadToStorage(blob, "industria");
+      }
+
+      const { error } = await sb.from(TABLE_INDUSTRIA_MEDIA).insert({
+        card_key: activeIndustriaCardKey,
+        media_type: "image",
+        image_path: imagePath,
+        focal_x: focal.x,
+        focal_y: focal.y,
+        caption,
+      });
+      if (error) throw error;
+    } else {
+      const videoUrl = document.getElementById("im_video_url").value.trim();
+      if (!videoUrl) {
+        status.className = "status err";
+        status.textContent = "Pegá el link del video.";
+        return;
+      }
+      status.textContent = "Guardando video…";
+      const { error } = await sb.from(TABLE_INDUSTRIA_MEDIA).insert({
+        card_key: activeIndustriaCardKey,
+        media_type: "video",
+        video_url: videoUrl,
+        caption,
+      });
+      if (error) throw error;
+    }
+
+    status.className = "status ok";
+    status.textContent = "Agregado correctamente.";
+    resetIndustriaMediaForm();
+    loadIndustriaMedia();
+  } catch (err) {
+    status.className = "status err";
+    status.textContent = "Error: " + err.message;
+  }
+});
+
+async function loadIndustriaMedia() {
+  const { data, error } = await sb
+    .from(TABLE_INDUSTRIA_MEDIA)
+    .select("*")
+    .eq("card_key", activeIndustriaCardKey)
+    .order("sort_order", { ascending: true })
+    .order("id", { ascending: true });
+  const list = document.getElementById("im_media_list");
+  list.innerHTML = "";
+  if (error) {
+    list.innerHTML = `<p class="hint">Error cargando: ${error.message}</p>`;
+    return;
+  }
+  list._rows = data;
+  if (!data.length) {
+    list.innerHTML = `<p class="hint">Todavía no cargaste nada para esta tarjeta.</p>`;
+    return;
+  }
+  data.forEach((m, i) => {
+    const div = document.createElement("div");
+    const moveBtns = `
+      <div class="row-actions" style="margin-top:8px">
+        <button class="btn btn-ghost btn-small" data-move-imedia="${m.id}" data-dir="up" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-ghost btn-small" data-move-imedia="${m.id}" data-dir="down" ${i === data.length - 1 ? "disabled" : ""}>↓</button>
+      </div>`;
+    if (m.media_type === "image") {
+      div.className = "focal-list-item";
+      div.innerHTML = `
+        <div class="focal-picker" style="aspect-ratio:4/3; max-width:140px; cursor:default">
+          <img class="focal-picker-img" src="${imageUrl(m.image_path)}" alt="" style="object-position:${m.focal_x}% ${m.focal_y}%">
+        </div>
+        <div class="focal-info">
+          <div class="file-name">${escapeHtml(m.caption || "Foto")}</div>
+          <button class="btn btn-danger" data-delete-imedia="${m.id}" data-path="${m.image_path}">Borrar</button>
+          ${moveBtns}
+        </div>`;
+    } else {
+      const thumb = driveThumbnail(m.video_url) || youtubeThumbnail(m.video_url);
+      div.className = "media-video-item";
+      div.innerHTML = `
+        <div class="media-video-thumb">${thumb ? `<img src="${thumb}" alt="">` : "🎬"}</div>
+        <div class="media-video-info">
+          <div class="file-name">${escapeHtml(m.caption || "Video")}</div>
+          <a href="${m.video_url}" target="_blank" rel="noopener">${escapeHtml(m.video_url)}</a>
+          ${moveBtns}
+        </div>
+        <button class="btn btn-danger" data-delete-imedia="${m.id}">Borrar</button>`;
+    }
+    list.appendChild(div);
+  });
+}
+
+document.getElementById("im_media_list").addEventListener("click", async (e) => {
+  const moveBtn = e.target.closest("[data-move-imedia]");
+  if (moveBtn) {
+    const rows = document.getElementById("im_media_list")._rows;
+    await reorderList(TABLE_INDUSTRIA_MEDIA, rows, Number(moveBtn.dataset.moveImedia), moveBtn.dataset.dir, loadIndustriaMedia);
+    return;
+  }
+  const btn = e.target.closest("[data-delete-imedia]");
+  if (!btn) return;
+  if (!confirm("¿Borrar este elemento?")) return;
+  const path = btn.dataset.path;
+  if (isOwnStorageFile(path)) await sb.storage.from(STORAGE_BUCKET).remove([path]);
+  await sb.from(TABLE_INDUSTRIA_MEDIA).delete().eq("id", btn.dataset.deleteImedia);
+  loadIndustriaMedia();
+});
+
 let profilePhotoPicker = null;
 let profilePhotoNewBlob = null; // solo se llena si se soltó una foto nueva (subida)
 let profilePhotoNewPath = null; // solo se llena si se cargó por Drive o GitHub
