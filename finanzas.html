@@ -16,12 +16,13 @@
     --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',system-ui,sans-serif; --font-mono:'IBM Plex Mono',monospace;
   }
   *{box-sizing:border-box;}
+  html, body{ overflow-x:hidden; max-width:100%; }
   body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--ink);line-height:1.5;}
   .wrap{max-width:1300px;margin:0 auto;padding:40px 20px 80px;}
   h1{font-family:var(--font-display);font-size:1.6rem;margin:0 0 4px;}
   h2{font-family:var(--font-display);font-size:1.15rem;margin:0 0 14px;}
   h3{font-family:var(--font-display);margin:0;}
-  .subtitle{color:var(--ink-soft);font-size:.9rem;margin:0 0 30px;}
+  .subtitle{color:var(--ink-soft);font-size:.9rem;margin:0 0 30px;overflow-wrap:anywhere;}
   .card{background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin-bottom:24px;}
   label{display:block;font-size:.82rem;font-weight:600;margin:14px 0 5px;}
   label:first-child{margin-top:0;}
@@ -63,6 +64,7 @@
   th{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em;}
 
   .top-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
+  .top-bar > div:first-child{ min-width:0; }
   .top-bar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   #loginScreen{max-width:380px;margin:80px auto;text-align:center;}
   .login-logo{height:64px;width:64px;border-radius:14px;object-fit:cover;margin:0 auto 16px;box-shadow:0 0 0 1px var(--line-strong);background:var(--bg-panel-alt);display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
