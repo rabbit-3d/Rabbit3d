@@ -160,6 +160,7 @@
     </div>
     <div class="top-bar-actions">
       <a href="finanzas.html" class="btn btn-ghost">💰 Finanzas</a>
+      <a href="ventas.html" class="btn btn-ghost" target="_blank" rel="noopener">🔑 Ver ventas.html</a>
       <a href="index.html" class="btn btn-ghost">← Ver sitio</a>
       <button class="btn btn-ghost" id="logoutBtn">Cerrar sesión</button>
     </div>
@@ -170,6 +171,7 @@
     <button class="tab" data-tab="productos">Producto</button>
     <button class="tab" data-tab="galeria">Foto de galería</button>
     <button class="tab" data-tab="sitio">Sitio</button>
+    <button class="tab" data-tab="empleados">Empleados</button>
   </div>
 
   <!-- -------- CATEGORÍAS (pedidos por cantidad) -------- -->
@@ -693,6 +695,46 @@
       </form>
     </div>
   </div>
+
+  <!-- -------- EMPLEADOS (códigos para "ventas.html") -------- -->
+  <div class="panel" id="panel-empleados">
+    <div class="card">
+      <h2 id="emp_form_title">Nuevo empleado</h2>
+      <p class="hint" style="margin-top:0">El código de 4 dígitos es lo que usan para entrar a "ventas.html". Los que no son administradores solo pueden editar reposiciones de los locales que tienen asignados.</p>
+      <a href="#" id="emp_cancel_edit" class="edit-link" style="display:none">← Cancelar edición y crear uno nuevo</a>
+      <form id="employeeForm">
+        <div class="grid-2">
+          <div>
+            <label for="emp_name">Nombre</label>
+            <input type="text" id="emp_name" required placeholder="Ej: Renzo">
+          </div>
+          <div>
+            <label for="emp_pin">Código de 4 dígitos</label>
+            <input type="text" id="emp_pin" required inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="Ej: 4821">
+          </div>
+        </div>
+        <div class="checkbox-row" style="margin-top:14px">
+          <input type="checkbox" id="emp_active" checked>
+          <label for="emp_active" style="margin:0">Activo (puede entrar a ventas.html)</label>
+        </div>
+        <div class="checkbox-row" style="margin-top:10px">
+          <input type="checkbox" id="emp_is_admin">
+          <label for="emp_is_admin" style="margin:0">Es administrador (puede editar los locales de cualquiera, no solo los suyos)</label>
+        </div>
+        <button class="btn btn-primary" type="submit" id="emp_submit">Guardar empleado</button>
+        <div class="status" id="emp_status"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Empleados cargados</h2>
+      <table>
+        <thead><tr><th>Nombre</th><th>Código</th><th>Activo</th><th>Admin</th><th></th></tr></thead>
+        <tbody id="employeesTableBody"></tbody>
+      </table>
+      <p class="hint" style="margin-top:16px">La página para tus empleados es <strong>ventas.html</strong> — ahí entran con su código, sin necesidad de usuario ni contraseña.</p>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -929,6 +971,7 @@ async function enterPanel() {
   loadGallery("taller");
   loadSettings();
   loadCategories();
+  loadEmployees();
 }
 
 // Si ya había una sesión activa (recarga de página), entrar directo.
@@ -2822,6 +2865,121 @@ document.getElementById("settingsForm").addEventListener("submit", async (e) => 
 // ---------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------
+// ---------------------------------------------------------------
+// EMPLEADOS (códigos de 4 dígitos para "ventas.html")
+// ---------------------------------------------------------------
+const TABLE_EMPLOYEES = "rabbit3d_employees";
+let editingEmployeeId = null;
+let employeesCache = [];
+
+function cancelEditEmployee() {
+  editingEmployeeId = null;
+  document.getElementById("employeeForm").reset();
+  document.getElementById("emp_active").checked = true;
+  document.getElementById("emp_is_admin").checked = false;
+  document.getElementById("emp_form_title").textContent = "Nuevo empleado";
+  document.getElementById("emp_cancel_edit").style.display = "none";
+  document.getElementById("emp_submit").textContent = "Guardar empleado";
+}
+document.getElementById("emp_cancel_edit").addEventListener("click", (e) => {
+  e.preventDefault();
+  cancelEditEmployee();
+});
+
+function startEditEmployee(row) {
+  editingEmployeeId = row.id;
+  document.getElementById("emp_name").value = row.name;
+  document.getElementById("emp_pin").value = row.pin_code;
+  document.getElementById("emp_active").checked = !!row.active;
+  document.getElementById("emp_is_admin").checked = !!row.is_admin;
+  document.getElementById("emp_form_title").textContent = "Editando empleado";
+  document.getElementById("emp_cancel_edit").style.display = "inline-block";
+  document.getElementById("emp_submit").textContent = "Guardar cambios";
+  document.getElementById("panel-empleados").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.getElementById("employeeForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("emp_status");
+  const submitBtn = document.getElementById("emp_submit");
+  const pin = document.getElementById("emp_pin").value.trim();
+
+  if (!/^[0-9]{4}$/.test(pin)) {
+    status.className = "status err";
+    status.textContent = "El código tiene que ser de 4 números (ej: 4821).";
+    return;
+  }
+
+  try {
+    submitBtn.disabled = true;
+    status.className = "status busy";
+    status.textContent = "Guardando…";
+
+    const payload = {
+      name: document.getElementById("emp_name").value.trim(),
+      pin_code: pin,
+      active: document.getElementById("emp_active").checked,
+      is_admin: document.getElementById("emp_is_admin").checked,
+    };
+
+    const { error } = editingEmployeeId
+      ? await sb.from(TABLE_EMPLOYEES).update(payload).eq("id", editingEmployeeId)
+      : await sb.from(TABLE_EMPLOYEES).insert(payload);
+    if (error) throw error;
+
+    status.className = "status ok";
+    status.textContent = "Guardado correctamente.";
+    cancelEditEmployee();
+    loadEmployees();
+  } catch (err) {
+    status.className = "status err";
+    status.textContent = err.message.includes("duplicate")
+      ? "Ese código ya lo está usando otro empleado — elegí uno distinto."
+      : "Error: " + err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+async function loadEmployees() {
+  const { data, error } = await sb.from(TABLE_EMPLOYEES).select("*").order("id", { ascending: true });
+  const tbody = document.getElementById("employeesTableBody");
+  tbody.innerHTML = "";
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="5">Error cargando: ${error.message}</td></tr>`;
+    return;
+  }
+  employeesCache = data;
+  data.forEach((emp) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(emp.name)}</td>
+      <td style="font-family:var(--font-mono)">${escapeHtml(emp.pin_code)}</td>
+      <td>${emp.active ? "Sí" : "No"}</td>
+      <td>${emp.is_admin ? "Sí" : "No"}</td>
+      <td class="row-actions">
+        <button class="btn btn-edit" data-edit-employee="${emp.id}">Editar</button>
+        <button class="btn btn-danger" data-delete-employee="${emp.id}">Borrar</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("employeesTableBody").addEventListener("click", async (e) => {
+  const editBtn = e.target.closest("[data-edit-employee]");
+  if (editBtn) {
+    const row = employeesCache.find((r) => String(r.id) === editBtn.dataset.editEmployee);
+    if (row) startEditEmployee(row);
+    return;
+  }
+  const delBtn = e.target.closest("[data-delete-employee]");
+  if (delBtn) {
+    if (!confirm("¿Borrar este empleado? Sus reposiciones ya cargadas quedan igual, con su nombre guardado.")) return;
+    await sb.from(TABLE_EMPLOYEES).delete().eq("id", delBtn.dataset.deleteEmployee);
+    loadEmployees();
+  }
+});
+
 function imageUrl(path) {
   if (!path) return null;
   if (/^https?:\/\//i.test(path)) return path; // ya es una URL completa (ej: link de Drive)
