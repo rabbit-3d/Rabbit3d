@@ -164,7 +164,6 @@
     </div>
     <div class="top-bar-actions">
       <a href="index.html" class="btn btn-ghost">Ver sitio</a>
-      <button class="btn btn-ghost" id="logoutBtn">Salir</button>
     </div>
   </div>
 
@@ -313,7 +312,6 @@
   <button data-nav-tab="modelos"><span class="nav-icon">🔑</span>Modelos</button>
   <button data-nav-tab="locales"><span class="nav-icon">🏪</span>Locales</button>
   <button data-nav-tab="estadisticas"><span class="nav-icon">📊</span>Stats</button>
-  <button id="navLogoutMobile"><span class="nav-icon">🚪</span>Salir</button>
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -372,10 +370,13 @@ document.getElementById("pinForm").addEventListener("submit", async (e) => {
   enterPanel();
 });
 
-document.getElementById("logoutBtn").addEventListener("click", () => {
+// Sesión guardada en este navegador — sin botón visible de "Salir" (si
+// alguna vez hace falta cerrarla a mano, basta con borrar el storage del
+// sitio desde el navegador).
+function logoutEmployee() {
   sessionStorage.removeItem("rabbit3d_employee");
   location.reload();
-});
+}
 
 let employeesBasicCache = [];
 
@@ -449,9 +450,6 @@ document.querySelectorAll(".tabs .tab[data-tab]").forEach((tab) => {
 });
 document.querySelectorAll("#bottomNav [data-nav-tab]").forEach((btn) => {
   btn.addEventListener("click", () => switchMainTab(btn.dataset.navTab));
-});
-document.getElementById("navLogoutMobile").addEventListener("click", () => {
-  document.getElementById("logoutBtn").click();
 });
 
 // ---------------------------------------------------------------
@@ -721,7 +719,7 @@ async function loadModels() {
   cardsList.innerHTML = "";
   modelsCache.forEach((m) => {
     const thumb = m.image_path
-      ? `<img src="${m.image_path}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`
+      ? `<img src="${m.image_path}" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:10px;">`
       : "";
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -741,7 +739,7 @@ async function loadModels() {
     const card = document.createElement("div");
     card.className = "simple-card";
     card.innerHTML = `
-      ${m.image_path ? `<img src="${m.image_path}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex-shrink:0;">` : ""}
+      ${m.image_path ? `<img src="${m.image_path}" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:12px;flex-shrink:0;">` : ""}
       <div class="simple-card-info">
         <div class="simple-card-title">${escapeHtml(m.name)}</div>
         ${m.description ? `<div class="simple-card-meta">${escapeHtml(m.description)}</div>` : ""}
