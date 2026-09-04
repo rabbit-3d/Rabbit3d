@@ -694,6 +694,54 @@
         <div class="status" id="s_status"></div>
       </form>
     </div>
+
+    <div class="card">
+      <h2>Ventas de Cults3D por país</h2>
+      <p class="hint" style="margin-top:0">Cults3D no da esta información en vivo — cargala a mano de vez en cuando (revisando tus ventas en tu cuenta de Cults3D). Se muestra como un mapa en la sección de Cults3D de tu página.</p>
+      <form id="cultsSaleForm">
+        <div class="grid-2">
+          <div>
+            <label for="cs_country_name">País</label>
+            <input type="text" id="cs_country_name" required placeholder="Ej: Argentina">
+          </div>
+          <div>
+            <label for="cs_country_code">Código (2 letras)</label>
+            <input type="text" id="cs_country_code" required maxlength="2" placeholder="Ej: AR" style="text-transform:uppercase">
+          </div>
+        </div>
+        <label for="cs_sales_count">Cantidad de ventas</label>
+        <input type="number" id="cs_sales_count" min="0" step="1" required placeholder="Ej: 12">
+        <button class="btn btn-primary btn-small" type="submit" id="cs_submit">Guardar</button>
+        <div class="status" id="cs_status"></div>
+      </form>
+
+      <table style="margin-top:20px">
+        <thead><tr><th>País</th><th>Código</th><th>Ventas</th><th></th></tr></thead>
+        <tbody id="cultsSalesTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Última venta cargada</h2>
+      <p class="hint" style="margin-top:0">Guardá acá el N° de pedido de la última venta que sumaste al conteo de países, así la próxima vez sabés desde dónde seguir sin repetir ni saltear ninguna.</p>
+      <p id="clo_current" style="font-family:var(--font-mono); font-size:.9rem; margin:0 0 16px;">Cargando…</p>
+      <form id="cultsLastOrderForm">
+        <div class="grid-2">
+          <div>
+            <label for="clo_order_id">N° de pedido</label>
+            <input type="text" id="clo_order_id" placeholder="Ej: 166034703">
+          </div>
+          <div>
+            <label for="clo_order_date">Fecha</label>
+            <input type="date" id="clo_order_date">
+          </div>
+        </div>
+        <label for="clo_notes">Notas (opcional)</label>
+        <input type="text" id="clo_notes" placeholder="Ej: juanmadellagaspera 🇦🇷 - Mate Harry Potter">
+        <button class="btn btn-primary btn-small" type="submit" id="clo_submit">Guardar</button>
+        <div class="status" id="clo_status"></div>
+      </form>
+    </div>
   </div>
 
   <!-- -------- EMPLEADOS (códigos para "ventas.html") -------- -->
@@ -972,6 +1020,8 @@ async function enterPanel() {
   loadSettings();
   loadCategories();
   loadEmployees();
+  loadCultsSales();
+  loadCultsLastOrder();
 }
 
 // Si ya había una sesión activa (recarga de página), entrar directo.
@@ -2977,6 +3027,134 @@ document.getElementById("employeesTableBody").addEventListener("click", async (e
     if (!confirm("¿Borrar este empleado? Sus reposiciones ya cargadas quedan igual, con su nombre guardado.")) return;
     await sb.from(TABLE_EMPLOYEES).delete().eq("id", delBtn.dataset.deleteEmployee);
     loadEmployees();
+  }
+});
+
+// ---------------------------------------------------------------
+// VENTAS DE CULTS3D POR PAÍS (para el mapa en el sitio)
+// ---------------------------------------------------------------
+const TABLE_CULTS_SALES = "rabbit3d_cults_sales";
+let cultsSalesCache = [];
+
+document.getElementById("cultsSaleForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("cs_status");
+  const submitBtn = document.getElementById("cs_submit");
+  try {
+    submitBtn.disabled = true;
+    status.className = "status busy";
+    status.textContent = "Guardando…";
+
+    const payload = {
+      country_name: document.getElementById("cs_country_name").value.trim(),
+      country_code: document.getElementById("cs_country_code").value.trim().toUpperCase(),
+      sales_count: Number(document.getElementById("cs_sales_count").value) || 0,
+    };
+
+    // "upsert" por código de país: si ya existe, actualiza el número en vez de duplicarlo.
+    const { error } = await sb.from(TABLE_CULTS_SALES).upsert(payload, { onConflict: "country_code" });
+    if (error) throw error;
+
+    status.className = "status ok";
+    status.textContent = "Guardado correctamente.";
+    document.getElementById("cultsSaleForm").reset();
+    loadCultsSales();
+  } catch (err) {
+    status.className = "status err";
+    status.textContent = "Error: " + err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+async function loadCultsSales() {
+  const { data, error } = await sb.from(TABLE_CULTS_SALES).select("*").order("sales_count", { ascending: false });
+  const tbody = document.getElementById("cultsSalesTableBody");
+  tbody.innerHTML = "";
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="4">Error cargando: ${error.message}</td></tr>`;
+    return;
+  }
+  cultsSalesCache = data;
+  data.forEach((row) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(row.country_name)}</td>
+      <td style="font-family:var(--font-mono)">${escapeHtml(row.country_code)}</td>
+      <td>${row.sales_count}</td>
+      <td class="row-actions">
+        <button class="btn btn-edit" data-edit-cults-sale="${row.id}">Editar</button>
+        <button class="btn btn-danger" data-delete-cults-sale="${row.id}">Borrar</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("cultsSalesTableBody").addEventListener("click", async (e) => {
+  const editBtn = e.target.closest("[data-edit-cults-sale]");
+  if (editBtn) {
+    const row = cultsSalesCache.find((r) => String(r.id) === editBtn.dataset.editCultsSale);
+    if (row) {
+      document.getElementById("cs_country_name").value = row.country_name;
+      document.getElementById("cs_country_code").value = row.country_code;
+      document.getElementById("cs_sales_count").value = row.sales_count;
+      document.getElementById("panel-sitio").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    return;
+  }
+  const delBtn = e.target.closest("[data-delete-cults-sale]");
+  if (delBtn) {
+    if (!confirm("¿Borrar este país de la lista?")) return;
+    await sb.from(TABLE_CULTS_SALES).delete().eq("id", delBtn.dataset.deleteCultsSale);
+    loadCultsSales();
+  }
+});
+
+// ---------------------------------------------------------------
+// ÚLTIMA VENTA DE CULTS3D CARGADA (bookmark para no repetir/saltear)
+// ---------------------------------------------------------------
+const TABLE_CULTS_LAST_ORDER = "rabbit3d_cults_last_order";
+
+async function loadCultsLastOrder() {
+  const { data, error } = await sb.from(TABLE_CULTS_LAST_ORDER).select("*").eq("id", 1).maybeSingle();
+  const current = document.getElementById("clo_current");
+  if (error || !data || !data.order_id) {
+    current.textContent = "Todavía no guardaste ninguna.";
+    return;
+  }
+  current.innerHTML = `Última guardada: <strong>#${escapeHtml(data.order_id)}</strong>${data.order_date ? ` — ${escapeHtml(data.order_date)}` : ""}${data.notes ? `<br><span style="font-family:var(--font-body); color:var(--ink-soft); font-size:.85rem">${escapeHtml(data.notes)}</span>` : ""}`;
+  document.getElementById("clo_order_id").value = data.order_id || "";
+  document.getElementById("clo_order_date").value = data.order_date || "";
+  document.getElementById("clo_notes").value = data.notes || "";
+}
+
+document.getElementById("cultsLastOrderForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("clo_status");
+  const submitBtn = document.getElementById("clo_submit");
+  try {
+    submitBtn.disabled = true;
+    status.className = "status busy";
+    status.textContent = "Guardando…";
+
+    const payload = {
+      id: 1,
+      order_id: document.getElementById("clo_order_id").value.trim() || null,
+      order_date: document.getElementById("clo_order_date").value || null,
+      notes: document.getElementById("clo_notes").value.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from(TABLE_CULTS_LAST_ORDER).upsert(payload, { onConflict: "id" });
+    if (error) throw error;
+
+    status.className = "status ok";
+    status.textContent = "Guardado correctamente.";
+    loadCultsLastOrder();
+  } catch (err) {
+    status.className = "status err";
+    status.textContent = "Error: " + err.message;
+  } finally {
+    submitBtn.disabled = false;
   }
 });
 
