@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/svgmap@v2.21.0/dist/svg-map.min.css" rel="stylesheet">
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
 <style>
 /* ==========================================================
    RABBIT3D — design tokens (paleta tomada del logo real:
@@ -443,11 +443,15 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 .sales-map-wrap{ max-width:760px; margin:24px auto 8px; text-align:center; }
 .sales-map-credit{ text-align:center; font-size:.72rem; color: var(--ink-soft); margin-top:8px; }
 .sales-map-credit a{ color: var(--ink-soft); }
-#cultsSalesMap{ width:100%; }
-#cultsSalesMap .svgMap-map-wrapper{ background: var(--bg-panel); border:1px solid var(--line-strong); border-radius: var(--radius); }
-#cultsSalesMap .svgMap-country{ stroke: var(--bg); stroke-width:0.5; }
-#cultsSalesMap .svgMap-map-controls-wrapper{ display:none; } /* sin zoom/pan: mapa simple, solo para mirar */
-#cultsSalesMap .svgMap-country[style*="cursor: pointer"]{ cursor:default; } /* solo los países con pin son clickeables en la práctica */
+#cultsSalesMap{
+  width:100%; height:420px; border-radius: var(--radius);
+  background: var(--bg-panel); border:1px solid var(--line-strong);
+}
+#cultsSalesMap .leaflet-container{ background: var(--bg-panel); font-family: var(--font-body); border-radius: var(--radius); }
+#cultsSalesMap .leaflet-control-zoom a{
+  background: var(--bg-panel-alt); color: var(--ink); border-color: var(--line-strong) !important;
+}
+#cultsSalesMap .leaflet-control-zoom a:hover{ background: var(--bg-panel); color: var(--red); }
 
 .sales-map-popup{
   display:none; align-items:center; gap:12px; margin:14px auto 0; padding:10px 14px;
@@ -1205,7 +1209,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
       <div class="sales-country-list" id="cultsSalesList"></div>
       <button type="button" class="btn btn-ghost sales-country-list-toggle" id="cultsSalesListToggle">Ver todos</button>
 
-      <p class="sales-map-credit">Mapa: <a href="https://stephanwagner.me/create-world-map-charts-with-svgmap" target="_blank" rel="noopener">svgMap</a> por Stephan Wagner (MIT)</p>
+      <p class="sales-map-credit">Mapa: <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a> · Datos de país: <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">Natural Earth</a> (dominio público)</p>
     </div>
 
     <div class="hero-actions center">
@@ -1316,7 +1320,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/svgmap@v2.21.0/dist/svg-map.umd.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /**
  * CONFIGURACIÓN DEL SITIO — RABBIT3D
@@ -1704,9 +1708,153 @@ const CULTS_COUNTRY_NAMES_ES = {
   PR: "Puerto Rico", YT: "Mayotte",
 };
 
-let cultsSalesMapInstance = null;
+// Ciudades principales (coordenadas reales) de los países con más
+// ventas, para concentrar ahí la mayoría de los puntos — el resto de
+// los países reparten sus puntos al azar por todo su territorio.
+const CULTS_COUNTRY_HOTSPOTS = {
+  AR: [
+    { lat: -34.6037, lng: -58.3816, weight: 10 }, // Buenos Aires
+    { lat: -31.4201, lng: -64.1888, weight: 3 }, // Córdoba
+    { lat: -32.9468, lng: -60.6393, weight: 1.5 }, // Rosario
+    { lat: -32.8908, lng: -68.8272, weight: 1 }, // Mendoza
+  ],
+  US: [
+    { lat: 40.7128, lng: -74.006, weight: 4 }, // Nueva York
+    { lat: 34.0522, lng: -118.2437, weight: 4 }, // Los Ángeles
+    { lat: 41.8781, lng: -87.6298, weight: 2 }, // Chicago
+    { lat: 29.7604, lng: -95.3698, weight: 2 }, // Houston
+  ],
+  FR: [
+    { lat: 48.8566, lng: 2.3522, weight: 6 }, // París
+    { lat: 45.764, lng: 4.8357, weight: 1.5 }, // Lyon
+    { lat: 43.2965, lng: 5.3698, weight: 1 }, // Marsella
+  ],
+  DE: [
+    { lat: 52.52, lng: 13.405, weight: 3 }, // Berlín
+    { lat: 48.1351, lng: 11.582, weight: 2 }, // Múnich
+    { lat: 53.5511, lng: 9.9937, weight: 1.5 }, // Hamburgo
+  ],
+  ES: [
+    { lat: 40.4168, lng: -3.7038, weight: 4 }, // Madrid
+    { lat: 41.3851, lng: 2.1734, weight: 3 }, // Barcelona
+  ],
+  CL: [{ lat: -33.4489, lng: -70.6693, weight: 6 }], // Santiago
+  MX: [{ lat: 19.4326, lng: -99.1332, weight: 5 }], // Ciudad de México
+  BR: [
+    { lat: -23.5505, lng: -46.6333, weight: 4 }, // São Paulo
+    { lat: -22.9068, lng: -43.1729, weight: 3 }, // Río de Janeiro
+  ],
+  GB: [{ lat: 51.5074, lng: -0.1278, weight: 5 }], // Londres
+  UY: [{ lat: -34.9011, lng: -56.1645, weight: 6 }], // Montevideo
+  CA: [
+    { lat: 43.6532, lng: -79.3832, weight: 3 }, // Toronto
+    { lat: 45.5019, lng: -73.5674, weight: 2 }, // Montreal
+    { lat: 49.2827, lng: -123.1207, weight: 2 }, // Vancouver
+  ],
+};
 
-function renderCultsSalesMap(rows) {
+// De cada punto que se dibuja, este % intenta caer cerca de una de esas
+// ciudades (pesado por su población); el resto queda disperso por
+// cualquier parte del país, para que se siga viendo una distribución
+// general y no todo amontonado en un solo lugar.
+const CULTS_HOTSPOT_PROBABILITY = 0.75;
+const CULTS_GEOJSON_URL = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson";
+
+let cultsLeafletMap = null;
+
+// Los datos de Natural Earth guardan el código de país en ISO_A2, salvo
+// un puñado de casos (Francia, Noruega...) que usan "-99" por tener
+// territorios de ultramar — para esos, ISO_A2_EH trae el código bueno.
+function neIso2(props) {
+  let a2 = props.ISO_A2 || "";
+  if (a2 === "-99") a2 = props.ISO_A2_EH || a2;
+  return (a2 || "").toUpperCase();
+}
+
+function cultsColorForCount(count, maxCount) {
+  if (!count) return "#1A2438"; // sin ventas
+  const t = Math.min(count / maxCount, 1);
+  const c1 = [0x3a, 0x10, 0x20]; // pocas ventas
+  const c2 = [0xe8, 0x12, 0x5c]; // muchas ventas (rosa de marca)
+  const rgb = c1.map((v, i) => Math.round(v + (c2[i] - v) * t));
+  return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+}
+
+function pickWeightedHotspot(hotspots) {
+  const total = hotspots.reduce((s, h) => s + h.weight, 0);
+  let r = Math.random() * total;
+  let chosen = hotspots[0];
+  for (const h of hotspots) {
+    if (r < h.weight) {
+      chosen = h;
+      break;
+    }
+    r -= h.weight;
+  }
+  // un poco de dispersión alrededor de la ciudad, para que no queden
+  // todos los puntos exactamente apilados unos sobre otros
+  const jitter = 0.18;
+  return { lat: chosen.lat + (Math.random() - 0.5) * jitter, lng: chosen.lng + (Math.random() - 0.5) * jitter };
+}
+
+// Ray casting simple: ¿el punto [lng,lat] está dentro de este anillo?
+function pointInRing(lng, lat, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1];
+    const xj = ring[j][0], yj = ring[j][1];
+    const intersect = yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+// Descompone Polygon/MultiPolygon en sus contornos externos, cada uno
+// con su recuadro — así se puede elegir uno pesado por tamaño (para que
+// una islita chica no "compita" en igualdad con el territorio principal).
+function cultsPolygonParts(geometry) {
+  const parts = [];
+  function addRing(coords) {
+    const outer = coords[0];
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    outer.forEach(([x, y]) => {
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    });
+    parts.push({ ring: outer, bbox: [minX, minY, maxX, maxY] });
+  }
+  if (geometry.type === "Polygon") addRing(geometry.coordinates);
+  else if (geometry.type === "MultiPolygon") geometry.coordinates.forEach(addRing);
+  return parts;
+}
+
+function cultsRandomPointInGeometry(parts) {
+  if (!parts.length) return null;
+  const weights = parts.map((p) => (p.bbox[2] - p.bbox[0]) * (p.bbox[3] - p.bbox[1]) || 0.0001);
+  const total = weights.reduce((a, b) => a + b, 0);
+
+  for (let attempt = 0; attempt < 60; attempt++) {
+    let r = Math.random() * total;
+    let idx = 0;
+    for (; idx < weights.length; idx++) {
+      if (r < weights[idx]) break;
+      r -= weights[idx];
+    }
+    const part = parts[idx] || parts[0];
+    const [minX, minY, maxX, maxY] = part.bbox;
+    const lng = minX + Math.random() * (maxX - minX);
+    const lat = minY + Math.random() * (maxY - minY);
+    if (pointInRing(lng, lat, part.ring)) return { lat, lng };
+  }
+  // si no se encontró nada en 60 intentos (forma muy irregular), el
+  // centro del recuadro más grande sirve como respaldo razonable
+  const biggest = parts.reduce((a, b) => (a.bbox[2] - a.bbox[0]) * (a.bbox[3] - a.bbox[1]) > (b.bbox[2] - b.bbox[0]) * (b.bbox[3] - b.bbox[1]) ? a : b);
+  return { lat: (biggest.bbox[1] + biggest.bbox[3]) / 2, lng: (biggest.bbox[0] + biggest.bbox[2]) / 2 };
+}
+
+async function renderCultsSalesMap(rows) {
   const wrap = document.getElementById("cultsSalesMapWrap");
   if (!rows || !rows.length) {
     wrap.style.display = "none";
@@ -1715,48 +1863,90 @@ function renderCultsSalesMap(rows) {
   wrap.style.display = "block";
   renderCultsSalesList(rows);
 
-  if (typeof svgMap === "undefined") return; // el mapa no cargó, pero la lista sigue mostrándose
+  if (typeof L === "undefined") return; // el mapa no cargó, pero la lista sigue mostrándose
 
-  const values = {};
   const countByCode = {};
   rows.forEach((r) => {
     const code = (r.country_code || "").toUpperCase();
-    if (code) {
-      values[code] = { ventas: r.sales_count };
-      countByCode[code] = r.sales_count;
+    if (code) countByCode[code] = r.sales_count;
+  });
+  const maxCount = Math.max(...Object.values(countByCode), 1);
+
+  hideCultsSalesPopup();
+
+  let geojson;
+  try {
+    if (!window.__cultsWorldGeoJson) {
+      const resp = await fetch(CULTS_GEOJSON_URL);
+      window.__cultsWorldGeoJson = await resp.json();
+    }
+    geojson = window.__cultsWorldGeoJson;
+  } catch (err) {
+    console.warn("[rabbit3d] No se pudo cargar el contorno de los países:", err);
+    return;
+  }
+
+  if (!cultsLeafletMap) {
+    cultsLeafletMap = L.map("cultsSalesMap", {
+      minZoom: 1,
+      maxZoom: 6,
+      maxBounds: [
+        [-85, -200],
+        [85, 200],
+      ],
+      maxBoundsViscosity: 1,
+      worldCopyJump: false,
+      attributionControl: false,
+    }).setView([15, 10], 1.3);
+  } else {
+    cultsLeafletMap.eachLayer((layer) => cultsLeafletMap.removeLayer(layer));
+  }
+
+  L.geoJSON(geojson, {
+    style: (feature) => ({
+      fillColor: cultsColorForCount(countByCode[neIso2(feature.properties)] || 0, maxCount),
+      fillOpacity: 1,
+      color: "#0A0F1A",
+      weight: 0.6,
+    }),
+    onEachFeature: (feature, layer) => {
+      const code = neIso2(feature.properties);
+      const count = countByCode[code];
+      if (count) {
+        layer.on("click", () => showCultsSalesPopup(code, count));
+      }
+    },
+  }).addTo(cultsLeafletMap);
+
+  // Un punto por cada venta individual: en países con ciudades definidas
+  // arriba, la mayoría cae cerca de esas ciudades (con su ubicación real);
+  // el resto se reparte al azar dentro del contorno verdadero del país.
+  Object.entries(countByCode).forEach(([code, count]) => {
+    const feature = geojson.features.find((f) => neIso2(f.properties) === code);
+    if (!feature) return;
+    const hotspots = CULTS_COUNTRY_HOTSPOTS[code];
+    const parts = cultsPolygonParts(feature.geometry);
+
+    for (let i = 0; i < count; i++) {
+      let point = null;
+      if (hotspots && hotspots.length && Math.random() < CULTS_HOTSPOT_PROBABILITY) {
+        point = pickWeightedHotspot(hotspots);
+      } else {
+        point = cultsRandomPointInGeometry(parts);
+      }
+      if (!point) continue;
+      L.circleMarker([point.lat, point.lng], {
+        radius: 2.5,
+        color: "#E8125C",
+        weight: 1,
+        fillColor: "#FFFFFF",
+        fillOpacity: 0.9,
+        interactive: false, // los clics siguen yendo al país de abajo
+      }).addTo(cultsLeafletMap);
     }
   });
 
-  hideCultsSalesPopup();
-  document.getElementById("cultsSalesMap").innerHTML = "";
-  cultsSalesMapInstance = new svgMap({
-    targetElementID: "cultsSalesMap",
-    colorMax: "#E8125C",
-    colorMin: "#3A1020",
-    colorNoData: "#1A2438",
-    countryNames: CULTS_COUNTRY_NAMES_ES,
-    // Sin tooltip al pasar el mouse por cualquier país (para que no se
-    // pueda "resaltar" uno sin ventas). En su lugar, un punto chico
-    // (staticPins) en los que sí tienen — y al tocarlo se abre el
-    // detalle en la tarjeta de abajo, en vez de un cartel siempre abierto.
-    showTooltips: false,
-    staticPins: Object.keys(values),
-    pinColor: "#E8125C",
-    pinStrokeColor: "#0A0F1A",
-    pinStrokeWidth: 1.5,
-    pinSize: 7,
-    onCountryClick: function (countryID) {
-      if (!countByCode[countryID]) return;
-      showCultsSalesPopup(countryID, countByCode[countryID]);
-    },
-    data: {
-      data: {
-        ventas: { name: "Ventas", format: "{0}" },
-      },
-      applyData: "ventas",
-      values,
-    },
-  });
+  setTimeout(() => cultsLeafletMap.invalidateSize(), 60);
 }
 
 function showCultsSalesPopup(code, count) {
