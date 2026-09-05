@@ -80,7 +80,10 @@
     border:1px solid var(--line); cursor:crosshair; touch-action:none; background:var(--bg-panel-alt);
     flex-shrink:0;
   }
-  .focal-picker-img{ width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
+  .focal-picker-img{ width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; transform-origin:center center; }
+  .focal-zoom-row{ display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .focal-zoom-row input[type=range]{ flex:1; }
+  .focal-zoom-row span{ font-family:var(--font-mono); font-size:.78rem; color:var(--ink-soft); min-width:44px; text-align:right; }
   .focal-crosshair{
     position:absolute; width:24px; height:24px; margin:-12px 0 0 -12px; left:50%; top:50%;
     border:2px solid #fff; border-radius:50%;
@@ -242,6 +245,11 @@
           <div class="focal-info">
             <span class="preview-sizes" id="c_preview_label"></span>
             <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
+            <div class="focal-zoom-row">
+              <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
+              <input type="range" id="c_focal_zoom" min="100" max="250" step="1" value="100">
+              <span id="c_focal_zoom_label">100%</span>
+            </div>
           </div>
         </div>
 
@@ -260,6 +268,8 @@
 
     <div class="card" id="categoryMediaCard" style="display:none">
       <h2>Fotos y videos de: <span id="cm_category_name"></span></h2>
+      <p style="margin:0 0 4px; font-weight:600" id="cm_media_form_title">Nueva foto o video</p>
+      <a href="#" id="cm_media_cancel_edit" class="edit-link" style="display:none">← Cancelar edición</a>
 
       <div class="tabs" id="cm_type_tabs">
         <button class="tab is-active" data-mtype="image">Foto</button>
@@ -306,6 +316,12 @@
           </div>
           <div class="focal-info">
             <span class="preview-sizes" id="cm_preview_label"></span>
+            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
+            <div class="focal-zoom-row">
+              <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
+              <input type="range" id="cm_focal_zoom" min="100" max="250" step="1" value="100">
+              <span id="cm_focal_zoom_label">100%</span>
+            </div>
           </div>
         </div>
       </div>
@@ -426,6 +442,11 @@
           <div class="focal-info">
             <span class="preview-sizes" id="p_preview_sizes"></span>
             <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible al recortarse.</p>
+            <div class="focal-zoom-row">
+              <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
+              <input type="range" id="p_focal_zoom" min="100" max="250" step="1" value="100">
+              <span id="p_focal_zoom_label">100%</span>
+            </div>
           </div>
         </div>
         <p class="hint">La imagen se redimensiona (máx. 1000px) y se convierte a WebP en tu navegador antes de subirse — no hace falta editarla antes.</p>
@@ -572,7 +593,14 @@
               <img id="im_preview_img" class="focal-picker-img" alt="">
               <div class="focal-crosshair" id="im_focal_crosshair"></div>
             </div>
-            <div class="focal-info"><span class="preview-sizes" id="im_preview_label"></span></div>
+            <div class="focal-info">
+              <span class="preview-sizes" id="im_preview_label"></span>
+              <div class="focal-zoom-row">
+                <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
+                <input type="range" id="im_focal_zoom" min="100" max="250" step="1" value="100">
+                <span id="im_focal_zoom_label">100%</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -692,6 +720,11 @@
           <div class="focal-info">
             <span class="preview-sizes" id="s_photo_preview_label">Foto actual</span>
             <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible. Para reemplazarla, elegí una fuente arriba.</p>
+            <div class="focal-zoom-row">
+              <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
+              <input type="range" id="s_photo_focal_zoom" min="100" max="250" step="1" value="100">
+              <span id="s_photo_focal_zoom_label">100%</span>
+            </div>
           </div>
         </div>
 
@@ -945,20 +978,24 @@ function setupDropzone(dropzoneEl, inputEl, onFiles) {
 // ---------------------------------------------------------------
 // SELECTOR DE PUNTO FOCAL (click/arrastre sobre la vista previa)
 // ---------------------------------------------------------------
-function setupFocalPicker(pickerEl, crosshairEl, initial, onChange) {
-  let point = { x: initial.x, y: initial.y };
+function setupFocalPicker(pickerEl, crosshairEl, initial, onChange, zoomSliderEl, zoomLabelEl) {
+  let point = { x: initial.x, y: initial.y, zoom: initial.zoom ?? 100 };
 
   function paint() {
     crosshairEl.style.left = `${point.x}%`;
     crosshairEl.style.top = `${point.y}%`;
-    pickerEl.querySelector(".focal-picker-img").style.objectPosition = `${point.x}% ${point.y}%`;
+    const img = pickerEl.querySelector(".focal-picker-img");
+    img.style.objectPosition = `${point.x}% ${point.y}%`;
+    img.style.transform = `scale(${point.zoom / 100})`;
+    if (zoomSliderEl) zoomSliderEl.value = point.zoom;
+    if (zoomLabelEl) zoomLabelEl.textContent = `${point.zoom}%`;
   }
 
   function setFromEvent(clientX, clientY) {
     const rect = pickerEl.getBoundingClientRect();
     const x = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
     const y = Math.min(100, Math.max(0, ((clientY - rect.top) / rect.height) * 100));
-    point = { x: Math.round(x), y: Math.round(y) };
+    point = { ...point, x: Math.round(x), y: Math.round(y) };
     paint();
     onChange(point);
   }
@@ -978,6 +1015,14 @@ function setupFocalPicker(pickerEl, crosshairEl, initial, onChange) {
       { once: true }
     );
   });
+
+  if (zoomSliderEl) {
+    zoomSliderEl.addEventListener("input", () => {
+      point = { ...point, zoom: Number(zoomSliderEl.value) };
+      paint();
+      onChange(point);
+    });
+  }
 
   paint();
   return { get: () => point };
@@ -1056,6 +1101,8 @@ let editingCategoryOriginal = null;
 let activeMediaCategoryId = null;
 let activeMediaCategoryName = null;
 let categoryMediaFocalPicker = null;
+let editingCategoryMediaId = null;
+let editingCategoryMediaOriginal = null;
 
 async function handleCategoryFile(file) {
   const fileInput = document.getElementById("c_image");
@@ -1074,8 +1121,10 @@ async function handleCategoryFile(file) {
   categoryFocalPicker = setupFocalPicker(
     document.getElementById("c_focal_picker"),
     document.getElementById("c_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("c_focal_zoom"),
+    document.getElementById("c_focal_zoom_label")
   );
 }
 
@@ -1121,8 +1170,10 @@ document.getElementById("c_image_drive_load").addEventListener("click", () => {
   categoryFocalPicker = setupFocalPicker(
     document.getElementById("c_focal_picker"),
     document.getElementById("c_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("c_focal_zoom"),
+    document.getElementById("c_focal_zoom_label")
   );
 });
 
@@ -1148,8 +1199,10 @@ document.getElementById("c_image_github_load").addEventListener("click", () => {
   categoryFocalPicker = setupFocalPicker(
     document.getElementById("c_focal_picker"),
     document.getElementById("c_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("c_focal_zoom"),
+    document.getElementById("c_focal_zoom_label")
   );
 });
 
@@ -1188,8 +1241,10 @@ function startEditCategory(c) {
   categoryFocalPicker = setupFocalPicker(
     document.getElementById("c_focal_picker"),
     document.getElementById("c_focal_crosshair"),
-    { x: c.cover_focal_x ?? 50, y: c.cover_focal_y ?? 50 },
-    () => {}
+    { x: c.cover_focal_x ?? 50, y: c.cover_focal_y ?? 50, zoom: c.cover_zoom ?? 100},
+    () => {},
+    document.getElementById("c_focal_zoom"),
+    document.getElementById("c_focal_zoom_label")
   );
 
   document.getElementById("c_form_title").textContent = `Editando: ${c.name}`;
@@ -1254,6 +1309,7 @@ document.getElementById("categoryForm").addEventListener("submit", async (e) => 
       cover_image_path: imagePath,
       cover_focal_x: focal.x,
       cover_focal_y: focal.y,
+      cover_zoom: focal.zoom,
     };
 
     status.textContent = isEditing ? "Guardando cambios…" : "Creando categoría…";
@@ -1420,6 +1476,8 @@ document.querySelectorAll("#cm_image_source_tabs .tab").forEach((tab) => {
 });
 
 function resetCategoryMediaForm() {
+  editingCategoryMediaId = null;
+  editingCategoryMediaOriginal = null;
   document.getElementById("cm_image").value = "";
   document.getElementById("cm_image")._compressedBlob = null;
   document.getElementById("cm_image_drive_url").value = "";
@@ -1434,6 +1492,55 @@ function resetCategoryMediaForm() {
   document.getElementById("cm_image_upload_block").style.display = "block";
   document.getElementById("cm_image_drive_block").style.display = "none";
   document.getElementById("cm_image_github_block").style.display = "none";
+  document.querySelectorAll("#cm_type_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+  document.querySelector('#cm_type_tabs .tab[data-mtype="image"]').classList.add("is-active");
+  document.getElementById("cm_image_form").style.display = "block";
+  document.getElementById("cm_video_form").style.display = "none";
+  document.getElementById("cm_media_form_title").textContent = "Nueva foto o video";
+  document.getElementById("cm_media_cancel_edit").style.display = "none";
+  document.getElementById("cm_submit").textContent = "Agregar";
+}
+
+document.getElementById("cm_media_cancel_edit").addEventListener("click", (e) => {
+  e.preventDefault();
+  resetCategoryMediaForm();
+});
+
+function startEditCategoryMedia(m) {
+  resetCategoryMediaForm();
+  editingCategoryMediaId = m.id;
+  editingCategoryMediaOriginal = m;
+
+  document.querySelectorAll("#cm_type_tabs .tab").forEach((t) => t.classList.remove("is-active"));
+  document.querySelector(`#cm_type_tabs .tab[data-mtype="${m.media_type}"]`).classList.add("is-active");
+  document.getElementById("cm_image_form").style.display = m.media_type === "image" ? "block" : "none";
+  document.getElementById("cm_video_form").style.display = m.media_type === "image" ? "none" : "block";
+
+  document.getElementById("cm_caption").value = m.caption || "";
+
+  if (m.media_type === "image") {
+    const focalWrap = document.getElementById("cm_focal_wrap");
+    const img = document.getElementById("cm_preview_img");
+    const label = document.getElementById("cm_preview_label");
+    img.src = imageUrl(m.image_path) || "";
+    label.textContent = "Foto actual — soltá una nueva arriba (o pegá un link) para reemplazarla";
+    focalWrap.style.display = "flex";
+    categoryMediaFocalPicker = setupFocalPicker(
+      document.getElementById("cm_focal_picker"),
+      document.getElementById("cm_focal_crosshair"),
+      { x: m.focal_x ?? 50, y: m.focal_y ?? 50, zoom: m.zoom ?? 100 },
+      () => {},
+      document.getElementById("cm_focal_zoom"),
+      document.getElementById("cm_focal_zoom_label")
+    );
+  } else {
+    document.getElementById("cm_video_url").value = m.video_url || "";
+  }
+
+  document.getElementById("cm_media_form_title").textContent = "Editando";
+  document.getElementById("cm_media_cancel_edit").style.display = "inline-block";
+  document.getElementById("cm_submit").textContent = "Guardar cambios";
+  document.getElementById("categoryMediaCard").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function handleCategoryMediaFile(file) {
@@ -1451,8 +1558,10 @@ async function handleCategoryMediaFile(file) {
   categoryMediaFocalPicker = setupFocalPicker(
     document.getElementById("cm_focal_picker"),
     document.getElementById("cm_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("cm_focal_zoom"),
+    document.getElementById("cm_focal_zoom_label")
   );
 }
 setupDropzone(document.getElementById("cm_dropzone"), document.getElementById("cm_image"), (files) =>
@@ -1484,8 +1593,10 @@ document.getElementById("cm_image_drive_load").addEventListener("click", () => {
   categoryMediaFocalPicker = setupFocalPicker(
     document.getElementById("cm_focal_picker"),
     document.getElementById("cm_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("cm_focal_zoom"),
+    document.getElementById("cm_focal_zoom_label")
   );
 });
 
@@ -1511,8 +1622,10 @@ document.getElementById("cm_image_github_load").addEventListener("click", () => 
   categoryMediaFocalPicker = setupFocalPicker(
     document.getElementById("cm_focal_picker"),
     document.getElementById("cm_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("cm_focal_zoom"),
+    document.getElementById("cm_focal_zoom_label")
   );
 });
 
@@ -1527,11 +1640,18 @@ document.getElementById("cm_submit").addEventListener("click", async () => {
     if (isImageTab) {
       const activeMediaImageSource = document.querySelector("#cm_image_source_tabs .tab.is-active")?.dataset.isource;
       const isDriveSource = activeMediaImageSource === "drive" || activeMediaImageSource === "github";
+      const fileInput = document.getElementById("cm_image");
+      const hasNewFile = !isDriveSource && fileInput.files[0];
+      const hasNewDriveUrl = isDriveSource && categoryMediaDriveUrl;
 
       let imagePath;
-      let focal = categoryMediaFocalPicker ? categoryMediaFocalPicker.get() : { x: 50, y: 50 };
+      let focal = categoryMediaFocalPicker ? categoryMediaFocalPicker.get() : { x: 50, y: 50, zoom: 100 };
 
-      if (isDriveSource) {
+      if (editingCategoryMediaId && !hasNewFile && !hasNewDriveUrl) {
+        // No se cargó ninguna fuente nueva: se mantiene la foto actual,
+        // solo se actualiza el foco/zoom/caption.
+        imagePath = editingCategoryMediaOriginal.image_path;
+      } else if (isDriveSource) {
         if (!categoryMediaDriveUrl) {
           status.className = "status err";
           status.textContent = "Cargá la vista previa primero (Drive o GitHub).";
@@ -1539,7 +1659,6 @@ document.getElementById("cm_submit").addEventListener("click", async () => {
         }
         imagePath = categoryMediaDriveUrl; // URL completa o ruta del repo — se guarda tal cual, sin subir a Storage
       } else {
-        const fileInput = document.getElementById("cm_image");
         const file = fileInput.files[0];
         if (!file) {
           status.className = "status err";
@@ -1551,15 +1670,32 @@ document.getElementById("cm_submit").addEventListener("click", async () => {
         imagePath = await uploadToStorage(blob, "categorias");
       }
 
-      const { error } = await sb.from(TABLE_CATEGORY_MEDIA).insert({
+      const payload = {
         category_id: activeMediaCategoryId,
         media_type: "image",
         image_path: imagePath,
         focal_x: focal.x,
         focal_y: focal.y,
+        zoom: focal.zoom,
         caption,
-      });
-      if (error) throw error;
+      };
+
+      if (editingCategoryMediaId) {
+        // Si se reemplazó la foto por una nueva y la anterior era propia
+        // (subida a Storage), se borra la vieja para no dejar basura.
+        if (
+          (hasNewFile || hasNewDriveUrl) &&
+          isOwnStorageFile(editingCategoryMediaOriginal.image_path) &&
+          editingCategoryMediaOriginal.image_path !== imagePath
+        ) {
+          await sb.storage.from(STORAGE_BUCKET).remove([editingCategoryMediaOriginal.image_path]);
+        }
+        const { error } = await sb.from(TABLE_CATEGORY_MEDIA).update(payload).eq("id", editingCategoryMediaId);
+        if (error) throw error;
+      } else {
+        const { error } = await sb.from(TABLE_CATEGORY_MEDIA).insert(payload);
+        if (error) throw error;
+      }
     } else {
       const videoUrl = document.getElementById("cm_video_url").value.trim();
       if (!videoUrl) {
@@ -1568,17 +1704,15 @@ document.getElementById("cm_submit").addEventListener("click", async () => {
         return;
       }
       status.textContent = "Guardando video…";
-      const { error } = await sb.from(TABLE_CATEGORY_MEDIA).insert({
-        category_id: activeMediaCategoryId,
-        media_type: "video",
-        video_url: videoUrl,
-        caption,
-      });
+      const payload = { category_id: activeMediaCategoryId, media_type: "video", video_url: videoUrl, caption };
+      const { error } = editingCategoryMediaId
+        ? await sb.from(TABLE_CATEGORY_MEDIA).update(payload).eq("id", editingCategoryMediaId)
+        : await sb.from(TABLE_CATEGORY_MEDIA).insert(payload);
       if (error) throw error;
     }
 
     status.className = "status ok";
-    status.textContent = "Agregado correctamente.";
+    status.textContent = "Guardado correctamente.";
     resetCategoryMediaForm();
     loadCategoryMedia();
   } catch (err) {
@@ -1617,10 +1751,11 @@ async function loadCategoryMedia() {
       div.className = "focal-list-item";
       div.innerHTML = `
         <div class="focal-picker" style="aspect-ratio:4/3; max-width:140px; cursor:default">
-          <img class="focal-picker-img" src="${imageUrl(m.image_path)}" alt="" style="object-position:${m.focal_x}% ${m.focal_y}%">
+          <img class="focal-picker-img" src="${imageUrl(m.image_path)}" alt="" style="object-position:${m.focal_x}% ${m.focal_y}%; transform:scale(${(m.zoom ?? 100) / 100})">
         </div>
         <div class="focal-info">
           <div class="file-name">${escapeHtml(m.caption || "Foto")}</div>
+          <button class="btn btn-edit" data-edit-media="${m.id}">Editar</button>
           <button class="btn btn-danger" data-delete-media="${m.id}" data-path="${m.image_path}">Borrar</button>
           ${moveBtns}
         </div>`;
@@ -1634,6 +1769,7 @@ async function loadCategoryMedia() {
           <a href="${m.video_url}" target="_blank" rel="noopener">${escapeHtml(m.video_url)}</a>
           ${moveBtns}
         </div>
+        <button class="btn btn-edit" data-edit-media="${m.id}">Editar</button>
         <button class="btn btn-danger" data-delete-media="${m.id}">Borrar</button>`;
     }
     list.appendChild(div);
@@ -1645,6 +1781,13 @@ document.getElementById("cm_media_list").addEventListener("click", async (e) => 
   if (moveBtn) {
     const rows = document.getElementById("cm_media_list")._rows;
     await reorderList(TABLE_CATEGORY_MEDIA, rows, Number(moveBtn.dataset.moveMedia), moveBtn.dataset.dir, loadCategoryMedia);
+    return;
+  }
+  const editBtn = e.target.closest("[data-edit-media]");
+  if (editBtn) {
+    const rows = document.getElementById("cm_media_list")._rows;
+    const row = rows.find((r) => String(r.id) === editBtn.dataset.editMedia);
+    if (row) startEditCategoryMedia(row);
     return;
   }
   const btn = e.target.closest("[data-delete-media]");
@@ -1881,8 +2024,10 @@ async function handleProductFile(file) {
   productFocalPicker = setupFocalPicker(
     document.getElementById("p_focal_picker"),
     document.getElementById("p_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("p_focal_zoom"),
+    document.getElementById("p_focal_zoom_label")
   );
 }
 
@@ -1915,8 +2060,10 @@ function startEditProduct(p) {
   productFocalPicker = setupFocalPicker(
     document.getElementById("p_focal_picker"),
     document.getElementById("p_focal_crosshair"),
-    { x: p.focal_x ?? 50, y: p.focal_y ?? 50 },
-    () => {}
+    { x: p.focal_x ?? 50, y: p.focal_y ?? 50, zoom: p.zoom ?? 100},
+    () => {},
+    document.getElementById("p_focal_zoom"),
+    document.getElementById("p_focal_zoom_label")
   );
 
   document.getElementById("p_form_title").textContent = `Editando: ${p.name}`;
@@ -1982,6 +2129,7 @@ document.getElementById("productForm").addEventListener("submit", async (e) => {
       image_path: imagePath,
       focal_x: focal.x,
       focal_y: focal.y,
+      zoom: focal.zoom,
     };
 
     status.textContent = isEditing ? "Guardando cambios…" : "Guardando producto…";
@@ -2077,6 +2225,11 @@ function addFocalListItem(imgBlob, label, initial) {
     <div class="focal-info">
       <div class="file-name">${escapeHtml(label)}</div>
       <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
+      <div class="focal-zoom-row">
+        <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
+        <input type="range" class="g-focal-zoom" min="100" max="250" step="1" value="100">
+        <span class="g-focal-zoom-label">100%</span>
+      </div>
     </div>
   `;
   list.appendChild(item);
@@ -2088,7 +2241,9 @@ function addFocalListItem(imgBlob, label, initial) {
     item.querySelector(".focal-picker"),
     item.querySelector(".focal-crosshair"),
     initial,
-    () => {}
+    () => {},
+    item.querySelector(".g-focal-zoom"),
+    item.querySelector(".g-focal-zoom-label")
   );
   return picker;
 }
@@ -2238,6 +2393,7 @@ function startEditGallery(g) {
     const picker = addFocalListItem(imageUrl(g.image_path), "Foto actual — soltá una nueva arriba para reemplazarla", {
       x: g.focal_x ?? 50,
       y: g.focal_y ?? 50,
+      zoom: g.zoom ?? 100,
     });
     // Referencia "vacía": si no se suelta una foto nueva, se reusa la imagen actual (sin blob).
     galleryEntries.push({ file: null, blob: null, picker, keepExisting: true });
@@ -2351,7 +2507,7 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
 
       const { error } = await sb
         .from(TABLE_GALLERY)
-        .update({ ...commonFields, media_type: "image", image_path: imagePath, video_url: null, focal_x: focal.x, focal_y: focal.y })
+        .update({ ...commonFields, media_type: "image", image_path: imagePath, video_url: null, focal_x: focal.x, focal_y: focal.y, zoom: focal.zoom })
         .eq("id", editingGalleryId);
       if (error) throw error;
 
@@ -2377,6 +2533,7 @@ document.getElementById("galleryForm").addEventListener("submit", async (e) => {
         video_url: null,
         focal_x: focal.x,
         focal_y: focal.y,
+        zoom: focal.zoom,
       });
       if (error) throw error;
     }
@@ -2556,8 +2713,10 @@ async function handleIndustriaMediaFile(file) {
   industriaMediaFocalPicker = setupFocalPicker(
     document.getElementById("im_focal_picker"),
     document.getElementById("im_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("im_focal_zoom"),
+    document.getElementById("im_focal_zoom_label")
   );
 }
 setupDropzone(document.getElementById("im_dropzone"), document.getElementById("im_image"), (files) =>
@@ -2586,8 +2745,10 @@ document.getElementById("im_image_drive_load").addEventListener("click", () => {
   industriaMediaFocalPicker = setupFocalPicker(
     document.getElementById("im_focal_picker"),
     document.getElementById("im_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("im_focal_zoom"),
+    document.getElementById("im_focal_zoom_label")
   );
 });
 
@@ -2613,8 +2774,10 @@ document.getElementById("im_image_github_load").addEventListener("click", () => 
   industriaMediaFocalPicker = setupFocalPicker(
     document.getElementById("im_focal_picker"),
     document.getElementById("im_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("im_focal_zoom"),
+    document.getElementById("im_focal_zoom_label")
   );
 });
 
@@ -2657,6 +2820,7 @@ document.getElementById("im_submit").addEventListener("click", async () => {
         image_path: imagePath,
         focal_x: focal.x,
         focal_y: focal.y,
+        zoom: focal.zoom,
         caption,
       });
       if (error) throw error;
@@ -2779,11 +2943,13 @@ async function loadSettings() {
     label.textContent = "Foto actual";
     wrap.style.display = "flex";
     profilePhotoPicker = setupFocalPicker(
-      document.getElementById("s_photo_focal_picker"),
-      document.getElementById("s_photo_focal_crosshair"),
-      { x: data.profile_photo_focal_x ?? 50, y: data.profile_photo_focal_y ?? 50 },
-      () => {}
-    );
+    document.getElementById("s_photo_focal_picker"),
+    document.getElementById("s_photo_focal_crosshair"),
+    { x: data.profile_photo_focal_x ?? 50, y: data.profile_photo_focal_y ?? 50, zoom: data.profile_photo_zoom ?? 100},
+    () => {},
+    document.getElementById("s_photo_focal_zoom"),
+    document.getElementById("s_photo_focal_zoom_label")
+  );
   }
 }
 
@@ -2803,8 +2969,10 @@ async function handleProfilePhotoFile(file) {
   profilePhotoPicker = setupFocalPicker(
     document.getElementById("s_photo_focal_picker"),
     document.getElementById("s_photo_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("s_photo_focal_zoom"),
+    document.getElementById("s_photo_focal_zoom_label")
   );
 }
 
@@ -2836,8 +3004,10 @@ function loadProfilePhotoPreview(url, label) {
   profilePhotoPicker = setupFocalPicker(
     document.getElementById("s_photo_focal_picker"),
     document.getElementById("s_photo_focal_crosshair"),
-    { x: 50, y: 50 },
-    () => {}
+    { x: 50, y: 50, zoom: 100},
+    () => {},
+    document.getElementById("s_photo_focal_zoom"),
+    document.getElementById("s_photo_focal_zoom_label")
   );
 }
 
@@ -2898,6 +3068,7 @@ document.getElementById("settingsForm").addEventListener("submit", async (e) => 
       const focal = profilePhotoPicker.get();
       update.profile_photo_focal_x = focal.x;
       update.profile_photo_focal_y = focal.y;
+      update.profile_photo_zoom = focal.zoom;
     }
 
     status.textContent = "Guardando cambios…";

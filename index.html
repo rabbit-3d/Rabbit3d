@@ -533,7 +533,8 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   .filter-chip{ flex:0 0 auto; }
 }
 
-.category-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.category-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+@media (max-width: 900px){ .category-grid{ grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px){ .category-grid{ grid-template-columns: 1fr; } }
 
 .category-card{
@@ -550,25 +551,14 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 .category-media img{
   width:100%; height:100%; object-fit:cover; display:block;
   transition: transform .5s ease;
+  transform: scale(var(--photo-zoom, 1));
 }
-.category-card:hover .category-media img{ transform: scale(1.06); }
+.category-card:hover .category-media img{ transform: scale(calc(var(--photo-zoom, 1) * 1.06)); }
 
-.category-tag{
-  position:absolute; top:10px; left:10px; z-index:2; font-family: var(--font-mono); font-size:.68rem;
-  background: var(--red); color: var(--white); padding:3px 10px; border-radius:999px;
-}
-.category-price-badge{
-  position:absolute; top:10px; right:10px; z-index:2;
-  background: rgba(10,15,26,.82); backdrop-filter: blur(4px);
-  border:1px solid rgba(255,255,255,.18); color:#fff;
-  font-family: var(--font-display); font-weight:700; font-size:.82rem;
-  padding:5px 12px; border-radius:999px; white-space:nowrap;
-}
-
-.category-body{ padding: 20px 20px 18px; display:flex; flex-direction:column; gap:6px; flex:1; }
-.category-body h3{ margin:0; font-size:1.1rem; }
+.category-body{ padding: 18px 20px; display:flex; flex-direction:column; gap:6px; flex:1; }
+.category-body h3{ margin:0; font-size:1.08rem; }
 .category-desc{
-  font-size:.86rem; margin:0 0 4px; color: var(--ink-soft);
+  font-size:.85rem; margin:0; color: var(--ink-soft);
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 
@@ -586,7 +576,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 }
 
 .category-cta{
-  display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+  display:inline-flex; align-items:center; gap:6px; margin-top:auto; padding-top:6px;
   font-weight:600; font-size:.88rem; color: var(--ink); transition: gap .2s ease, color .2s ease;
 }
 .category-card:hover .category-cta{ color: var(--red); gap:10px; }
@@ -615,6 +605,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   background: var(--bg-panel-2); border:1px solid var(--line);
 }
 .category-modal-main img, .category-modal-main iframe{ width:100%; height:100%; object-fit:cover; border:0; display:block; }
+.category-modal-main img{ transform: scale(var(--photo-zoom, 1)); }
 .category-modal-main .play-badge{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   background:rgba(0,0,0,.3); cursor:pointer;
@@ -626,7 +617,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   border:2px solid transparent; opacity:.65; transition: opacity .15s ease, border-color .15s ease; position:relative;
   background: var(--bg-panel-2);
 }
-.category-modal-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.category-modal-thumb img{ width:100%; height:100%; object-fit:cover; display:block; transform: scale(var(--photo-zoom, 1)); }
 .category-modal-thumb.is-active{ opacity:1; border-color: var(--red); }
 .category-modal-thumb .thumb-play{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -656,7 +647,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   aspect-ratio: 1/1; border-radius: var(--radius-sm); overflow:hidden; position:relative;
   background: var(--bg-alt); border: 1px solid var(--line);
 }
-.gallery-item img{ width:100%; height:100%; object-fit:cover; }
+.gallery-item img{ width:100%; height:100%; object-fit:cover; transform: scale(var(--photo-zoom, 1)); }
 .gallery-item.is-video{ cursor:pointer; background:var(--bg-panel-2); }
 .gallery-item iframe{ width:100%; height:100%; border:0; }
 .gallery-item .play-badge{
@@ -687,7 +678,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   box-shadow: var(--shadow-soft);
 }
 .press-media{ position:relative; aspect-ratio: 16/9; overflow:hidden; }
-.press-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+.press-media img{ width:100%; height:100%; object-fit:cover; display:block; transform: scale(var(--photo-zoom, 1)); }
 .press-media iframe{ width:100%; height:100%; border:0; }
 .press-media .play-badge{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -800,6 +791,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
       <a href="#taller">Taller</a>
       <a href="#sobre-mi">Sobre mí</a>
       <a href="#prensa">Medios</a>
+      <a href="#cults3d">Cults3D</a>
     </nav>
 
     <button type="button" class="btn btn-small btn-primary header-cta" id="headerContactBtn">Contactar</button>
@@ -1197,6 +1189,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
     <ul class="about-stats about-stats-center">
       <li><strong>+490</strong><span>diseños publicados</span></li>
       <li><strong>+43.200</strong><span>descargas</span></li>
+      <li><strong>+560</strong><span>ventas realizadas</span></li>
       <li><strong>+18.400</strong><span>suscriptores en Telegram</span></li>
     </ul>
 
@@ -2070,7 +2063,7 @@ function renderIndustriaMainMedia(m) {
     const url = window.Rabbit3DData?.buildImageUrl
       ? window.Rabbit3DData.buildImageUrl(m.image_path, 800)
       : m.image_path;
-    main.innerHTML = `<img src="${url}" alt="${escapeHtml(m.caption || "")}" style="object-position:${focalPosition(m)}">`;
+    main.innerHTML = `<img src="${url}" alt="${escapeHtml(m.caption || "")}" style="${focalStyle(m)}">`;
     return;
   }
   const driveId = driveFileId(m.video_url);
@@ -2113,7 +2106,7 @@ async function openIndustriaLightbox(cardKey, cardTitle) {
         const url = window.Rabbit3DData?.buildImageUrl
           ? window.Rabbit3DData.buildImageUrl(m.image_path, 120)
           : m.image_path;
-        thumb.innerHTML = `<img src="${url}" alt="" style="object-position:${focalPosition(m)}">`;
+        thumb.innerHTML = `<img src="${url}" alt="" style="${focalStyle(m)}">`;
       } else {
         const thumbUrl = anyVideoThumbnail(m.video_url);
         thumb.innerHTML = thumbUrl
@@ -2202,11 +2195,12 @@ function applySettings(settings) {
     "sobreMiPhotoFrame",
     settings.profile_photo_path,
     "Foto del taller de Rabbit3D",
-    focalPosition({ focal_x: settings.profile_photo_focal_x, focal_y: settings.profile_photo_focal_y })
+    focalPosition({ focal_x: settings.profile_photo_focal_x, focal_y: settings.profile_photo_focal_y }),
+    settings.profile_photo_zoom
   );
 }
 
-function replacePhotoFrame(frameId, imagePath, alt, objectPosition) {
+function replacePhotoFrame(frameId, imagePath, alt, objectPosition, zoom) {
   if (!imagePath) return;
   const frame = document.getElementById(frameId);
   if (!frame) return;
@@ -2222,6 +2216,7 @@ function replacePhotoFrame(frameId, imagePath, alt, objectPosition) {
   img.style.height = "100%";
   img.style.objectFit = "cover";
   img.style.objectPosition = objectPosition || "50% 50%";
+  img.style.transform = `scale(${(zoom != null ? zoom : 100) / 100})`;
   img.style.borderRadius = "var(--radius)";
   frame.replaceWith(img);
   img.id = frameId; // por si algo más lo busca por id después
@@ -2358,6 +2353,7 @@ function categoryCard(c, fallbackMedia, priceTiers) {
     : null;
   let focalX = c.cover_focal_x;
   let focalY = c.cover_focal_y;
+  let focalZoom = c.cover_zoom;
 
   // Si no cargaste una foto de portada, usamos la primera foto que
   // hayas subido en "Fotos/videos" de esa categoría como respaldo.
@@ -2367,19 +2363,15 @@ function categoryCard(c, fallbackMedia, priceTiers) {
       : fallbackMedia.image_path;
     focalX = fallbackMedia.focal_x;
     focalY = fallbackMedia.focal_y;
+    focalZoom = fallbackMedia.zoom;
   }
 
   const hasTiers = priceTiers && priceTiers.length > 0;
 
   // Precio de entrada, visible de un vistazo sobre la propia foto —
-  // usamos el primer tramo (normalmente el de menor cantidad).
-  const startingPriceBadge = hasTiers
-    ? `<span class="category-price-badge">Desde $${Number(priceTiers[0].total_price).toLocaleString("es-AR")}</span>`
-    : "";
-
-  // Debajo, el detalle completo: TODAS las cantidades cargadas, en un
-  // formato tipo "carta de menú" (cantidad ...... precio). Si todavía no
-  // cargaste ningún precio, cae a la nota de precio libre, o "Consultar precio".
+  // Todos los precios cargados, uno por cantidad — estilo "carta de
+  // menú" (cantidad ...... precio). Si todavía no cargaste ninguno, cae
+  // a la nota de precio libre, o "Consultar precio".
   const priceHtml = hasTiers
     ? `<div class="category-price-rows">
         ${priceTiers
@@ -2397,11 +2389,9 @@ function categoryCard(c, fallbackMedia, priceTiers) {
 
   card.innerHTML = `
     <div class="category-media">
-      <span class="category-tag">Desde ${MIN_ORDER_QTY} unidades</span>
-      ${startingPriceBadge}
       ${
         imgUrl
-          ? `<img src="${imgUrl}" alt="${escapeHtml(c.name)}" loading="lazy" decoding="async" width="480" height="360" style="object-position:${focalPosition({ focal_x: focalX, focal_y: focalY })}">`
+          ? `<img src="${imgUrl}" alt="${escapeHtml(c.name)}" loading="lazy" decoding="async" width="480" height="360" style="${focalStyle({ focal_x: focalX, focal_y: focalY, zoom: focalZoom })}">`
           : `<div class="gallery-placeholder">📦<br>Foto pendiente</div>`
       }
     </div>
@@ -2486,7 +2476,7 @@ function renderCategoryMainMedia(m) {
     const url = window.Rabbit3DData?.buildImageUrl
       ? window.Rabbit3DData.buildImageUrl(m.image_path, 800)
       : m.image_path;
-    main.innerHTML = `<img src="${url}" alt="${escapeHtml(m.caption || "")}" style="object-position:${focalPosition(m)}">`;
+    main.innerHTML = `<img src="${url}" alt="${escapeHtml(m.caption || "")}" style="${focalStyle(m)}">`;
     return;
   }
   const driveId = driveFileId(m.video_url);
@@ -2558,7 +2548,7 @@ async function openCategoryModal(category) {
         const url = window.Rabbit3DData?.buildImageUrl
           ? window.Rabbit3DData.buildImageUrl(m.image_path, 120)
           : m.image_path;
-        thumb.innerHTML = `<img src="${url}" alt="" style="object-position:${focalPosition(m)}">`;
+        thumb.innerHTML = `<img src="${url}" alt="" style="${focalStyle(m)}">`;
       } else {
         const thumbUrl = anyVideoThumbnail(m.video_url);
         thumb.innerHTML = thumbUrl
@@ -2732,7 +2722,7 @@ function renderGallery(category, items) {
         ? window.Rabbit3DData.buildImageUrl(item.image_path, 480)
         : item.image_path;
       div.innerHTML = `
-        <img src="${url}" alt="${escapeHtml(item.alt_text || item.title || "")}" loading="lazy" decoding="async" width="480" height="480" style="object-position:${focalPosition(item)}">
+        <img src="${url}" alt="${escapeHtml(item.alt_text || item.title || "")}" loading="lazy" decoding="async" width="480" height="480" style="${focalStyle(item)}">
         ${item.title ? `<span class="gallery-caption">${escapeHtml(item.title)}</span>` : ""}
       `;
     }
@@ -2806,7 +2796,7 @@ function renderPress(category, items) {
       div.innerHTML = `
         <div class="press-media">
           <span class="press-badge">${config.badge}</span>
-          <img src="${url}" alt="${escapeHtml(item.alt_text || item.title || "")}" loading="lazy" decoding="async" width="800" height="450" style="object-position:${focalPosition(item)}">
+          <img src="${url}" alt="${escapeHtml(item.alt_text || item.title || "")}" loading="lazy" decoding="async" width="800" height="450" style="${focalStyle(item)}">
         </div>
         ${
           item.title || item.event_date
@@ -2826,6 +2816,15 @@ function focalPosition(item) {
   const x = item?.focal_x != null ? item.focal_x : 50;
   const y = item?.focal_y != null ? item.focal_y : 50;
   return `${x}% ${y}%`;
+}
+
+// Igual que focalPosition, pero además aplica el zoom guardado desde el
+// panel (si no tiene, queda en 100% = sin zoom, tal cual estaba antes).
+// Se pasa como variable CSS (--photo-zoom) en vez de "transform" directo,
+// para no pisar animaciones de hover que ya usan transform en algunas fotos.
+function focalStyle(item) {
+  const zoom = item?.zoom != null ? item.zoom : 100;
+  return `object-position:${focalPosition(item)}; --photo-zoom:${zoom / 100}`;
 }
 
 function escapeHtml(str) {
