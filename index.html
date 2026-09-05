@@ -448,6 +448,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   width:100%; max-width:100%; height:420px; border-radius: var(--radius);
   background: var(--bg-panel); border:1px solid var(--line-strong);
   overflow:hidden; box-sizing:border-box;
+  position:relative; z-index:0; isolation:isolate; /* aísla los z-index internos de Leaflet, para que no compitan con la barra de abajo */
 }
 @media (max-width:600px){
   #cultsSalesMap{ height:300px; }
@@ -457,6 +458,9 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   background: var(--bg-panel-alt); color: var(--ink); border-color: var(--line-strong) !important;
 }
 #cultsSalesMap .leaflet-control-zoom a:hover{ background: var(--bg-panel); color: var(--red); }
+@media (max-width:600px){
+  #cultsSalesMap .leaflet-control-zoom a{ width:26px; height:26px; line-height:24px; font-size:.85rem; }
+}
 
 .sales-map-popup{
   display:none; align-items:center; gap:12px; margin:14px auto 0; padding:10px 14px;
@@ -619,8 +623,8 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   position:relative; aspect-ratio:4/3; border-radius: var(--radius); overflow:hidden;
   background: var(--bg-panel-2); border:1px solid var(--line);
 }
-.category-modal-main img, .category-modal-main iframe{ width:100%; height:100%; object-fit:cover; border:0; display:block; }
-.category-modal-main img{ transform: scale(var(--photo-zoom, 1)); }
+.category-modal-main img, .category-modal-main iframe{ width:100%; height:100%; border:0; display:block; }
+.category-modal-main img{ object-fit:cover; transform: scale(var(--photo-zoom, 1)); }
 .category-modal-main .play-badge{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   background:rgba(0,0,0,.3); cursor:pointer;
@@ -801,7 +805,6 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
 
     <nav class="main-nav" id="main-nav">
       <a href="#categorias">Productos</a>
-      <a href="#mayorista">Mayorista</a>
       <a href="#impresion-3d">Cómo imprimo</a>
       <a href="#taller">Taller</a>
       <a href="#sobre-mi">Sobre mí</a>
@@ -980,29 +983,6 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
 
     <div class="category-grid" id="categoryGrid"></div>
     <p class="empty-note" id="categoryEmpty" hidden>Todavía no hay productos cargados.</p>
-  </div>
-</section>
-
-<div class="layer-divider" aria-hidden="true"></div>
-
-<section class="section section-dark" id="mayorista">
-  <div class="wrap">
-    <p class="eyebrow center">Cómo funciona</p>
-    <h2 class="center">Pedidos por cantidad, no por unidad</h2>
-    <p class="center lede-narrow">
-      Hoy me dedico exclusivamente a pedidos grandes: <strong>mínimo 50 unidades</strong> por
-      diseño, sin importar el producto. Es la forma en la que puedo sostener buenos precios
-      y buenos tiempos de entrega con el tiempo que tengo disponible.
-    </p>
-    <ul class="check-list" style="max-width:420px; margin-left:auto; margin-right:auto;">
-      <li>Mínimo 50 unidades por diseño (algunos productos piden 100)</li>
-      <li>Precio diferencial por volumen — se cotiza según diseño y cantidad</li>
-      <li>Podés combinar variantes de color dentro de un mismo pedido</li>
-      <li>Tiempo de producción según cantidad — se informa al cotizar</li>
-    </ul>
-    <div class="hero-actions center">
-      <button type="button" class="btn btn-primary" id="waMayorista">Cotizar un pedido por WhatsApp</button>
-    </div>
   </div>
 </section>
 
@@ -1237,7 +1217,6 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
       <h4 class="footer-col-title">Menú</h4>
       <a href="#inicio">Inicio</a>
       <a href="#categorias">Productos</a>
-      <a href="#mayorista">Mayorista</a>
     </nav>
 
     <nav class="footer-col" aria-label="Rabbit3D">
@@ -1766,16 +1745,17 @@ const CULTS_COUNTRY_HOTSPOTS = {
 // cualquier parte del país, para que se siga viendo una distribución
 // general y no todo amontonado en un solo lugar.
 const CULTS_HOTSPOT_PROBABILITY = 0.75;
-const CULTS_GEOJSON_URL = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson";
+const CULTS_GEOJSON_URL = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson";
 
 let cultsLeafletMap = null;
 
 // Los datos de Natural Earth guardan el código de país en ISO_A2, salvo
-// un puñado de casos (Francia, Noruega...) que usan "-99" por tener
-// territorios de ultramar — para esos, ISO_A2_EH trae el código bueno.
+// algunos casos (Francia, Noruega, Taiwán...) que usan "-99" o códigos
+// no estándar (como "CN-TW") por tratarse de territorios especiales —
+// para esos, ISO_A2_EH trae el código de 2 letras correcto.
 function neIso2(props) {
   let a2 = props.ISO_A2 || "";
-  if (a2 === "-99") a2 = props.ISO_A2_EH || a2;
+  if (!/^[A-Z]{2}$/i.test(a2)) a2 = props.ISO_A2_EH || a2;
   return (a2 || "").toUpperCase();
 }
 
@@ -2653,7 +2633,6 @@ function setupWhatsappModal() {
   const triggers = [
     { id: "headerContactBtn", context: "hacer una consulta" },
     { id: "heroContactBtn", context: "hacer un pedido" },
-    { id: "waMayorista", context: "cotizar un pedido por cantidad" },
     { id: "bottomNavWhatsapp", context: "hacer una consulta" },
     { id: "footerWaText", context: "hacer una consulta" },
   ];
