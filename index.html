@@ -499,6 +499,12 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 .process-num{
   font-family: var(--font-mono); color: var(--red); font-weight:600; font-size:.85rem;
 }
+.process-card-toggle{
+  display:flex; align-items:baseline; gap:10px; width:100%; text-align:left;
+  background:none; border:none; padding:0; margin:0; font:inherit; color:inherit; cursor:default;
+}
+.process-card-toggle h3{ margin:0.6em 0 0; }
+.process-chevron{ display:none; margin-left:auto; align-self:center; flex-shrink:0; transition:transform .2s ease; color: var(--ink-soft); }
 #industria .process-num{ font-size:1.8rem; font-family:initial; display:block; }
 
 /* tarjetas de "industria" con foto que se revela al pasar el mouse */
@@ -521,6 +527,18 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 }
 @media (max-width: 560px){
   .process-grid, .process-grid-3{ grid-template-columns: 1fr; }
+
+  /* Acordeón: en pantallas angostas, solo el título de cada paso se ve
+     de entrada — tocarlo despliega su descripción. En pantallas más
+     anchas (arriba de este breakpoint) queda todo abierto, como antes. */
+  #impresion-3d .process-card-toggle{ cursor:pointer; }
+  #impresion-3d .process-chevron{ display:block; }
+  #impresion-3d .process-card-body{
+    max-height:0; overflow:hidden; transition: max-height .25s ease;
+  }
+  #impresion-3d .process-card-body p{ margin-top:.6em; }
+  #impresion-3d .process-card.is-open .process-card-body{ max-height:220px; }
+  #impresion-3d .process-card.is-open .process-chevron{ transform: rotate(180deg); }
 }
 
 /* ---------- catalog ---------- */
@@ -544,17 +562,6 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 
 .category-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 @media (max-width: 900px){ .category-grid{ grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px){
-  .category-grid{ gap: 12px; }
-  .category-body{ padding: 12px 14px; gap:4px; }
-  .category-body h3{ font-size:.94rem; }
-  .category-desc{ font-size:.78rem; -webkit-line-clamp:1; }
-  .category-price-rows{ padding-top:8px; margin-top:4px; gap:4px; }
-  .cpr-qty{ font-size:.66rem; }
-  .cpr-price{ font-size:.82rem; }
-  .category-price-note{ font-size:.78rem; padding-top:8px; margin-top:4px; }
-  .category-cta{ font-size:.78rem; padding-top:4px; }
-}
 
 .category-card{
   background: var(--bg-panel); border-radius: var(--radius); overflow:hidden;
@@ -601,6 +608,30 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 .category-card:hover .category-cta{ color: var(--red); gap:10px; }
 .category-cta svg{ transition: transform .2s ease; flex-shrink:0; }
 .category-card:hover .category-cta svg{ transform: translateX(2px); }
+
+@media (max-width: 560px){
+  /* Se intenta 2 por fila primero (más compacto). Si algún precio no
+     entra en una sola línea, script.js le agrega la clase
+     "force-single-col" al grid y pasa todo a 1 por fila, con textos
+     de tamaño normal. Ver adjustCategoryGridLayout(). */
+  .category-grid{ grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .category-body{ padding: 12px 14px; gap:4px; }
+  .category-body h3{ font-size:.94rem; }
+  .category-desc{ font-size:.78rem; -webkit-line-clamp:1; }
+  .category-price-rows{ padding-top:8px; margin-top:4px; gap:4px; }
+  .cpr-qty{ font-size:.68rem; }
+  .cpr-price{ font-size:.85rem; }
+  .category-price-note{ font-size:.78rem; padding-top:8px; margin-top:4px; }
+  .category-cta{ font-size:.78rem; padding-top:4px; }
+
+  .category-grid.force-single-col{ grid-template-columns: 1fr; gap:16px; }
+  .category-grid.force-single-col .category-body{ padding: 20px 20px 18px; gap:6px; }
+  .category-grid.force-single-col .category-body h3{ font-size:1.08rem; }
+  .category-grid.force-single-col .category-desc{ font-size:.85rem; -webkit-line-clamp:2; }
+  .category-grid.force-single-col .cpr-qty{ font-size:.76rem; }
+  .category-grid.force-single-col .cpr-price{ font-size:.95rem; }
+  .category-grid.force-single-col .category-cta{ font-size:.88rem; padding-top:6px; }
+}
 
 .empty-note{ text-align:center; color: var(--ink-soft); font-size:.9rem; }
 
@@ -998,26 +1029,46 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
       de la pantalla al objeto que tenés en la mano.
     </p>
 
-    <ol class="process-grid">
+    <ol class="process-grid" id="processStepsList">
       <li class="process-card">
-        <span class="process-num">01</span>
-        <h3>Diseño 3D</h3>
-        <p>El objeto se modela (o se descarga un diseño ya hecho) hasta tener una malla en 3D lista para el laminado.</p>
+        <button type="button" class="process-card-toggle" aria-expanded="false">
+          <span class="process-num">01</span>
+          <h3>Diseño 3D</h3>
+          <svg class="process-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="process-card-body">
+          <p>El objeto se modela (o se descarga un diseño ya hecho) hasta tener una malla en 3D lista para el laminado.</p>
+        </div>
       </li>
       <li class="process-card">
-        <span class="process-num">02</span>
-        <h3>Laminado</h3>
-        <p>Un programa "corta" el modelo en capas horizontales finísimas y genera las instrucciones que va a seguir la impresora, configurando velocidad, temperaturas, tamaños de capa y otros parámetros.</p>
+        <button type="button" class="process-card-toggle" aria-expanded="false">
+          <span class="process-num">02</span>
+          <h3>Laminado</h3>
+          <svg class="process-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="process-card-body">
+          <p>Un programa "corta" el modelo en capas horizontales finísimas y genera las instrucciones que va a seguir la impresora, configurando velocidad, temperaturas, tamaños de capa y otros parámetros.</p>
+        </div>
       </li>
       <li class="process-card">
-        <span class="process-num">03</span>
-        <h3>Impresión</h3>
-        <p>La impresora derrite filamento plástico y lo deposita capa sobre capa, de abajo hacia arriba, hasta formar la pieza completa.</p>
+        <button type="button" class="process-card-toggle" aria-expanded="false">
+          <span class="process-num">03</span>
+          <h3>Impresión</h3>
+          <svg class="process-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="process-card-body">
+          <p>La impresora derrite filamento plástico y lo deposita capa sobre capa, de abajo hacia arriba, hasta formar la pieza completa.</p>
+        </div>
       </li>
       <li class="process-card">
-        <span class="process-num">04</span>
-        <h3>Terminación</h3>
-        <p>Se retiran los soportes, se lija, se sacan los "pelitos" sobrantes y, según el producto, se pinta, se sella o se le colocan cadenas.</p>
+        <button type="button" class="process-card-toggle" aria-expanded="false">
+          <span class="process-num">04</span>
+          <h3>Terminación</h3>
+          <svg class="process-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="process-card-body">
+          <p>Se retiran los soportes, se lija, se sacan los "pelitos" sobrantes y, según el producto, se pinta, se sella o se le colocan cadenas.</p>
+        </div>
       </li>
     </ol>
   </div>
@@ -2446,7 +2497,44 @@ async function renderCategories(categories) {
     }
     grid.appendChild(categoryCard(c, fallbackMedia, pricingByCategory[c.id] || null));
   }
+
+  adjustCategoryGridLayout();
 }
+
+// En celular se intenta 2 categorías por fila (más compacto). Si algún
+// precio no entra en una sola línea con ese ancho más angosto, se pasa
+// TODO el grid a 1 por fila, para que quede prolijo y legible en vez de
+// cortado. Se vuelve a probar en 2 columnas cada vez (por si la
+// pantalla rotó o cambió de tamaño), antes de decidir si hace falta bajar a 1.
+function adjustCategoryGridLayout() {
+  const grid = document.getElementById("categoryGrid");
+  if (!grid) return;
+
+  if (window.innerWidth > 560) {
+    grid.classList.remove("force-single-col");
+    return;
+  }
+
+  grid.classList.remove("force-single-col");
+  void grid.offsetWidth; // fuerza a recalcular el layout con 2 columnas antes de medir
+
+  let overflow = false;
+  grid.querySelectorAll(".category-price-row").forEach((row) => {
+    if (row.scrollWidth > row.clientWidth + 1) overflow = true;
+  });
+
+  if (overflow) grid.classList.add("force-single-col");
+}
+
+let categoryGridResizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(categoryGridResizeTimer);
+  categoryGridResizeTimer = setTimeout(adjustCategoryGridLayout, 150);
+});
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(adjustCategoryGridLayout); // por si la fuente definitiva mide distinto que la de respaldo
+}
+
 
 function youtubeEmbedInfo(url) {
   const match = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
@@ -2828,6 +2916,17 @@ function focalStyle(item) {
   const zoom = item?.zoom != null ? item.zoom : 100;
   return `object-position:${focalPosition(item)}; --photo-zoom:${zoom / 100}`;
 }
+
+// Acordeón de "¿Cómo funciona la impresión 3D?" — solo tiene efecto
+// visual en pantallas angostas (ver @media 560px en el CSS); en
+// pantallas más anchas el CSS ya deja todo abierto siempre.
+document.querySelectorAll("#impresion-3d .process-card-toggle").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const card = btn.closest(".process-card");
+    const isOpen = card.classList.toggle("is-open");
+    btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+});
 
 function escapeHtml(str) {
   return String(str)
