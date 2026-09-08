@@ -779,6 +779,7 @@ a.contact-card:hover{ border-color: var(--red); transform: translateY(-2px); box
 }
 .footer-back-top{ color: var(--ink-soft); text-decoration:none; }
 .footer-back-top:hover{ color: var(--ink); }
+.footer-credit{ text-align:center; font-size:.72rem; color: var(--ink-soft); opacity:.65; margin:0 0 18px; }
 
 @media (max-width: 880px){
   .footer-grid{ grid-template-columns: 1fr; gap: 32px 24px; padding: 40px 24px 32px; }
@@ -1269,6 +1270,7 @@ a:focus-visible, button:focus-visible{ outline: 2px solid var(--red); outline-of
       <span>© <span id="year"></span> Rabbit3D — Todos los derechos reservados.</span>
       <a href="#inicio" class="footer-back-top">Volver arriba</a>
     </div>
+    <p class="footer-credit">Creación de Mateo Duarte</p>
   </div>
 </footer>
 
@@ -1761,7 +1763,13 @@ function neIso2(props) {
 
 function cultsColorForCount(count, maxCount) {
   if (!count) return "#1A2438"; // sin ventas
-  const t = Math.min(count / maxCount, 1);
+  // Raíz cuadrada en vez de una escala lineal directa: como Argentina y
+  // EE.UU. tienen muchísimas más ventas que el resto, una escala lineal
+  // dejaba a todos los demás países (1, 2, 5 ventas) casi pegados al
+  // color de "pocas ventas" — indistinguibles del de "sin ventas" a
+  // simple vista, sobre todo en países chicos. Así, cualquier país con
+  // ventas se nota claramente, no solo los dos que más vendieron.
+  const t = Math.sqrt(Math.min(count / maxCount, 1));
   const c1 = [0x3a, 0x10, 0x20]; // pocas ventas
   const c2 = [0xe8, 0x12, 0x5c]; // muchas ventas (rosa de marca)
   const rgb = c1.map((v, i) => Math.round(v + (c2[i] - v) * t));
