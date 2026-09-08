@@ -326,6 +326,25 @@
 
         <label for="exp_amount">Monto total ($)</label>
         <input type="number" id="exp_amount" min="0" step="1" required placeholder="Ej: 20000">
+        <a href="#" id="exp_calc_toggle" style="font-size:.78rem; display:inline-block; margin-top:6px">¿Calcular el monto con la calculadora de costos?</a>
+
+        <div id="exp_calc_wrap" style="display:none; margin-top:12px; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--bg-panel-alt)">
+          <label for="exp_calc_grams" style="margin-top:0">Gramos de filamento usados</label>
+          <input type="number" id="exp_calc_grams" min="0" step="1" placeholder="Ej: 120">
+          <p class="hint" id="exp_calc_filament_preview" style="margin-top:4px"></p>
+
+          <label style="margin-top:16px">Insumos fijos</label>
+          <div id="exp_calc_fixed_items_list"></div>
+
+          <label style="margin-top:16px">Otras líneas de costo</label>
+          <div id="exp_calc_cost_lines"></div>
+          <button type="button" class="btn btn-ghost btn-small" id="exp_calc_add_line">+ Agregar línea de costo</button>
+
+          <div class="summary-item" style="margin-top:16px; padding-top:12px; border-top:1px solid var(--line)">
+            <span class="summary-label">Costo total calculado</span>
+            <span class="summary-value" id="exp_calc_total">$0</span>
+          </div>
+        </div>
 
         <label for="exp_notes">Notas (opcional)</label>
         <input type="text" id="exp_notes" placeholder="Ej: Comprado en local X">
@@ -519,6 +538,25 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 function escapeHtml(str) {
   return String(str).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
+// "Hoy" según la hora LOCAL del navegador, no UTC — toISOString() antes
+// convertía a UTC primero, y como Argentina está 3 horas atrás, cargar
+// algo de noche (21:00 en adelante) hacía que "hoy" saliera como el
+// día siguiente, ya que en UTC ya era otro día.
+function todayLocalISODate() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+// Los campos <input type="date"> necesitan sí o sí el formato ISO
+// (año-mes-día) para funcionar — esto es solo para MOSTRAR la fecha ya
+// guardada de forma más natural (día/mes/año), en tablas y listas.
+function formatDateDisplay(isoDate) {
+  if (!isoDate) return "";
+  const [y, m, d] = isoDate.split("-");
+  return `${d}/${m}/${y}`;
+}
 function money(n) {
   return `$${Number(n || 0).toLocaleString("es-AR", { maximumFractionDigits: 0 })}`;
 }
@@ -688,17 +726,144 @@ document.querySelectorAll("#exp_type_tabs .tab").forEach((tab) => {
 function cancelEditExpense() {
   editingExpenseId = null;
   document.getElementById("expenseForm").reset();
-  document.getElementById("exp_date").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("exp_date").value = todayLocalISODate();
   document.querySelectorAll("#exp_type_tabs .tab").forEach((t) => t.classList.remove("is-active"));
   document.querySelector('#exp_type_tabs .tab[data-type="gasto"]').classList.add("is-active");
   applyExpenseTypeUI();
   document.getElementById("exp_form_title").textContent = "Nuevo movimiento";
   document.getElementById("exp_cancel_edit").style.display = "none";
+  document.getElementById("exp_calc_wrap").style.display = "none";
+  document.getElementById("exp_calc_grams").value = "";
+  document.getElementById("exp_calc_filament_preview").textContent = "";
+  document.getElementById("exp_calc_cost_lines").innerHTML = "";
+  renderExpCalcFixedItemsChecklist();
 }
 document.getElementById("exp_cancel_edit").addEventListener("click", (e) => {
   e.preventDefault();
   cancelEditExpense();
 });
+
+// ---------------------------------------------------------------
+// Calculadora de costos, dentro del formulario de gastos — igual que
+// la pestaña "Calculadora de precio" (filamento por gramos + insumos
+// fijos + líneas manuales), pero sin precio de venta ni ganancia: acá
+// solo interesa el costo total, para completar el "Monto total" solo.
+// Útil para regalos/donaciones u otros gastos sin factura, donde lo
+// único que sabés es cuánto material/insumos se usaron.
+// ---------------------------------------------------------------
+let expCalcLineIdCounter = 0;
+
+document.getElementById("exp_calc_toggle").addEventListener("click", (e) => {
+  e.preventDefault();
+  const wrap = document.getElementById("exp_calc_wrap");
+  wrap.style.display = wrap.style.display === "none" ? "block" : "none";
+  if (wrap.style.display === "block") renderExpCalcFixedItemsChecklist();
+});
+
+function renderExpCalcFixedItemsChecklist() {
+  const list = document.getElementById("exp_calc_fixed_items_list");
+  if (!list) return;
+  list.innerHTML = "";
+  if (!costItemsCache.length) {
+    list.innerHTML = `<p class="hint">Todavía no cargaste ningún insumo fijo (pestaña "Insumos fijos").</p>`;
+    return;
+  }
+  costItemsCache.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "checkbox-row";
+    row.innerHTML = `
+      <span class="cr-left">
+        <input type="checkbox" data-exp-fixed-item-checkbox="${item.id}">
+        <span>${escapeHtml(item.name)}</span>
+      </span>
+      <span class="cr-price">${money(item.amount)}</span>
+    `;
+    list.appendChild(row);
+    row.querySelector("input").addEventListener("change", (e) => {
+      if (e.target.checked) {
+        addExpCalcCostLineRow(item.name, item.amount, item.id);
+      } else {
+        removeExpCalcCostLineByFixedItem(item.id);
+      }
+    });
+  });
+}
+
+function removeExpCalcCostLineByFixedItem(fixedItemId) {
+  const row = document.querySelector(`#exp_calc_cost_lines .calc-cost-line[data-fixed-item-id="${fixedItemId}"]`);
+  if (row) row.remove();
+  updateExpCalcTotal();
+}
+
+function addExpCalcCostLineRow(label = "", amount = "", fixedItemId = null) {
+  const id = ++expCalcLineIdCounter;
+  const container = document.getElementById("exp_calc_cost_lines");
+  const row = document.createElement("div");
+  row.className = "grid-2 calc-cost-line";
+  row.dataset.lineId = id;
+  if (fixedItemId != null) row.dataset.fixedItemId = fixedItemId;
+  row.innerHTML = `
+    <div><input type="text" placeholder="Ej: Insumo extra" class="cl-label" value="${escapeHtml(label)}"></div>
+    <div style="display:flex; gap:8px; align-items:center">
+      <input type="number" min="0" step="1" placeholder="$ total" class="cl-amount" value="${amount}" style="flex:1">
+      <button type="button" class="btn btn-danger btn-small" data-remove-exp-line="${id}">×</button>
+    </div>`;
+  container.appendChild(row);
+  row.querySelector(".cl-label").addEventListener("input", updateExpCalcTotal);
+  row.querySelector(".cl-amount").addEventListener("input", updateExpCalcTotal);
+  updateExpCalcTotal();
+}
+document.getElementById("exp_calc_add_line").addEventListener("click", () => addExpCalcCostLineRow());
+
+document.getElementById("exp_calc_cost_lines").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-remove-exp-line]");
+  if (!btn) return;
+  const row = btn.closest(".calc-cost-line");
+  const fixedItemId = row.dataset.fixedItemId;
+  const isFilamentLine = row.dataset.filamentLine === "true";
+  row.remove();
+  if (fixedItemId) {
+    const box = document.querySelector(`[data-exp-fixed-item-checkbox="${fixedItemId}"]`);
+    if (box) box.checked = false;
+  }
+  if (isFilamentLine) {
+    document.getElementById("exp_calc_grams").value = "";
+    document.getElementById("exp_calc_filament_preview").textContent = "";
+  }
+  updateExpCalcTotal();
+});
+
+function updateExpCalcFilamentCost() {
+  const grams = Number(document.getElementById("exp_calc_grams").value) || 0;
+  const preview = document.getElementById("exp_calc_filament_preview");
+  const existingRow = document.querySelector('#exp_calc_cost_lines .calc-cost-line[data-filament-line="true"]');
+
+  if (grams > 0 && filamentPricePerKg > 0) {
+    const totalCost = (filamentPricePerKg / 1000) * grams;
+    preview.textContent = `= ${money(totalCost)} (a ${money(filamentPricePerKg)}/kg)`;
+    if (existingRow) {
+      existingRow.querySelector(".cl-label").value = "Filamento";
+      existingRow.querySelector(".cl-amount").value = totalCost.toFixed(2);
+    } else {
+      addExpCalcCostLineRow("Filamento", totalCost.toFixed(2));
+      const rows = document.querySelectorAll("#exp_calc_cost_lines .calc-cost-line");
+      rows[rows.length - 1].dataset.filamentLine = "true";
+    }
+  } else {
+    preview.textContent =
+      grams > 0 && !filamentPricePerKg ? 'Configurá el precio del kg en la pestaña "Insumos fijos".' : "";
+    if (existingRow) existingRow.remove();
+  }
+  updateExpCalcTotal();
+}
+document.getElementById("exp_calc_grams").addEventListener("input", updateExpCalcFilamentCost);
+
+function updateExpCalcTotal() {
+  const lines = Array.from(document.querySelectorAll("#exp_calc_cost_lines .calc-cost-line"));
+  const total = lines.reduce((sum, row) => sum + (Number(row.querySelector(".cl-amount").value) || 0), 0);
+  document.getElementById("exp_calc_total").textContent = money(total);
+  document.getElementById("exp_amount").value = Math.round(total);
+}
 
 // En celular, el formulario vive en una ficha que sube desde abajo. En
 // escritorio estas mismas funciones no hacen nada visible (la ficha ya
@@ -784,9 +949,13 @@ document.querySelectorAll("#exp_filter_tabs .tab").forEach((tab) => {
 function getFilteredMovements() {
   let rows = expensesFilter === "todos" ? expensesCache : expensesCache.filter((r) => (r.type || "gasto") === expensesFilter);
   if (movementsCategoryFilter) {
-    rows = rows.filter(
-      (r) => (r.type || "gasto") === movementsCategoryFilter.type && (r.category || "Sin categoría") === movementsCategoryFilter.category
-    );
+    if (movementsCategoryFilter.id != null) {
+      rows = rows.filter((r) => r.id === movementsCategoryFilter.id);
+    } else {
+      rows = rows.filter(
+        (r) => (r.type || "gasto") === movementsCategoryFilter.type && (r.category || "Sin categoría") === movementsCategoryFilter.category
+      );
+    }
   }
   return rows;
 }
@@ -826,7 +995,7 @@ function renderExpensesTable(rows) {
     const tipoLabel = isIncome ? "Ingreso" : "Gasto";
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${escapeHtml(exp.expense_date || "")}</td>
+      <td>${escapeHtml(formatDateDisplay(exp.expense_date))}</td>
       <td><span class="summary-value ${isIncome ? "positive" : "negative"}" style="font-size:.8rem">${tipoLabel}</span></td>
       <td>${escapeHtml(exp.description || "—")}${exp.category ? ` <span class="hint" style="display:inline">(${escapeHtml(CATEGORY_LABELS[exp.category] || exp.category)})</span>` : ""}</td>
       <td class="${isIncome ? "positive" : "negative"}">${isIncome ? "+" : "-"}${money(exp.amount)}</td>
@@ -855,7 +1024,7 @@ function renderMoveCards(rows) {
       <span class="move-icon ${isIncome ? "income" : "expense"}">${isIncome ? "💚" : "📉"}</span>
       <div class="move-info">
         <div class="move-desc">${escapeHtml(exp.description || exp.category || (isIncome ? "Ingreso" : "Gasto"))}</div>
-        <div class="move-meta">${escapeHtml(exp.category || "Sin categoría")} · ${escapeHtml(exp.expense_date || "")}</div>
+        <div class="move-meta">${escapeHtml(exp.category || "Sin categoría")} · ${escapeHtml(formatDateDisplay(exp.expense_date))}</div>
       </div>
       <div class="move-amount" style="color:${isIncome ? "var(--green)" : "var(--red)"}">${isIncome ? "+" : "-"}${money(exp.amount)}</div>
       <div class="move-actions">
@@ -866,7 +1035,7 @@ function renderMoveCards(rows) {
   });
 }
 
-const CATEGORY_COLORS = ["#4ADE80", "#94A1B4", "#22D3EE", "#818CF8", "#E8125C", "#F59E0B", "#F472B6", "#38BDF8", "#A78BFA", "#FACC15"];
+const CATEGORY_COLORS = ["#818CF8", "#F59E0B", "#22D3EE", "#A78BFA", "#FACC15", "#38BDF8", "#FB923C", "#C084FC", "#94A1B4", "#2DD4BF"];
 let expensesPeriod = "mes";
 let categoryChartType = "gasto";
 
@@ -891,9 +1060,9 @@ document.querySelectorAll("#cat_type_tabs .tab").forEach((tab) => {
 function rowInPeriod(row) {
   if (expensesPeriod === "todo") return true;
   if (!row.expense_date) return false;
-  const now = new Date();
-  if (expensesPeriod === "mes") return row.expense_date.slice(0, 7) === now.toISOString().slice(0, 7);
-  if (expensesPeriod === "anio") return row.expense_date.slice(0, 4) === String(now.getFullYear());
+  const todayStr = todayLocalISODate(); // ya en hora local, ver todayLocalISODate()
+  if (expensesPeriod === "mes") return row.expense_date.slice(0, 7) === todayStr.slice(0, 7);
+  if (expensesPeriod === "anio") return row.expense_date.slice(0, 4) === todayStr.slice(0, 4);
   return true;
 }
 
@@ -964,24 +1133,41 @@ function renderExpenseStats() {
     }
   );
 
-  // Torta "Por categoría" (gastos o ingresos, según la pestaña elegida).
-  // Tocar una porción filtra los Movimientos por esa categoría puntual.
-  const totals = {};
-  rowsInPeriod
-    .filter((r) => (r.type || "gasto") === categoryChartType)
-    .forEach((r) => {
-      const key = r.category || "Sin categoría";
-      totals[key] = (totals[key] || 0) + Number(r.amount);
-    });
-  const breakdown = Object.entries(totals)
-    .map(([name, amount], i) => ({ name, amount, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }))
-    .sort((a, b) => b.amount - a.amount);
+  // Torta "Por categoría": los gastos se agrupan por categoría; los
+  // ingresos se muestran uno por uno (usando su descripción), ya que
+  // agruparlos por categoría los mezclaba todos en una sola porción.
+  let breakdown;
+  if (categoryChartType === "ingreso") {
+    breakdown = rowsInPeriod
+      .filter((r) => r.type === "ingreso")
+      .map((r, i) => ({
+        id: r.id,
+        name: r.description || r.category || "Ingreso",
+        amount: Number(r.amount),
+        color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
+      }))
+      .sort((a, b) => b.amount - a.amount);
+  } else {
+    const totals = {};
+    rowsInPeriod
+      .filter((r) => (r.type || "gasto") === "gasto")
+      .forEach((r) => {
+        const key = r.category || "Sin categoría";
+        totals[key] = (totals[key] || 0) + Number(r.amount);
+      });
+    breakdown = Object.entries(totals)
+      .map(([name, amount], i) => ({ name, amount, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }))
+      .sort((a, b) => b.amount - a.amount);
+  }
 
   renderPie(document.getElementById("cat_pie"), document.getElementById("cat_legend"), breakdown, (item) => {
     document.querySelectorAll("#exp_filter_tabs .tab").forEach((t) => t.classList.remove("is-active"));
     document.querySelector(`#exp_filter_tabs .tab[data-filter="${categoryChartType}"]`).classList.add("is-active");
     expensesFilter = categoryChartType;
-    movementsCategoryFilter = { type: categoryChartType, category: item.name };
+    movementsCategoryFilter =
+      categoryChartType === "ingreso"
+        ? { type: "ingreso", id: item.id, category: item.name }
+        : { type: categoryChartType, category: item.name };
     renderMovements();
     document.getElementById("panel-gastos").querySelector(".finance-col:last-child").scrollIntoView({ behavior: "smooth", block: "start" });
   });

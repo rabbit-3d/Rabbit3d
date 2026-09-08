@@ -333,6 +333,24 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 function escapeHtml(str) {
   return String(str).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
+// "Hoy" según la hora LOCAL del navegador, no UTC (ver la misma
+// aclaración en finanzas.html: toISOString() corría la fecha un día
+// para adelante en Argentina, de noche).
+function todayLocalISODate() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+// Los campos <input type="date"> necesitan sí o sí el formato ISO
+// (año-mes-día) — esto es solo para MOSTRAR la fecha de forma más
+// natural (día/mes/año) en el historial.
+function formatDateDisplay(isoDate) {
+  if (!isoDate) return "";
+  const [y, m, d] = isoDate.split("-");
+  return `${d}/${m}/${y}`;
+}
 function driveFileId(url) {
   const m =
     String(url).match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) ||
@@ -419,7 +437,7 @@ async function enterPanel() {
   pinScreen.style.display = "none";
   panelScreen.style.display = "block";
   document.getElementById("employeeNameLabel").textContent = currentEmployee.name + (currentEmployee.is_admin ? " (administrador)" : "");
-  document.getElementById("visit_date").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("visit_date").value = todayLocalISODate();
   applyPermissionsUI();
   await loadEmployeesBasic();
   await loadModels();
@@ -819,7 +837,7 @@ document.getElementById("visit_items").addEventListener("click", (e) => {
 function cancelEditVisit() {
   editingVisitId = null;
   document.getElementById("visitForm").reset();
-  document.getElementById("visit_date").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("visit_date").value = todayLocalISODate();
   document.getElementById("visit_items").innerHTML = "";
   addVisitItemRow();
   document.getElementById("visit_form_title").textContent = "Nueva reposición";
@@ -951,7 +969,7 @@ async function loadVisits() {
       <div class="visit-card-header">
         <div>
           <h3>${escapeHtml(store?.name || "Local borrado")}</h3>
-          <div class="visit-card-meta">${escapeHtml(visit.visit_date)} · ${escapeHtml(visit.employee_name || "—")}</div>
+          <div class="visit-card-meta">${escapeHtml(formatDateDisplay(visit.visit_date))} · ${escapeHtml(visit.employee_name || "—")}</div>
           ${visit.notes ? `<p class="hint" style="margin-top:6px">${escapeHtml(visit.notes)}</p>` : ""}
         </div>
         <div class="row-actions">
