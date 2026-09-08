@@ -244,7 +244,7 @@
           </div>
           <div class="focal-info">
             <span class="preview-sizes" id="c_preview_label"></span>
-            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
+            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible. Elegí el punto primero, y recién después ajustá el zoom — así el zoom se hace justo desde ahí.</p>
             <div class="focal-zoom-row">
               <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
               <input type="range" id="c_focal_zoom" min="100" max="250" step="1" value="100">
@@ -316,7 +316,7 @@
           </div>
           <div class="focal-info">
             <span class="preview-sizes" id="cm_preview_label"></span>
-            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
+            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible. Elegí el punto primero, y recién después ajustá el zoom — así el zoom se hace justo desde ahí.</p>
             <div class="focal-zoom-row">
               <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
               <input type="range" id="cm_focal_zoom" min="100" max="250" step="1" value="100">
@@ -441,7 +441,7 @@
           </div>
           <div class="focal-info">
             <span class="preview-sizes" id="p_preview_sizes"></span>
-            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible al recortarse.</p>
+            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible al recortarse. Elegí el punto primero, y recién después ajustá el zoom — así el zoom se hace justo desde ahí.</p>
             <div class="focal-zoom-row">
               <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
               <input type="range" id="p_focal_zoom" min="100" max="250" step="1" value="100">
@@ -719,7 +719,7 @@
           </div>
           <div class="focal-info">
             <span class="preview-sizes" id="s_photo_preview_label">Foto actual</span>
-            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible. Para reemplazarla, elegí una fuente arriba.</p>
+            <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible (elegí el punto antes de ajustar el zoom, así el zoom se hace justo desde ahí). Para reemplazar la foto, elegí una fuente arriba.</p>
             <div class="focal-zoom-row">
               <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
               <input type="range" id="s_photo_focal_zoom" min="100" max="250" step="1" value="100">
@@ -986,6 +986,7 @@ function setupFocalPicker(pickerEl, crosshairEl, initial, onChange, zoomSliderEl
     crosshairEl.style.top = `${point.y}%`;
     const img = pickerEl.querySelector(".focal-picker-img");
     img.style.objectPosition = `${point.x}% ${point.y}%`;
+    img.style.transformOrigin = `${point.x}% ${point.y}%`; // el zoom se hace desde el punto elegido, no desde el centro
     img.style.transform = `scale(${point.zoom / 100})`;
     if (zoomSliderEl) zoomSliderEl.value = point.zoom;
     if (zoomLabelEl) zoomLabelEl.textContent = `${point.zoom}%`;
@@ -2224,7 +2225,7 @@ function addFocalListItem(imgBlob, label, initial) {
     </div>
     <div class="focal-info">
       <div class="file-name">${escapeHtml(label)}</div>
-      <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible.</p>
+      <p class="hint" style="margin-top:6px">Hacé click o arrastrá el punto para elegir qué parte de la foto queda visible. Elegí el punto primero, y recién después ajustá el zoom — así el zoom se hace justo desde ahí.</p>
       <div class="focal-zoom-row">
         <label style="margin:0; font-weight:400; font-size:.82rem; flex-shrink:0">Zoom</label>
         <input type="range" class="g-focal-zoom" min="100" max="250" step="1" value="100">
